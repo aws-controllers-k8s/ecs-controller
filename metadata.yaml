@@ -1,0 +1,8 @@
+service:
+  full_name: Amazon Elastic Container Service
+  short_name: ECS
+  link: https://aws.amazon.com/ecs/
+  documentation: https://docs.aws.amazon.com/ecs/
+api_versions:
+  - api_version: v1alpha1
+    status: available
