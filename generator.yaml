@@ -1,7 +1,76 @@
 ignore:
   resource_names:
-  - Cluster
+  # Cluster
   - Service
   - CapacityProvider
   - TaskDefinition
   - TaskSet
+operations:
+  DescribeClusters:
+    operation_type:
+    - ReadMany
+    resource_name: Cluster
+    output_wrapper_field_path: Clusters
+  RegisterTaskDefinition:
+    operation_type:
+    - Create
+    resource_name: TaskDefinition
+  DeregisterTaskDefinition:
+    operation_type:
+    - Delete
+    resource_name: TaskDefinition
+resources: 
+  Cluster: 
+    fields:
+      Name:
+        is_primary_key: true
+        print:
+          name: CLUSTER
+      Attachments.Type:
+        go_tag: json:"type,omitempty"
+        is_read_only: true
+      ActiveServicesCount:
+        print:
+          name: ACTIVESERVICES
+      PendingTasksCount:
+        print:
+          name: PENDINGTASKS
+      RunningTasksCount:
+        print:
+          name: RUNNINGTASKS
+      Status:
+        print:
+          name: STATUS
+    hooks:
+      sdk_create_post_set_output:
+        template_path: hooks/cluster/sdk_create_post_set_output.go.tpl
+      sdk_read_many_post_build_request:
+        template_path: hooks/cluster/sdk_read_many_post_build_request.go.tpl
+      sdk_read_many_post_set_output:
+        template_path: hooks/cluster/sdk_read_many_post_set_output.go.tpl
+      sdk_update_post_build_request:
+        template_path: hooks/cluster/sdk_update_post_build_request.go.tpl
+      sdk_delete_post_build_request:
+        template_path: hooks/cluster/sdk_delete_post_build_request.go.tpl
+      sdk_update_pre_build_request:
+        template_path: hooks/cluster/sdk_update_pre_build_request.go.tpl
+    exceptions:
+      terminal_codes:
+      - InvalidParameterException
+    list_operation:
+      match_fields:
+      - Name
+    renames:
+      operations:
+        CreateCluster:
+          input_fields:
+            ClusterName: Name
+        DeleteCluster:
+          input_fields:
+            ClusterName: Name
+        UpdateCluster:
+          input_fields:
+            ClusterName: Name
+        DescribeClusters:
+          input_fields:
+            ClusterName: Name

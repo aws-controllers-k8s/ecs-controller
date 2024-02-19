@@ -18,26 +18,26 @@ package v1alpha1
 type AgentUpdateStatus string
 
 const (
-	AgentUpdateStatus_PENDING AgentUpdateStatus = "PENDING"
-	AgentUpdateStatus_STAGING AgentUpdateStatus = "STAGING"
-	AgentUpdateStatus_STAGED AgentUpdateStatus = "STAGED"
+	AgentUpdateStatus_PENDING  AgentUpdateStatus = "PENDING"
+	AgentUpdateStatus_STAGING  AgentUpdateStatus = "STAGING"
+	AgentUpdateStatus_STAGED   AgentUpdateStatus = "STAGED"
 	AgentUpdateStatus_UPDATING AgentUpdateStatus = "UPDATING"
-	AgentUpdateStatus_UPDATED AgentUpdateStatus = "UPDATED"
-	AgentUpdateStatus_FAILED AgentUpdateStatus = "FAILED"
+	AgentUpdateStatus_UPDATED  AgentUpdateStatus = "UPDATED"
+	AgentUpdateStatus_FAILED   AgentUpdateStatus = "FAILED"
 )
 
 type ApplicationProtocol string
 
 const (
-	ApplicationProtocol_http ApplicationProtocol = "http"
+	ApplicationProtocol_http  ApplicationProtocol = "http"
 	ApplicationProtocol_http2 ApplicationProtocol = "http2"
-	ApplicationProtocol_grpc ApplicationProtocol = "grpc"
+	ApplicationProtocol_grpc  ApplicationProtocol = "grpc"
 )
 
 type AssignPublicIP string
 
 const (
-	AssignPublicIP_ENABLED AssignPublicIP = "ENABLED"
+	AssignPublicIP_ENABLED  AssignPublicIP = "ENABLED"
 	AssignPublicIP_DISABLED AssignPublicIP = "DISABLED"
 )
 
@@ -45,7 +45,7 @@ type CPUArchitecture string
 
 const (
 	CPUArchitecture_X86_64 CPUArchitecture = "X86_64"
-	CPUArchitecture_ARM64 CPUArchitecture = "ARM64"
+	CPUArchitecture_ARM64  CPUArchitecture = "ARM64"
 )
 
 type CapacityProviderField string
@@ -57,7 +57,7 @@ const (
 type CapacityProviderStatus string
 
 const (
-	CapacityProviderStatus_ACTIVE CapacityProviderStatus = "ACTIVE"
+	CapacityProviderStatus_ACTIVE   CapacityProviderStatus = "ACTIVE"
 	CapacityProviderStatus_INACTIVE CapacityProviderStatus = "INACTIVE"
 )
 
@@ -65,21 +65,21 @@ type CapacityProviderUpdateStatus string
 
 const (
 	CapacityProviderUpdateStatus_DELETE_IN_PROGRESS CapacityProviderUpdateStatus = "DELETE_IN_PROGRESS"
-	CapacityProviderUpdateStatus_DELETE_COMPLETE CapacityProviderUpdateStatus = "DELETE_COMPLETE"
-	CapacityProviderUpdateStatus_DELETE_FAILED CapacityProviderUpdateStatus = "DELETE_FAILED"
+	CapacityProviderUpdateStatus_DELETE_COMPLETE    CapacityProviderUpdateStatus = "DELETE_COMPLETE"
+	CapacityProviderUpdateStatus_DELETE_FAILED      CapacityProviderUpdateStatus = "DELETE_FAILED"
 	CapacityProviderUpdateStatus_UPDATE_IN_PROGRESS CapacityProviderUpdateStatus = "UPDATE_IN_PROGRESS"
-	CapacityProviderUpdateStatus_UPDATE_COMPLETE CapacityProviderUpdateStatus = "UPDATE_COMPLETE"
-	CapacityProviderUpdateStatus_UPDATE_FAILED CapacityProviderUpdateStatus = "UPDATE_FAILED"
+	CapacityProviderUpdateStatus_UPDATE_COMPLETE    CapacityProviderUpdateStatus = "UPDATE_COMPLETE"
+	CapacityProviderUpdateStatus_UPDATE_FAILED      CapacityProviderUpdateStatus = "UPDATE_FAILED"
 )
 
 type ClusterField string
 
 const (
-	ClusterField_ATTACHMENTS ClusterField = "ATTACHMENTS"
+	ClusterField_ATTACHMENTS    ClusterField = "ATTACHMENTS"
 	ClusterField_CONFIGURATIONS ClusterField = "CONFIGURATIONS"
-	ClusterField_SETTINGS ClusterField = "SETTINGS"
-	ClusterField_STATISTICS ClusterField = "STATISTICS"
-	ClusterField_TAGS ClusterField = "TAGS"
+	ClusterField_SETTINGS       ClusterField = "SETTINGS"
+	ClusterField_STATISTICS     ClusterField = "STATISTICS"
+	ClusterField_TAGS           ClusterField = "TAGS"
 )
 
 type ClusterSettingName string
@@ -91,57 +91,57 @@ const (
 type Compatibility string
 
 const (
-	Compatibility_EC2 Compatibility = "EC2"
-	Compatibility_FARGATE Compatibility = "FARGATE"
+	Compatibility_EC2      Compatibility = "EC2"
+	Compatibility_FARGATE  Compatibility = "FARGATE"
 	Compatibility_EXTERNAL Compatibility = "EXTERNAL"
 )
 
 type Connectivity string
 
 const (
-	Connectivity_CONNECTED Connectivity = "CONNECTED"
+	Connectivity_CONNECTED    Connectivity = "CONNECTED"
 	Connectivity_DISCONNECTED Connectivity = "DISCONNECTED"
 )
 
 type ContainerCondition string
 
 const (
-	ContainerCondition_START ContainerCondition = "START"
+	ContainerCondition_START    ContainerCondition = "START"
 	ContainerCondition_COMPLETE ContainerCondition = "COMPLETE"
-	ContainerCondition_SUCCESS ContainerCondition = "SUCCESS"
-	ContainerCondition_HEALTHY ContainerCondition = "HEALTHY"
+	ContainerCondition_SUCCESS  ContainerCondition = "SUCCESS"
+	ContainerCondition_HEALTHY  ContainerCondition = "HEALTHY"
 )
 
 type ContainerInstanceField string
 
 const (
-	ContainerInstanceField_TAGS ContainerInstanceField = "TAGS"
+	ContainerInstanceField_TAGS                      ContainerInstanceField = "TAGS"
 	ContainerInstanceField_CONTAINER_INSTANCE_HEALTH ContainerInstanceField = "CONTAINER_INSTANCE_HEALTH"
 )
 
 type ContainerInstanceStatus string
 
 const (
-	ContainerInstanceStatus_ACTIVE ContainerInstanceStatus = "ACTIVE"
-	ContainerInstanceStatus_DRAINING ContainerInstanceStatus = "DRAINING"
-	ContainerInstanceStatus_REGISTERING ContainerInstanceStatus = "REGISTERING"
-	ContainerInstanceStatus_DEREGISTERING ContainerInstanceStatus = "DEREGISTERING"
+	ContainerInstanceStatus_ACTIVE              ContainerInstanceStatus = "ACTIVE"
+	ContainerInstanceStatus_DRAINING            ContainerInstanceStatus = "DRAINING"
+	ContainerInstanceStatus_REGISTERING         ContainerInstanceStatus = "REGISTERING"
+	ContainerInstanceStatus_DEREGISTERING       ContainerInstanceStatus = "DEREGISTERING"
 	ContainerInstanceStatus_REGISTRATION_FAILED ContainerInstanceStatus = "REGISTRATION_FAILED"
 )
 
 type DeploymentControllerType string
 
 const (
-	DeploymentControllerType_ECS DeploymentControllerType = "ECS"
+	DeploymentControllerType_ECS         DeploymentControllerType = "ECS"
 	DeploymentControllerType_CODE_DEPLOY DeploymentControllerType = "CODE_DEPLOY"
-	DeploymentControllerType_EXTERNAL DeploymentControllerType = "EXTERNAL"
+	DeploymentControllerType_EXTERNAL    DeploymentControllerType = "EXTERNAL"
 )
 
 type DeploymentRolloutState string
 
 const (
-	DeploymentRolloutState_COMPLETED DeploymentRolloutState = "COMPLETED"
-	DeploymentRolloutState_FAILED DeploymentRolloutState = "FAILED"
+	DeploymentRolloutState_COMPLETED   DeploymentRolloutState = "COMPLETED"
+	DeploymentRolloutState_FAILED      DeploymentRolloutState = "FAILED"
 	DeploymentRolloutState_IN_PROGRESS DeploymentRolloutState = "IN_PROGRESS"
 )
 
@@ -156,7 +156,7 @@ const (
 type DeviceCgroupPermission string
 
 const (
-	DeviceCgroupPermission_read DeviceCgroupPermission = "read"
+	DeviceCgroupPermission_read  DeviceCgroupPermission = "read"
 	DeviceCgroupPermission_write DeviceCgroupPermission = "write"
 	DeviceCgroupPermission_mknod DeviceCgroupPermission = "mknod"
 )
@@ -170,14 +170,14 @@ const (
 type EFSAuthorizationConfigIAM string
 
 const (
-	EFSAuthorizationConfigIAM_ENABLED EFSAuthorizationConfigIAM = "ENABLED"
+	EFSAuthorizationConfigIAM_ENABLED  EFSAuthorizationConfigIAM = "ENABLED"
 	EFSAuthorizationConfigIAM_DISABLED EFSAuthorizationConfigIAM = "DISABLED"
 )
 
 type EFSTransitEncryption string
 
 const (
-	EFSTransitEncryption_ENABLED EFSTransitEncryption = "ENABLED"
+	EFSTransitEncryption_ENABLED  EFSTransitEncryption = "ENABLED"
 	EFSTransitEncryption_DISABLED EFSTransitEncryption = "DISABLED"
 )
 
@@ -190,24 +190,24 @@ const (
 type ExecuteCommandLogging string
 
 const (
-	ExecuteCommandLogging_NONE ExecuteCommandLogging = "NONE"
-	ExecuteCommandLogging_DEFAULT ExecuteCommandLogging = "DEFAULT"
+	ExecuteCommandLogging_NONE     ExecuteCommandLogging = "NONE"
+	ExecuteCommandLogging_DEFAULT  ExecuteCommandLogging = "DEFAULT"
 	ExecuteCommandLogging_OVERRIDE ExecuteCommandLogging = "OVERRIDE"
 )
 
 type FirelensConfigurationType string
 
 const (
-	FirelensConfigurationType_fluentd FirelensConfigurationType = "fluentd"
+	FirelensConfigurationType_fluentd   FirelensConfigurationType = "fluentd"
 	FirelensConfigurationType_fluentbit FirelensConfigurationType = "fluentbit"
 )
 
 type HealthStatus string
 
 const (
-	HealthStatus_HEALTHY HealthStatus = "HEALTHY"
+	HealthStatus_HEALTHY   HealthStatus = "HEALTHY"
 	HealthStatus_UNHEALTHY HealthStatus = "UNHEALTHY"
-	HealthStatus_UNKNOWN HealthStatus = "UNKNOWN"
+	HealthStatus_UNKNOWN   HealthStatus = "UNKNOWN"
 )
 
 type IPCMode string
@@ -221,10 +221,10 @@ const (
 type InstanceHealthCheckState string
 
 const (
-	InstanceHealthCheckState_OK InstanceHealthCheckState = "OK"
-	InstanceHealthCheckState_IMPAIRED InstanceHealthCheckState = "IMPAIRED"
+	InstanceHealthCheckState_OK                InstanceHealthCheckState = "OK"
+	InstanceHealthCheckState_IMPAIRED          InstanceHealthCheckState = "IMPAIRED"
 	InstanceHealthCheckState_INSUFFICIENT_DATA InstanceHealthCheckState = "INSUFFICIENT_DATA"
-	InstanceHealthCheckState_INITIALIZING InstanceHealthCheckState = "INITIALIZING"
+	InstanceHealthCheckState_INITIALIZING      InstanceHealthCheckState = "INITIALIZING"
 )
 
 type InstanceHealthCheckType string
@@ -236,21 +236,21 @@ const (
 type LaunchType string
 
 const (
-	LaunchType_EC2 LaunchType = "EC2"
-	LaunchType_FARGATE LaunchType = "FARGATE"
+	LaunchType_EC2      LaunchType = "EC2"
+	LaunchType_FARGATE  LaunchType = "FARGATE"
 	LaunchType_EXTERNAL LaunchType = "EXTERNAL"
 )
 
 type LogDriver string
 
 const (
-	LogDriver_json_file LogDriver = "json-file"
-	LogDriver_syslog LogDriver = "syslog"
-	LogDriver_journald LogDriver = "journald"
-	LogDriver_gelf LogDriver = "gelf"
-	LogDriver_fluentd LogDriver = "fluentd"
-	LogDriver_awslogs LogDriver = "awslogs"
-	LogDriver_splunk LogDriver = "splunk"
+	LogDriver_json_file   LogDriver = "json-file"
+	LogDriver_syslog      LogDriver = "syslog"
+	LogDriver_journald    LogDriver = "journald"
+	LogDriver_gelf        LogDriver = "gelf"
+	LogDriver_fluentd     LogDriver = "fluentd"
+	LogDriver_awslogs     LogDriver = "awslogs"
+	LogDriver_splunk      LogDriver = "splunk"
 	LogDriver_awsfirelens LogDriver = "awsfirelens"
 )
 
@@ -263,21 +263,21 @@ const (
 type ManagedDraining string
 
 const (
-	ManagedDraining_ENABLED ManagedDraining = "ENABLED"
+	ManagedDraining_ENABLED  ManagedDraining = "ENABLED"
 	ManagedDraining_DISABLED ManagedDraining = "DISABLED"
 )
 
 type ManagedScalingStatus string
 
 const (
-	ManagedScalingStatus_ENABLED ManagedScalingStatus = "ENABLED"
+	ManagedScalingStatus_ENABLED  ManagedScalingStatus = "ENABLED"
 	ManagedScalingStatus_DISABLED ManagedScalingStatus = "DISABLED"
 )
 
 type ManagedTerminationProtection string
 
 const (
-	ManagedTerminationProtection_ENABLED ManagedTerminationProtection = "ENABLED"
+	ManagedTerminationProtection_ENABLED  ManagedTerminationProtection = "ENABLED"
 	ManagedTerminationProtection_DISABLED ManagedTerminationProtection = "DISABLED"
 )
 
@@ -285,9 +285,9 @@ type NetworkMode string
 
 const (
 	NetworkMode_bridge NetworkMode = "bridge"
-	NetworkMode_host NetworkMode = "host"
+	NetworkMode_host   NetworkMode = "host"
 	NetworkMode_awsvpc NetworkMode = "awsvpc"
-	NetworkMode_none NetworkMode = "none"
+	NetworkMode_none   NetworkMode = "none"
 )
 
 type OSFamily string
@@ -300,7 +300,7 @@ const (
 	OSFamily_WINDOWS_SERVER_2022_CORE OSFamily = "WINDOWS_SERVER_2022_CORE"
 	OSFamily_WINDOWS_SERVER_2022_FULL OSFamily = "WINDOWS_SERVER_2022_FULL"
 	OSFamily_WINDOWS_SERVER_20H2_CORE OSFamily = "WINDOWS_SERVER_20H2_CORE"
-	OSFamily_LINUX OSFamily = "LINUX"
+	OSFamily_LINUX                    OSFamily = "LINUX"
 )
 
 type PIDMode string
@@ -314,14 +314,14 @@ type PlacementConstraintType string
 
 const (
 	PlacementConstraintType_distinctInstance PlacementConstraintType = "distinctInstance"
-	PlacementConstraintType_memberOf PlacementConstraintType = "memberOf"
+	PlacementConstraintType_memberOf         PlacementConstraintType = "memberOf"
 )
 
 type PlacementStrategyType string
 
 const (
-	PlacementStrategyType_random PlacementStrategyType = "random"
-	PlacementStrategyType_spread PlacementStrategyType = "spread"
+	PlacementStrategyType_random  PlacementStrategyType = "random"
+	PlacementStrategyType_spread  PlacementStrategyType = "spread"
 	PlacementStrategyType_binpack PlacementStrategyType = "binpack"
 )
 
@@ -335,8 +335,8 @@ type PropagateTags string
 
 const (
 	PropagateTags_TASK_DEFINITION PropagateTags = "TASK_DEFINITION"
-	PropagateTags_SERVICE PropagateTags = "SERVICE"
-	PropagateTags_NONE PropagateTags = "NONE"
+	PropagateTags_SERVICE         PropagateTags = "SERVICE"
+	PropagateTags_NONE            PropagateTags = "NONE"
 )
 
 type ProxyConfigurationType string
@@ -348,7 +348,7 @@ const (
 type ResourceType string
 
 const (
-	ResourceType_GPU ResourceType = "GPU"
+	ResourceType_GPU                  ResourceType = "GPU"
 	ResourceType_InferenceAccelerator ResourceType = "InferenceAccelerator"
 )
 
@@ -362,13 +362,13 @@ type SchedulingStrategy string
 
 const (
 	SchedulingStrategy_REPLICA SchedulingStrategy = "REPLICA"
-	SchedulingStrategy_DAEMON SchedulingStrategy = "DAEMON"
+	SchedulingStrategy_DAEMON  SchedulingStrategy = "DAEMON"
 )
 
 type Scope string
 
 const (
-	Scope_task Scope = "task"
+	Scope_task   Scope = "task"
 	Scope_shared Scope = "shared"
 )
 
@@ -381,28 +381,28 @@ const (
 type SettingName string
 
 const (
-	SettingName_serviceLongArnFormat SettingName = "serviceLongArnFormat"
-	SettingName_taskLongArnFormat SettingName = "taskLongArnFormat"
-	SettingName_containerInstanceLongArnFormat SettingName = "containerInstanceLongArnFormat"
-	SettingName_awsvpcTrunking SettingName = "awsvpcTrunking"
-	SettingName_containerInsights SettingName = "containerInsights"
-	SettingName_fargateFIPSMode SettingName = "fargateFIPSMode"
-	SettingName_tagResourceAuthorization SettingName = "tagResourceAuthorization"
+	SettingName_serviceLongArnFormat            SettingName = "serviceLongArnFormat"
+	SettingName_taskLongArnFormat               SettingName = "taskLongArnFormat"
+	SettingName_containerInstanceLongArnFormat  SettingName = "containerInstanceLongArnFormat"
+	SettingName_awsvpcTrunking                  SettingName = "awsvpcTrunking"
+	SettingName_containerInsights               SettingName = "containerInsights"
+	SettingName_fargateFIPSMode                 SettingName = "fargateFIPSMode"
+	SettingName_tagResourceAuthorization        SettingName = "tagResourceAuthorization"
 	SettingName_fargateTaskRetirementWaitPeriod SettingName = "fargateTaskRetirementWaitPeriod"
-	SettingName_guardDutyActivate SettingName = "guardDutyActivate"
+	SettingName_guardDutyActivate               SettingName = "guardDutyActivate"
 )
 
 type SettingType string
 
 const (
-	SettingType_user SettingType = "user"
+	SettingType_user        SettingType = "user"
 	SettingType_aws_managed SettingType = "aws_managed"
 )
 
 type SortOrder string
 
 const (
-	SortOrder_ASC SortOrder = "ASC"
+	SortOrder_ASC  SortOrder = "ASC"
 	SortOrder_DESC SortOrder = "DESC"
 )
 
@@ -410,7 +410,7 @@ type StabilityStatus string
 
 const (
 	StabilityStatus_STEADY_STATE StabilityStatus = "STEADY_STATE"
-	StabilityStatus_STABILIZING StabilityStatus = "STABILIZING"
+	StabilityStatus_STABILIZING  StabilityStatus = "STABILIZING"
 )
 
 type TargetType string
@@ -422,9 +422,9 @@ const (
 type TaskDefinitionFamilyStatus string
 
 const (
-	TaskDefinitionFamilyStatus_ACTIVE TaskDefinitionFamilyStatus = "ACTIVE"
+	TaskDefinitionFamilyStatus_ACTIVE   TaskDefinitionFamilyStatus = "ACTIVE"
 	TaskDefinitionFamilyStatus_INACTIVE TaskDefinitionFamilyStatus = "INACTIVE"
-	TaskDefinitionFamilyStatus_ALL TaskDefinitionFamilyStatus = "ALL"
+	TaskDefinitionFamilyStatus_ALL      TaskDefinitionFamilyStatus = "ALL"
 )
 
 type TaskDefinitionField string
@@ -442,8 +442,8 @@ const (
 type TaskDefinitionStatus string
 
 const (
-	TaskDefinitionStatus_ACTIVE TaskDefinitionStatus = "ACTIVE"
-	TaskDefinitionStatus_INACTIVE TaskDefinitionStatus = "INACTIVE"
+	TaskDefinitionStatus_ACTIVE             TaskDefinitionStatus = "ACTIVE"
+	TaskDefinitionStatus_INACTIVE           TaskDefinitionStatus = "INACTIVE"
 	TaskDefinitionStatus_DELETE_IN_PROGRESS TaskDefinitionStatus = "DELETE_IN_PROGRESS"
 )
 
@@ -458,7 +458,7 @@ type TaskFilesystemType string
 const (
 	TaskFilesystemType_ext3 TaskFilesystemType = "ext3"
 	TaskFilesystemType_ext4 TaskFilesystemType = "ext4"
-	TaskFilesystemType_xfs TaskFilesystemType = "xfs"
+	TaskFilesystemType_xfs  TaskFilesystemType = "xfs"
 )
 
 type TaskSetField string
@@ -470,12 +470,12 @@ const (
 type TaskStopCode string
 
 const (
-	TaskStopCode_TaskFailedToStart TaskStopCode = "TaskFailedToStart"
-	TaskStopCode_EssentialContainerExited TaskStopCode = "EssentialContainerExited"
-	TaskStopCode_UserInitiated TaskStopCode = "UserInitiated"
+	TaskStopCode_TaskFailedToStart         TaskStopCode = "TaskFailedToStart"
+	TaskStopCode_EssentialContainerExited  TaskStopCode = "EssentialContainerExited"
+	TaskStopCode_UserInitiated             TaskStopCode = "UserInitiated"
 	TaskStopCode_ServiceSchedulerInitiated TaskStopCode = "ServiceSchedulerInitiated"
-	TaskStopCode_SpotInterruption TaskStopCode = "SpotInterruption"
-	TaskStopCode_TerminationNotice TaskStopCode = "TerminationNotice"
+	TaskStopCode_SpotInterruption          TaskStopCode = "SpotInterruption"
+	TaskStopCode_TerminationNotice         TaskStopCode = "TerminationNotice"
 )
 
 type TransportProtocol string
@@ -488,19 +488,19 @@ const (
 type UlimitName string
 
 const (
-	UlimitName_core UlimitName = "core"
-	UlimitName_cpu UlimitName = "cpu"
-	UlimitName_data UlimitName = "data"
-	UlimitName_fsize UlimitName = "fsize"
-	UlimitName_locks UlimitName = "locks"
-	UlimitName_memlock UlimitName = "memlock"
-	UlimitName_msgqueue UlimitName = "msgqueue"
-	UlimitName_nice UlimitName = "nice"
-	UlimitName_nofile UlimitName = "nofile"
-	UlimitName_nproc UlimitName = "nproc"
-	UlimitName_rss UlimitName = "rss"
-	UlimitName_rtprio UlimitName = "rtprio"
-	UlimitName_rttime UlimitName = "rttime"
+	UlimitName_core       UlimitName = "core"
+	UlimitName_cpu        UlimitName = "cpu"
+	UlimitName_data       UlimitName = "data"
+	UlimitName_fsize      UlimitName = "fsize"
+	UlimitName_locks      UlimitName = "locks"
+	UlimitName_memlock    UlimitName = "memlock"
+	UlimitName_msgqueue   UlimitName = "msgqueue"
+	UlimitName_nice       UlimitName = "nice"
+	UlimitName_nofile     UlimitName = "nofile"
+	UlimitName_nproc      UlimitName = "nproc"
+	UlimitName_rss        UlimitName = "rss"
+	UlimitName_rtprio     UlimitName = "rtprio"
+	UlimitName_rttime     UlimitName = "rttime"
 	UlimitName_sigpending UlimitName = "sigpending"
-	UlimitName_stack UlimitName = "stack"
+	UlimitName_stack      UlimitName = "stack"
 )
