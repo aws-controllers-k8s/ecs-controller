@@ -1,0 +1,1 @@
+	input.Cluster = desired.ko.Spec.Name

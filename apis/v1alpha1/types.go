@@ -27,3 +27,1070 @@ var (
 	_ = &aws.JSONValue{}
 	_ = ackv1alpha1.AWSAccountID("")
 )
+
+// An object representing the networking details for a task or service. For
+// example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
+type AWSVPCConfiguration struct {
+	SecurityGroups []*string `json:"securityGroups,omitempty"`
+	Subnets        []*string `json:"subnets,omitempty"`
+}
+
+// An object representing a container instance or task attachment.
+type Attachment struct {
+	Details []*KeyValuePair `json:"details,omitempty"`
+	ID      *string         `json:"id,omitempty"`
+	Status  *string         `json:"status,omitempty"`
+	Type    *string         `json:"type,omitempty"`
+}
+
+// An object representing a change in state for a task attachment.
+type AttachmentStateChange struct {
+	AttachmentARN *string `json:"attachmentARN,omitempty"`
+	Status        *string `json:"status,omitempty"`
+}
+
+// An attribute is a name-value pair that's associated with an Amazon ECS object.
+// Use attributes to extend the Amazon ECS data model by adding custom metadata
+// to your resources. For more information, see Attributes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html#attributes)
+// in the Amazon Elastic Container Service Developer Guide.
+type Attribute struct {
+	Name     *string `json:"name,omitempty"`
+	TargetID *string `json:"targetID,omitempty"`
+	Value    *string `json:"value,omitempty"`
+}
+
+// The details of the Auto Scaling group for the capacity provider.
+type AutoScalingGroupProvider struct {
+	AutoScalingGroupARN *string `json:"autoScalingGroupARN,omitempty"`
+}
+
+// The details for a capacity provider.
+type CapacityProvider struct {
+	CapacityProviderARN *string `json:"capacityProviderARN,omitempty"`
+	Name                *string `json:"name,omitempty"`
+	Tags                []*Tag  `json:"tags,omitempty"`
+	UpdateStatusReason  *string `json:"updateStatusReason,omitempty"`
+}
+
+// The details of a capacity provider strategy. A capacity provider strategy
+// can be set when using the RunTask or CreateCluster APIs or as the default
+// capacity provider strategy for a cluster with the CreateCluster API.
+//
+// Only capacity providers that are already associated with a cluster and have
+// an ACTIVE or UPDATING status can be used in a capacity provider strategy.
+// The PutClusterCapacityProviders API is used to associate a capacity provider
+// with a cluster.
+//
+// If specifying a capacity provider that uses an Auto Scaling group, the capacity
+// provider must already be created. New Auto Scaling group capacity providers
+// can be created with the CreateCapacityProvider API operation.
+//
+// To use a Fargate capacity provider, specify either the FARGATE or FARGATE_SPOT
+// capacity providers. The Fargate capacity providers are available to all accounts
+// and only need to be associated with a cluster to be used in a capacity provider
+// strategy.
+//
+// A capacity provider strategy may contain a maximum of 6 capacity providers.
+type CapacityProviderStrategyItem struct {
+	Base             *int64  `json:"base,omitempty"`
+	CapacityProvider *string `json:"capacityProvider,omitempty"`
+	Weight           *int64  `json:"weight,omitempty"`
+}
+
+// The execute command configuration for the cluster.
+type ClusterConfiguration struct {
+	// The details of the execute command configuration.
+	ExecuteCommandConfiguration *ExecuteCommandConfiguration `json:"executeCommandConfiguration,omitempty"`
+}
+
+// Use this parameter to set a default Service Connect namespace. After you
+// set a default Service Connect namespace, any new services with Service Connect
+// turned on that are created in the cluster are added as client services in
+// the namespace. This setting only applies to new services that set the enabled
+// parameter to true in the ServiceConnectConfiguration. You can set the namespace
+// of each service individually in the ServiceConnectConfiguration to override
+// this default parameter.
+//
+// Tasks that run in a namespace can use short names to connect to services
+// in the namespace. Tasks can connect to services across all of the clusters
+// in the namespace. Tasks connect through a managed proxy container that collects
+// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+// services create are supported with Service Connect. For more information,
+// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ClusterServiceConnectDefaults struct {
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+// Use this parameter to set a default Service Connect namespace. After you
+// set a default Service Connect namespace, any new services with Service Connect
+// turned on that are created in the cluster are added as client services in
+// the namespace. This setting only applies to new services that set the enabled
+// parameter to true in the ServiceConnectConfiguration. You can set the namespace
+// of each service individually in the ServiceConnectConfiguration to override
+// this default parameter.
+//
+// Tasks that run in a namespace can use short names to connect to services
+// in the namespace. Tasks can connect to services across all of the clusters
+// in the namespace. Tasks connect through a managed proxy container that collects
+// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+// services create are supported with Service Connect. For more information,
+// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ClusterServiceConnectDefaultsRequest struct {
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+// The settings to use when creating a cluster. This parameter is used to turn
+// on CloudWatch Container Insights for a cluster.
+type ClusterSetting struct {
+	Name  *string `json:"name,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// A regional grouping of one or more container instances where you can run
+// task requests. Each account receives a default cluster the first time you
+// use the Amazon ECS service, but you may also create other clusters. Clusters
+// may contain more than one instance type simultaneously.
+type Cluster_SDK struct {
+	ActiveServicesCount *int64        `json:"activeServicesCount,omitempty"`
+	Attachments         []*Attachment `json:"attachments,omitempty"`
+	AttachmentsStatus   *string       `json:"attachmentsStatus,omitempty"`
+	CapacityProviders   []*string     `json:"capacityProviders,omitempty"`
+	ClusterARN          *string       `json:"clusterARN,omitempty"`
+	ClusterName         *string       `json:"clusterName,omitempty"`
+	// The execute command configuration for the cluster.
+	Configuration                     *ClusterConfiguration           `json:"configuration,omitempty"`
+	DefaultCapacityProviderStrategy   []*CapacityProviderStrategyItem `json:"defaultCapacityProviderStrategy,omitempty"`
+	PendingTasksCount                 *int64                          `json:"pendingTasksCount,omitempty"`
+	RegisteredContainerInstancesCount *int64                          `json:"registeredContainerInstancesCount,omitempty"`
+	RunningTasksCount                 *int64                          `json:"runningTasksCount,omitempty"`
+	// Use this parameter to set a default Service Connect namespace. After you
+	// set a default Service Connect namespace, any new services with Service Connect
+	// turned on that are created in the cluster are added as client services in
+	// the namespace. This setting only applies to new services that set the enabled
+	// parameter to true in the ServiceConnectConfiguration. You can set the namespace
+	// of each service individually in the ServiceConnectConfiguration to override
+	// this default parameter.
+	//
+	// Tasks that run in a namespace can use short names to connect to services
+	// in the namespace. Tasks can connect to services across all of the clusters
+	// in the namespace. Tasks connect through a managed proxy container that collects
+	// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+	// services create are supported with Service Connect. For more information,
+	// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	ServiceConnectDefaults *ClusterServiceConnectDefaults `json:"serviceConnectDefaults,omitempty"`
+	Settings               []*ClusterSetting              `json:"settings,omitempty"`
+	Statistics             []*KeyValuePair                `json:"statistics,omitempty"`
+	Status                 *string                        `json:"status,omitempty"`
+	Tags                   []*Tag                         `json:"tags,omitempty"`
+}
+
+// A Docker container that's part of a task.
+type Container struct {
+	ContainerARN      *string `json:"containerARN,omitempty"`
+	CPU               *string `json:"cpu,omitempty"`
+	Image             *string `json:"image,omitempty"`
+	ImageDigest       *string `json:"imageDigest,omitempty"`
+	LastStatus        *string `json:"lastStatus,omitempty"`
+	Memory            *string `json:"memory,omitempty"`
+	MemoryReservation *string `json:"memoryReservation,omitempty"`
+	Name              *string `json:"name,omitempty"`
+	Reason            *string `json:"reason,omitempty"`
+	RuntimeID         *string `json:"runtimeID,omitempty"`
+	TaskARN           *string `json:"taskARN,omitempty"`
+}
+
+// Container definitions are used in task definitions to describe the different
+// containers that are launched as part of a task.
+type ContainerDefinition struct {
+	Command               []*string `json:"command,omitempty"`
+	CPU                   *int64    `json:"cpu,omitempty"`
+	CredentialSpecs       []*string `json:"credentialSpecs,omitempty"`
+	DNSSearchDomains      []*string `json:"dnsSearchDomains,omitempty"`
+	DNSServers            []*string `json:"dnsServers,omitempty"`
+	DockerSecurityOptions []*string `json:"dockerSecurityOptions,omitempty"`
+	EntryPoint            []*string `json:"entryPoint,omitempty"`
+	Hostname              *string   `json:"hostname,omitempty"`
+	Image                 *string   `json:"image,omitempty"`
+	Links                 []*string `json:"links,omitempty"`
+	Name                  *string   `json:"name,omitempty"`
+	User                  *string   `json:"user,omitempty"`
+	WorkingDirectory      *string   `json:"workingDirectory,omitempty"`
+}
+
+// The dependencies defined for container startup and shutdown. A container
+// can contain multiple dependencies. When a dependency is defined for container
+// startup, for container shutdown it is reversed.
+//
+// Your Amazon ECS container instances require at least version 1.26.0 of the
+// container agent to use container dependencies. However, we recommend using
+// the latest container agent version. For information about checking your agent
+// version and updating to the latest version, see Updating the Amazon ECS Container
+// Agent (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html)
+// in the Amazon Elastic Container Service Developer Guide. If you're using
+// an Amazon ECS-optimized Linux AMI, your instance needs at least version 1.26.0-1
+// of the ecs-init package. If your container instances are launched from version
+// 20190301 or later, then they contain the required versions of the container
+// agent and ecs-init. For more information, see Amazon ECS-optimized Linux
+// AMI (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// For tasks that use the Fargate launch type, the task or service requires
+// the following platforms:
+//
+//   - Linux platform version 1.3.0 or later.
+//
+//   - Windows platform version 1.0.0 or later.
+//
+// For more information about how to create a container dependency, see Container
+// dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
+// in the Amazon Elastic Container Service Developer Guide.
+type ContainerDependency struct {
+	ContainerName *string `json:"containerName,omitempty"`
+}
+
+// An Amazon EC2 or External instance that's running the Amazon ECS agent and
+// has been registered with a cluster.
+type ContainerInstance struct {
+	AgentConnected       *bool         `json:"agentConnected,omitempty"`
+	Attachments          []*Attachment `json:"attachments,omitempty"`
+	CapacityProviderName *string       `json:"capacityProviderName,omitempty"`
+	ContainerInstanceARN *string       `json:"containerInstanceARN,omitempty"`
+	EC2InstanceID        *string       `json:"ec2InstanceID,omitempty"`
+	PendingTasksCount    *int64        `json:"pendingTasksCount,omitempty"`
+	RunningTasksCount    *int64        `json:"runningTasksCount,omitempty"`
+	Status               *string       `json:"status,omitempty"`
+	StatusReason         *string       `json:"statusReason,omitempty"`
+	Tags                 []*Tag        `json:"tags,omitempty"`
+}
+
+// The overrides that are sent to a container. An empty container override can
+// be passed in. An example of an empty container override is {"containerOverrides":
+// [ ] }. If a non-empty container override is specified, the name parameter
+// must be included.
+//
+// You can use Secrets Manager or Amazon Web Services Systems Manager Parameter
+// Store to store the sensitive data. For more information, see Retrieve secrets
+// through environment variables (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar.html)
+// in the Amazon ECS Developer Guide.
+type ContainerOverride struct {
+	Command []*string `json:"command,omitempty"`
+	Name    *string   `json:"name,omitempty"`
+}
+
+// An object that represents a change in state for a container.
+type ContainerStateChange struct {
+	ContainerName *string `json:"containerName,omitempty"`
+	ImageDigest   *string `json:"imageDigest,omitempty"`
+	Reason        *string `json:"reason,omitempty"`
+	RuntimeID     *string `json:"runtimeID,omitempty"`
+	Status        *string `json:"status,omitempty"`
+}
+
+// The details of an Amazon ECS service deployment. This is used only when a
+// service uses the ECS deployment controller type.
+type Deployment struct {
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	DesiredCount             *int64                          `json:"desiredCount,omitempty"`
+	FailedTasks              *int64                          `json:"failedTasks,omitempty"`
+	ID                       *string                         `json:"id,omitempty"`
+	PendingCount             *int64                          `json:"pendingCount,omitempty"`
+	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
+	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
+	RolloutStateReason       *string                         `json:"rolloutStateReason,omitempty"`
+	RunningCount             *int64                          `json:"runningCount,omitempty"`
+	Status                   *string                         `json:"status,omitempty"`
+	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
+}
+
+// One of the methods which provide a way for you to quickly identify when a
+// deployment has failed, and then to optionally roll back the failure to the
+// last working deployment.
+//
+// When the alarms are generated, Amazon ECS sets the service deployment to
+// failed. Set the rollback parameter to have Amazon ECS to roll back your service
+// to the last completed deployment after a failure.
+//
+// You can only use the DeploymentAlarms method to detect failures when the
+// DeploymentController is set to ECS (rolling update).
+//
+// For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
+// in the Amazon Elastic Container Service Developer Guide .
+type DeploymentAlarms struct {
+	AlarmNames []*string `json:"alarmNames,omitempty"`
+	Enable     *bool     `json:"enable,omitempty"`
+	Rollback   *bool     `json:"rollback,omitempty"`
+}
+
+// The deployment circuit breaker can only be used for services using the rolling
+// update (ECS) deployment type.
+//
+// The deployment circuit breaker determines whether a service deployment will
+// fail if the service can't reach a steady state. If it is turned on, a service
+// deployment will transition to a failed state and stop launching new tasks.
+// You can also configure Amazon ECS to roll back your service to the last completed
+// deployment after a failure. For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// For more information about API failure reasons, see API failure reasons (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/api_failures_messages.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type DeploymentCircuitBreaker struct {
+	Enable   *bool `json:"enable,omitempty"`
+	Rollback *bool `json:"rollback,omitempty"`
+}
+
+// An object representing a container instance host device.
+type Device struct {
+	ContainerPath *string `json:"containerPath,omitempty"`
+	HostPath      *string `json:"hostPath,omitempty"`
+}
+
+// This parameter is specified when you're using Docker volumes. Docker volumes
+// are only supported when you're using the EC2 launch type. Windows containers
+// only support the use of the local driver. To use bind mounts, specify a host
+// instead.
+type DockerVolumeConfiguration struct {
+	Driver *string `json:"driver,omitempty"`
+}
+
+// The tag specifications of an Amazon EBS volume.
+type EBSTagSpecification struct {
+	Tags []*Tag `json:"tags,omitempty"`
+}
+
+// The authorization configuration details for the Amazon EFS file system.
+type EFSAuthorizationConfig struct {
+	AccessPointID *string `json:"accessPointID,omitempty"`
+}
+
+// This parameter is specified when you're using an Amazon Elastic File System
+// file system for task storage. For more information, see Amazon EFS volumes
+// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type EFSVolumeConfiguration struct {
+	FileSystemID  *string `json:"fileSystemID,omitempty"`
+	RootDirectory *string `json:"rootDirectory,omitempty"`
+}
+
+// A list of files containing the environment variables to pass to a container.
+// You can specify up to ten environment files. The file must have a .env file
+// extension. Each line in an environment file should contain an environment
+// variable in VARIABLE=VALUE format. Lines beginning with # are treated as
+// comments and are ignored.
+//
+// If there are environment variables specified using the environment parameter
+// in a container definition, they take precedence over the variables contained
+// within an environment file. If multiple environment files are specified that
+// contain the same variable, they're processed from the top down. We recommend
+// that you use unique variable names. For more information, see Specifying
+// environment variables (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/taskdef-envfiles.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// You must use the following platforms for the Fargate launch type:
+//
+//   - Linux platform version 1.4.0 or later.
+//
+//   - Windows platform version 1.0.0 or later.
+//
+// Consider the following when using the Fargate launch type:
+//
+//   - The file is handled like a native Docker env-file.
+//
+//   - There is no support for shell escape handling.
+//
+//   - The container entry point interperts the VARIABLE values.
+type EnvironmentFile struct {
+	Value *string `json:"value,omitempty"`
+}
+
+// The amount of ephemeral storage to allocate for the task. This parameter
+// is used to expand the total amount of ephemeral storage available, beyond
+// the default amount, for tasks hosted on Fargate. For more information, see
+// Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html)
+// in the Amazon ECS Developer Guide;.
+//
+// For tasks using the Fargate launch type, the task requires the following
+// platforms:
+//
+//   - Linux platform version 1.4.0 or later.
+//
+//   - Windows platform version 1.0.0 or later.
+type EphemeralStorage struct {
+	SizeInGiB *int64 `json:"sizeInGiB,omitempty"`
+}
+
+// The details of the execute command configuration.
+type ExecuteCommandConfiguration struct {
+	KMSKeyID *string `json:"kmsKeyID,omitempty"`
+	// The log configuration for the results of the execute command actions. The
+	// logs can be sent to CloudWatch Logs or an Amazon S3 bucket.
+	LogConfiguration *ExecuteCommandLogConfiguration `json:"logConfiguration,omitempty"`
+	Logging          *string                         `json:"logging,omitempty"`
+}
+
+// The log configuration for the results of the execute command actions. The
+// logs can be sent to CloudWatch Logs or an Amazon S3 bucket.
+type ExecuteCommandLogConfiguration struct {
+	CloudWatchEncryptionEnabled *bool   `json:"cloudWatchEncryptionEnabled,omitempty"`
+	CloudWatchLogGroupName      *string `json:"cloudWatchLogGroupName,omitempty"`
+	S3BucketName                *string `json:"s3BucketName,omitempty"`
+	S3EncryptionEnabled         *bool   `json:"s3EncryptionEnabled,omitempty"`
+	S3KeyPrefix                 *string `json:"s3KeyPrefix,omitempty"`
+}
+
+// The authorization configuration details for Amazon FSx for Windows File Server
+// file system. See FSxWindowsFileServerVolumeConfiguration (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_FSxWindowsFileServerVolumeConfiguration.html)
+// in the Amazon ECS API Reference.
+//
+// For more information and the input format, see Amazon FSx for Windows File
+// Server Volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/wfsx-volumes.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type FSxWindowsFileServerAuthorizationConfig struct {
+	CredentialsParameter *string `json:"credentialsParameter,omitempty"`
+	Domain               *string `json:"domain,omitempty"`
+}
+
+// This parameter is specified when you're using Amazon FSx for Windows File
+// Server (https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html)
+// file system for task storage.
+//
+// For more information and the input format, see Amazon FSx for Windows File
+// Server volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/wfsx-volumes.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type FSxWindowsFileServerVolumeConfiguration struct {
+	FileSystemID  *string `json:"fileSystemID,omitempty"`
+	RootDirectory *string `json:"rootDirectory,omitempty"`
+}
+
+// A failed resource. For a list of common causes, see API failure reasons (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/api_failures_messages.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type Failure struct {
+	ARN    *string `json:"arn,omitempty"`
+	Detail *string `json:"detail,omitempty"`
+	Reason *string `json:"reason,omitempty"`
+}
+
+// An object representing a container health check. Health check parameters
+// that are specified in a container definition override any Docker health checks
+// that exist in the container image (such as those specified in a parent image
+// or from the image's Dockerfile). This configuration maps to the HEALTHCHECK
+// parameter of docker run (https://docs.docker.com/engine/reference/run/).
+//
+// The Amazon ECS container agent only monitors and reports on the health checks
+// specified in the task definition. Amazon ECS does not monitor Docker health
+// checks that are embedded in a container image and not specified in the container
+// definition. Health check parameters that are specified in a container definition
+// override any Docker health checks that exist in the container image.
+//
+// You can view the health status of both individual containers and a task with
+// the DescribeTasks API operation or when viewing the task details in the console.
+//
+// The health check is designed to make sure that your containers survive agent
+// restarts, upgrades, or temporary unavailability.
+//
+// The following describes the possible healthStatus values for a container:
+//
+//   - HEALTHY-The container health check has passed successfully.
+//
+//   - UNHEALTHY-The container health check has failed.
+//
+//   - UNKNOWN-The container health check is being evaluated, there's no container
+//     health check defined, or Amazon ECS doesn't have the health status of
+//     the container.
+//
+// The following describes the possible healthStatus values based on the container
+// health checker status of essential containers in the task with the following
+// priority order (high to low):
+//
+//   - UNHEALTHY-One or more essential containers have failed their health
+//     check.
+//
+//   - UNKNOWN-Any essential container running within the task is in an UNKNOWN
+//     state and no other essential containers have an UNHEALTHY state.
+//
+//   - HEALTHY-All essential containers within the task have passed their health
+//     checks.
+//
+// Consider the following task health example with 2 containers.
+//
+//   - If Container1 is UNHEALTHY and Container2 is UNKNOWN, the task health
+//     is UNHEALTHY.
+//
+//   - If Container1 is UNHEALTHY and Container2 is HEALTHY, the task health
+//     is UNHEALTHY.
+//
+//   - If Container1 is HEALTHY and Container2 is UNKNOWN, the task health
+//     is UNKNOWN.
+//
+//   - If Container1 is HEALTHY and Container2 is HEALTHY, the task health
+//     is HEALTHY.
+//
+// Consider the following task health example with 3 containers.
+//
+//   - If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+//     is UNKNOWN, the task health is UNHEALTHY.
+//
+//   - If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+//     is HEALTHY, the task health is UNHEALTHY.
+//
+//   - If Container1 is UNHEALTHY and Container2 is HEALTHY, and Container3
+//     is HEALTHY, the task health is UNHEALTHY.
+//
+//   - If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+//     HEALTHY, the task health is UNKNOWN.
+//
+//   - If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+//     UNKNOWN, the task health is UNKNOWN.
+//
+//   - If Container1 is HEALTHY and Container2 is HEALTHY, and Container3 is
+//     HEALTHY, the task health is HEALTHY.
+//
+// If a task is run manually, and not as part of a service, the task will continue
+// its lifecycle regardless of its health status. For tasks that are part of
+// a service, if the task reports as unhealthy then the task will be stopped
+// and the service scheduler will replace it.
+//
+// The following are notes about container health check support:
+//
+//   - When the Amazon ECS agent cannot connect to the Amazon ECS service,
+//     the service reports the container as UNHEALTHY.
+//
+//   - The health check statuses are the "last heard from" response from the
+//     Amazon ECS agent. There are no assumptions made about the status of the
+//     container health checks.
+//
+//   - Container health checks require version 1.17.0 or greater of the Amazon
+//     ECS container agent. For more information, see Updating the Amazon ECS
+//     container agent (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html).
+//
+//   - Container health checks are supported for Fargate tasks if you're using
+//     platform version 1.1.0 or greater. For more information, see Fargate platform
+//     versions (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/platform_versions.html).
+//
+//   - Container health checks aren't supported for tasks that are part of
+//     a service that's configured to use a Classic Load Balancer.
+type HealthCheck struct {
+	Command []*string `json:"command,omitempty"`
+}
+
+// Hostnames and IP address entries that are added to the /etc/hosts file of
+// a container via the extraHosts parameter of its ContainerDefinition.
+type HostEntry struct {
+	Hostname  *string `json:"hostname,omitempty"`
+	IPAddress *string `json:"ipAddress,omitempty"`
+}
+
+// Details on a container instance bind mount host volume.
+type HostVolumeProperties struct {
+	SourcePath *string `json:"sourcePath,omitempty"`
+}
+
+// Details on an Elastic Inference accelerator. For more information, see Working
+// with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type InferenceAccelerator struct {
+	DeviceName *string `json:"deviceName,omitempty"`
+	DeviceType *string `json:"deviceType,omitempty"`
+}
+
+// Details on an Elastic Inference accelerator task override. This parameter
+// is used to override the Elastic Inference accelerator specified in the task
+// definition. For more information, see Working with Amazon Elastic Inference
+// on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type InferenceAcceleratorOverride struct {
+	DeviceName *string `json:"deviceName,omitempty"`
+	DeviceType *string `json:"deviceType,omitempty"`
+}
+
+// The Linux capabilities for the container that are added to or dropped from
+// the default configuration provided by Docker. For more information about
+// the default capabilities and the non-default available capabilities, see
+// Runtime privilege and Linux capabilities (https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+// in the Docker run reference. For more detailed information about these Linux
+// capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
+// Linux manual page.
+type KernelCapabilities struct {
+	Add  []*string `json:"add,omitempty"`
+	Drop []*string `json:"drop,omitempty"`
+}
+
+// A key-value pair object.
+type KeyValuePair struct {
+	Name  *string `json:"name,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// The load balancer configuration to use with a service or task set.
+//
+// When you add, update, or remove a load balancer configuration, Amazon ECS
+// starts a new deployment with the updated Elastic Load Balancing configuration.
+// This causes tasks to register to and deregister from load balancers.
+//
+// We recommend that you verify this on a test environment before you update
+// the Elastic Load Balancing configuration.
+//
+// A service-linked role is required for services that use multiple target groups.
+// For more information, see Using service-linked roles (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type LoadBalancer struct {
+	ContainerName    *string `json:"containerName,omitempty"`
+	LoadBalancerName *string `json:"loadBalancerName,omitempty"`
+	TargetGroupARN   *string `json:"targetGroupARN,omitempty"`
+}
+
+// Details about the managed agent status for the container.
+type ManagedAgent struct {
+	LastStatus *string `json:"lastStatus,omitempty"`
+	Reason     *string `json:"reason,omitempty"`
+}
+
+// An object representing a change in state for a managed agent.
+type ManagedAgentStateChange struct {
+	ContainerName *string `json:"containerName,omitempty"`
+	Reason        *string `json:"reason,omitempty"`
+	Status        *string `json:"status,omitempty"`
+}
+
+// The details for a volume mount point that's used in a container definition.
+type MountPoint struct {
+	ContainerPath *string `json:"containerPath,omitempty"`
+	SourceVolume  *string `json:"sourceVolume,omitempty"`
+}
+
+// Details on the network bindings between a container and its host container
+// instance. After a task reaches the RUNNING status, manual and automatic host
+// and container port assignments are visible in the networkBindings section
+// of DescribeTasks API responses.
+type NetworkBinding struct {
+	BindIP             *string `json:"bindIP,omitempty"`
+	ContainerPortRange *string `json:"containerPortRange,omitempty"`
+	HostPortRange      *string `json:"hostPortRange,omitempty"`
+}
+
+// An object representing the elastic network interface for tasks that use the
+// awsvpc network mode.
+type NetworkInterface struct {
+	AttachmentID       *string `json:"attachmentID,omitempty"`
+	IPv6Address        *string `json:"ipv6Address,omitempty"`
+	PrivateIPv4Address *string `json:"privateIPv4Address,omitempty"`
+}
+
+// An object representing a constraint on task placement. For more information,
+// see Task placement constraints (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// If you're using the Fargate launch type, task placement constraints aren't
+// supported.
+type PlacementConstraint struct {
+	Expression *string `json:"expression,omitempty"`
+}
+
+// The task placement strategy for a task or service. For more information,
+// see Task placement strategies (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-strategies.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type PlacementStrategy struct {
+	Field *string `json:"field,omitempty"`
+}
+
+// The devices that are available on the container instance. The only supported
+// device type is a GPU.
+type PlatformDevice struct {
+	ID *string `json:"id,omitempty"`
+}
+
+// Port mappings allow containers to access ports on the host container instance
+// to send or receive traffic. Port mappings are specified as part of the container
+// definition.
+//
+// If you use containers in a task with the awsvpc or host network mode, specify
+// the exposed ports using containerPort. The hostPort can be left blank or
+// it must be the same value as the containerPort.
+//
+// Most fields of this parameter (containerPort, hostPort, protocol) maps to
+// PortBindings in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
+// section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
+// and the --publish option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+// If the network mode of a task definition is set to host, host ports must
+// either be undefined or match the container port in the port mapping.
+//
+// You can't expose the same container port for multiple protocols. If you attempt
+// this, an error is returned.
+//
+// After a task reaches the RUNNING status, manual and automatic host and container
+// port assignments are visible in the networkBindings section of DescribeTasks
+// API responses.
+type PortMapping struct {
+	ContainerPortRange *string `json:"containerPortRange,omitempty"`
+	Name               *string `json:"name,omitempty"`
+}
+
+// An object representing the protection status details for a task. You can
+// set the protection status with the UpdateTaskProtection API and get the status
+// of tasks with the GetTaskProtection API.
+type ProtectedTask struct {
+	ProtectionEnabled *bool   `json:"protectionEnabled,omitempty"`
+	TaskARN           *string `json:"taskARN,omitempty"`
+}
+
+// The configuration details for the App Mesh proxy.
+//
+// For tasks that use the EC2 launch type, the container instances require at
+// least version 1.26.0 of the container agent and at least version 1.26.0-1
+// of the ecs-init package to use a proxy configuration. If your container instances
+// are launched from the Amazon ECS optimized AMI version 20190301 or later,
+// then they contain the required versions of the container agent and ecs-init.
+// For more information, see Amazon ECS-optimized Linux AMI (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html)
+type ProxyConfiguration struct {
+	ContainerName *string `json:"containerName,omitempty"`
+}
+
+// The repository credentials for private registry authentication.
+type RepositoryCredentials struct {
+	CredentialsParameter *string `json:"credentialsParameter,omitempty"`
+}
+
+// Describes the resources available for a container instance.
+type Resource struct {
+	IntegerValue   *int64    `json:"integerValue,omitempty"`
+	Name           *string   `json:"name,omitempty"`
+	StringSetValue []*string `json:"stringSetValue,omitempty"`
+	Type           *string   `json:"type_,omitempty"`
+}
+
+// The type and amount of a resource to assign to a container. The supported
+// resource types are GPUs and Elastic Inference accelerators. For more information,
+// see Working with GPUs on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-gpu.html)
+// or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
+// in the Amazon Elastic Container Service Developer Guide
+type ResourceRequirement struct {
+	Value *string `json:"value,omitempty"`
+}
+
+// An object representing the secret to expose to your container. Secrets can
+// be exposed to a container in the following ways:
+//
+//   - To inject sensitive data into your containers as environment variables,
+//     use the secrets container definition parameter.
+//
+//   - To reference sensitive information in the log configuration of a container,
+//     use the secretOptions container definition parameter.
+//
+// For more information, see Specifying sensitive data (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type Secret struct {
+	Name      *string `json:"name,omitempty"`
+	ValueFrom *string `json:"valueFrom,omitempty"`
+}
+
+// Details on a service within a cluster.
+type Service struct {
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	ClusterARN               *string                         `json:"clusterARN,omitempty"`
+	CreatedBy                *string                         `json:"createdBy,omitempty"`
+	DesiredCount             *int64                          `json:"desiredCount,omitempty"`
+	EnableECSManagedTags     *bool                           `json:"enableECSManagedTags,omitempty"`
+	EnableExecuteCommand     *bool                           `json:"enableExecuteCommand,omitempty"`
+	PendingCount             *int64                          `json:"pendingCount,omitempty"`
+	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
+	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
+	RoleARN                  *string                         `json:"roleARN,omitempty"`
+	RunningCount             *int64                          `json:"runningCount,omitempty"`
+	ServiceARN               *string                         `json:"serviceARN,omitempty"`
+	ServiceName              *string                         `json:"serviceName,omitempty"`
+	Status                   *string                         `json:"status,omitempty"`
+	Tags                     []*Tag                          `json:"tags,omitempty"`
+	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
+}
+
+// An object that represents the Amazon Web Services Private Certificate Authority
+// certificate.
+type ServiceConnecTTLSCertificateAuthority struct {
+	AWSPcaAuthorityARN *string `json:"awsPcaAuthorityARN,omitempty"`
+}
+
+// An object that represents the configuration for Service Connect TLS.
+type ServiceConnecTTLSConfiguration struct {
+	KMSKey  *string `json:"kmsKey,omitempty"`
+	RoleARN *string `json:"roleARN,omitempty"`
+}
+
+// Each alias ("endpoint") is a fully-qualified name and port number that other
+// tasks ("clients") can use to connect to this service.
+//
+// Each name and port mapping must be unique within the namespace.
+//
+// Tasks that run in a namespace can use short names to connect to services
+// in the namespace. Tasks can connect to services across all of the clusters
+// in the namespace. Tasks connect through a managed proxy container that collects
+// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+// services create are supported with Service Connect. For more information,
+// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ServiceConnectClientAlias struct {
+	DNSName *string `json:"dnsName,omitempty"`
+}
+
+// The Service Connect configuration of your Amazon ECS service. The configuration
+// for this service to discover and connect to services, and be discovered by,
+// and connected from, other services within a namespace.
+//
+// Tasks that run in a namespace can use short names to connect to services
+// in the namespace. Tasks can connect to services across all of the clusters
+// in the namespace. Tasks connect through a managed proxy container that collects
+// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+// services create are supported with Service Connect. For more information,
+// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ServiceConnectConfiguration struct {
+	Enabled   *bool   `json:"enabled,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+// The Service Connect service object configuration. For more information, see
+// Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ServiceConnectService struct {
+	DiscoveryName *string `json:"discoveryName,omitempty"`
+	PortName      *string `json:"portName,omitempty"`
+}
+
+// The Service Connect resource. Each configuration maps a discovery name to
+// a Cloud Map service name. The data is stored in Cloud Map as part of the
+// Service Connect configuration for each discovery name of this Amazon ECS
+// service.
+//
+// A task can resolve the dnsName for each of the clientAliases of a service.
+// However a task can't resolve the discovery names. If you want to connect
+// to a service, refer to the ServiceConnectConfiguration of that service for
+// the list of clientAliases that you can use.
+type ServiceConnectServiceResource struct {
+	DiscoveryARN  *string `json:"discoveryARN,omitempty"`
+	DiscoveryName *string `json:"discoveryName,omitempty"`
+}
+
+// The details for an event that's associated with a service.
+type ServiceEvent struct {
+	ID      *string `json:"id,omitempty"`
+	Message *string `json:"message,omitempty"`
+}
+
+// The details for the service registry.
+//
+// Each service may be associated with one service registry. Multiple service
+// registries for each service are not supported.
+//
+// When you add, update, or remove the service registries configuration, Amazon
+// ECS starts a new deployment. New tasks are registered and deregistered to
+// the updated service registry configuration.
+type ServiceRegistry struct {
+	ContainerName *string `json:"containerName,omitempty"`
+	RegistryARN   *string `json:"registryARN,omitempty"`
+}
+
+// The details for the execute command session.
+type Session struct {
+	SessionID *string `json:"sessionID,omitempty"`
+	StreamURL *string `json:"streamURL,omitempty"`
+}
+
+// The current account setting for a resource.
+type Setting struct {
+	PrincipalARN *string `json:"principalARN,omitempty"`
+	Value        *string `json:"value,omitempty"`
+}
+
+// A list of namespaced kernel parameters to set in the container. This parameter
+// maps to Sysctls in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
+// section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
+// and the --sysctl option to docker run (https://docs.docker.com/engine/reference/run/#security-configuration).
+// For example, you can configure net.ipv4.tcp_keepalive_time setting to maintain
+// longer lived connections.
+//
+// We don't recommend that you specify network-related systemControls parameters
+// for multiple containers in a single task that also uses either the awsvpc
+// or host network mode. Doing this has the following disadvantages:
+//
+//   - For tasks that use the awsvpc network mode including Fargate, if you
+//     set systemControls for any container, it applies to all containers in
+//     the task. If you set different systemControls for multiple containers
+//     in a single task, the container that's started last determines which systemControls
+//     take effect.
+//
+//   - For tasks that use the host network mode, the network namespace systemControls
+//     aren't supported.
+//
+// If you're setting an IPC resource namespace to use for the containers in
+// the task, the following conditions apply to your system controls. For more
+// information, see IPC mode (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_definition_ipcmode).
+//
+//   - For tasks that use the host IPC mode, IPC namespace systemControls aren't
+//     supported.
+//
+//   - For tasks that use the task IPC mode, IPC namespace systemControls values
+//     apply to all containers within a task.
+//
+// This parameter is not supported for Windows containers.
+//
+// This parameter is only supported for tasks that are hosted on Fargate if
+// the tasks are using platform version 1.4.0 or later (Linux). This isn't supported
+// for Windows containers on Fargate.
+type SystemControl struct {
+	Namespace *string `json:"namespace,omitempty"`
+	Value     *string `json:"value,omitempty"`
+}
+
+// The metadata that you apply to a resource to help you categorize and organize
+// them. Each tag consists of a key and an optional value. You define them.
+//
+// The following basic restrictions apply to tags:
+//
+//   - Maximum number of tags per resource - 50
+//
+//   - For each resource, each tag key must be unique, and each tag key can
+//     have only one value.
+//
+//   - Maximum key length - 128 Unicode characters in UTF-8
+//
+//   - Maximum value length - 256 Unicode characters in UTF-8
+//
+//   - If your tagging schema is used across multiple services and resources,
+//     remember that other services may have restrictions on allowed characters.
+//     Generally allowed characters are: letters, numbers, and spaces representable
+//     in UTF-8, and the following characters: + - = . _ : / @.
+//
+//   - Tag keys and values are case-sensitive.
+//
+//   - Do not use aws:, AWS:, or any upper or lowercase combination of such
+//     as a prefix for either keys or values as it is reserved for Amazon Web
+//     Services use. You cannot edit or delete tag keys or values with this prefix.
+//     Tags with this prefix do not count against your tags per resource limit.
+type Tag struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// Details on a task in a cluster.
+type Task struct {
+	Attachments          []*Attachment `json:"attachments,omitempty"`
+	AvailabilityZone     *string       `json:"availabilityZone,omitempty"`
+	CapacityProviderName *string       `json:"capacityProviderName,omitempty"`
+	ClusterARN           *string       `json:"clusterARN,omitempty"`
+	ContainerInstanceARN *string       `json:"containerInstanceARN,omitempty"`
+	CPU                  *string       `json:"cpu,omitempty"`
+	DesiredStatus        *string       `json:"desiredStatus,omitempty"`
+	EnableExecuteCommand *bool         `json:"enableExecuteCommand,omitempty"`
+	Group                *string       `json:"group,omitempty"`
+	LastStatus           *string       `json:"lastStatus,omitempty"`
+	Memory               *string       `json:"memory,omitempty"`
+	PlatformFamily       *string       `json:"platformFamily,omitempty"`
+	PlatformVersion      *string       `json:"platformVersion,omitempty"`
+	StartedBy            *string       `json:"startedBy,omitempty"`
+	StoppedReason        *string       `json:"stoppedReason,omitempty"`
+	Tags                 []*Tag        `json:"tags,omitempty"`
+	TaskARN              *string       `json:"taskARN,omitempty"`
+	TaskDefinitionARN    *string       `json:"taskDefinitionARN,omitempty"`
+}
+
+// The details of a task definition which describes the container and volume
+// definitions of an Amazon Elastic Container Service task. You can specify
+// which Docker images to use, the required resources, and other configurations
+// related to launching the task definition through an Amazon ECS service or
+// task.
+type TaskDefinition struct {
+	CPU               *string `json:"cpu,omitempty"`
+	ExecutionRoleARN  *string `json:"executionRoleARN,omitempty"`
+	Family            *string `json:"family,omitempty"`
+	Memory            *string `json:"memory,omitempty"`
+	RegisteredBy      *string `json:"registeredBy,omitempty"`
+	Revision          *int64  `json:"revision,omitempty"`
+	TaskDefinitionARN *string `json:"taskDefinitionARN,omitempty"`
+	TaskRoleARN       *string `json:"taskRoleARN,omitempty"`
+}
+
+// The constraint on task placement in the task definition. For more information,
+// see Task placement constraints (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// Task placement constraints aren't supported for tasks run on Fargate.
+type TaskDefinitionPlacementConstraint struct {
+	Expression *string `json:"expression,omitempty"`
+}
+
+// The overrides that are associated with a task.
+type TaskOverride struct {
+	CPU              *string `json:"cpu,omitempty"`
+	ExecutionRoleARN *string `json:"executionRoleARN,omitempty"`
+	Memory           *string `json:"memory,omitempty"`
+	TaskRoleARN      *string `json:"taskRoleARN,omitempty"`
+}
+
+// Information about a set of Amazon ECS tasks in either an CodeDeploy or an
+// EXTERNAL deployment. An Amazon ECS task set includes details such as the
+// desired number of tasks, how many tasks are running, and whether the task
+// set serves production traffic.
+type TaskSet struct {
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	ClusterARN               *string                         `json:"clusterARN,omitempty"`
+	ComputedDesiredCount     *int64                          `json:"computedDesiredCount,omitempty"`
+	ExternalID               *string                         `json:"externalID,omitempty"`
+	ID                       *string                         `json:"id,omitempty"`
+	PendingCount             *int64                          `json:"pendingCount,omitempty"`
+	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
+	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
+	RunningCount             *int64                          `json:"runningCount,omitempty"`
+	ServiceARN               *string                         `json:"serviceARN,omitempty"`
+	StartedBy                *string                         `json:"startedBy,omitempty"`
+	Status                   *string                         `json:"status,omitempty"`
+	Tags                     []*Tag                          `json:"tags,omitempty"`
+	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
+	TaskSetARN               *string                         `json:"taskSetARN,omitempty"`
+}
+
+// The container path, mount options, and size of the tmpfs mount.
+type Tmpfs struct {
+	ContainerPath *string   `json:"containerPath,omitempty"`
+	MountOptions  []*string `json:"mountOptions,omitempty"`
+	Size          *int64    `json:"size,omitempty"`
+}
+
+// The ulimit settings to pass to the container.
+//
+// Amazon ECS tasks hosted on Fargate use the default resource limit values
+// set by the operating system with the exception of the nofile resource limit
+// parameter which Fargate overrides. The nofile resource limit sets a restriction
+// on the number of open files that a container can use. The default nofile
+// soft limit is 1024 and the default hard limit is 65535.
+//
+// You can specify the ulimit settings for a container in a task definition.
+type Ulimit struct {
+	HardLimit *int64 `json:"hardLimit,omitempty"`
+	SoftLimit *int64 `json:"softLimit,omitempty"`
+}
+
+// The Docker and Amazon ECS container agent version information about a container
+// instance.
+type VersionInfo struct {
+	AgentHash     *string `json:"agentHash,omitempty"`
+	AgentVersion  *string `json:"agentVersion,omitempty"`
+	DockerVersion *string `json:"dockerVersion,omitempty"`
+}
+
+// The data volume configuration for tasks launched using this task definition.
+// Specifying a volume configuration in a task definition is optional. The volume
+// configuration may contain multiple volumes but only one volume configured
+// at launch is supported. Each volume defined in the volume configuration may
+// only specify a name and one of either configuredAtLaunch, dockerVolumeConfiguration,
+// efsVolumeConfiguration, fsxWindowsFileServerVolumeConfiguration, or host.
+// If an empty volume configuration is specified, by default Amazon ECS uses
+// a host volume. For more information, see Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
+type Volume struct {
+	Name *string `json:"name,omitempty"`
+}
+
+// Details on a data volume from another container in the same task definition.
+type VolumeFrom struct {
+	SourceContainer *string `json:"sourceContainer,omitempty"`
+}
