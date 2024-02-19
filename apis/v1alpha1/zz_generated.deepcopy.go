@@ -140,6 +140,11 @@ func (in *Attribute) DeepCopyInto(out *Attribute) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.TargetType != nil {
+		in, out := &in.TargetType, &out.TargetType
+		*out = new(string)
+		**out = **in
+	}
 	if in.Value != nil {
 		in, out := &in.Value, &out.Value
 		*out = new(string)
@@ -693,6 +698,11 @@ func (in *Container) DeepCopyInto(out *Container) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ExitCode != nil {
+		in, out := &in.ExitCode, &out.ExitCode
+		*out = new(int64)
+		**out = **in
+	}
 	if in.Image != nil {
 		in, out := &in.Image, &out.Image
 		*out = new(string)
@@ -780,6 +790,22 @@ func (in *ContainerDefinition) DeepCopyInto(out *ContainerDefinition) {
 			}
 		}
 	}
+	if in.DependsOn != nil {
+		in, out := &in.DependsOn, &out.DependsOn
+		*out = make([]*ContainerDependency, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(ContainerDependency)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.DisableNetworking != nil {
+		in, out := &in.DisableNetworking, &out.DisableNetworking
+		*out = new(bool)
+		**out = **in
+	}
 	if in.DNSSearchDomains != nil {
 		in, out := &in.DNSSearchDomains, &out.DNSSearchDomains
 		*out = make([]*string, len(*in))
@@ -800,6 +826,22 @@ func (in *ContainerDefinition) DeepCopyInto(out *ContainerDefinition) {
 				*out = new(string)
 				**out = **in
 			}
+		}
+	}
+	if in.DockerLabels != nil {
+		in, out := &in.DockerLabels, &out.DockerLabels
+		*out = make(map[string]*string, len(*in))
+		for key, val := range *in {
+			var outVal *string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				inVal := (*in)[key]
+				in, out := &inVal, &outVal
+				*out = new(string)
+				**out = **in
+			}
+			(*out)[key] = outVal
 		}
 	}
 	if in.DockerSecurityOptions != nil {
@@ -824,6 +866,54 @@ func (in *ContainerDefinition) DeepCopyInto(out *ContainerDefinition) {
 			}
 		}
 	}
+	if in.Environment != nil {
+		in, out := &in.Environment, &out.Environment
+		*out = make([]*KeyValuePair, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(KeyValuePair)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.EnvironmentFiles != nil {
+		in, out := &in.EnvironmentFiles, &out.EnvironmentFiles
+		*out = make([]*EnvironmentFile, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(EnvironmentFile)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Essential != nil {
+		in, out := &in.Essential, &out.Essential
+		*out = new(bool)
+		**out = **in
+	}
+	if in.ExtraHosts != nil {
+		in, out := &in.ExtraHosts, &out.ExtraHosts
+		*out = make([]*HostEntry, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(HostEntry)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.FirelensConfiguration != nil {
+		in, out := &in.FirelensConfiguration, &out.FirelensConfiguration
+		*out = new(FirelensConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.HealthCheck != nil {
+		in, out := &in.HealthCheck, &out.HealthCheck
+		*out = new(HealthCheck)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Hostname != nil {
 		in, out := &in.Hostname, &out.Hostname
 		*out = new(string)
@@ -832,6 +922,11 @@ func (in *ContainerDefinition) DeepCopyInto(out *ContainerDefinition) {
 	if in.Image != nil {
 		in, out := &in.Image, &out.Image
 		*out = new(string)
+		**out = **in
+	}
+	if in.Interactive != nil {
+		in, out := &in.Interactive, &out.Interactive
+		*out = new(bool)
 		**out = **in
 	}
 	if in.Links != nil {
@@ -845,15 +940,142 @@ func (in *ContainerDefinition) DeepCopyInto(out *ContainerDefinition) {
 			}
 		}
 	}
+	if in.LinuxParameters != nil {
+		in, out := &in.LinuxParameters, &out.LinuxParameters
+		*out = new(LinuxParameters)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.LogConfiguration != nil {
+		in, out := &in.LogConfiguration, &out.LogConfiguration
+		*out = new(LogConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Memory != nil {
+		in, out := &in.Memory, &out.Memory
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MemoryReservation != nil {
+		in, out := &in.MemoryReservation, &out.MemoryReservation
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MountPoints != nil {
+		in, out := &in.MountPoints, &out.MountPoints
+		*out = make([]*MountPoint, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(MountPoint)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
 		*out = new(string)
 		**out = **in
 	}
+	if in.PortMappings != nil {
+		in, out := &in.PortMappings, &out.PortMappings
+		*out = make([]*PortMapping, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(PortMapping)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Privileged != nil {
+		in, out := &in.Privileged, &out.Privileged
+		*out = new(bool)
+		**out = **in
+	}
+	if in.PseudoTerminal != nil {
+		in, out := &in.PseudoTerminal, &out.PseudoTerminal
+		*out = new(bool)
+		**out = **in
+	}
+	if in.ReadonlyRootFilesystem != nil {
+		in, out := &in.ReadonlyRootFilesystem, &out.ReadonlyRootFilesystem
+		*out = new(bool)
+		**out = **in
+	}
+	if in.RepositoryCredentials != nil {
+		in, out := &in.RepositoryCredentials, &out.RepositoryCredentials
+		*out = new(RepositoryCredentials)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.ResourceRequirements != nil {
+		in, out := &in.ResourceRequirements, &out.ResourceRequirements
+		*out = make([]*ResourceRequirement, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(ResourceRequirement)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Secrets != nil {
+		in, out := &in.Secrets, &out.Secrets
+		*out = make([]*Secret, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Secret)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.StartTimeout != nil {
+		in, out := &in.StartTimeout, &out.StartTimeout
+		*out = new(int64)
+		**out = **in
+	}
+	if in.StopTimeout != nil {
+		in, out := &in.StopTimeout, &out.StopTimeout
+		*out = new(int64)
+		**out = **in
+	}
+	if in.SystemControls != nil {
+		in, out := &in.SystemControls, &out.SystemControls
+		*out = make([]*SystemControl, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(SystemControl)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Ulimits != nil {
+		in, out := &in.Ulimits, &out.Ulimits
+		*out = make([]*Ulimit, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Ulimit)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	if in.User != nil {
 		in, out := &in.User, &out.User
 		*out = new(string)
 		**out = **in
+	}
+	if in.VolumesFrom != nil {
+		in, out := &in.VolumesFrom, &out.VolumesFrom
+		*out = make([]*VolumeFrom, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(VolumeFrom)
+				(*in).DeepCopyInto(*out)
+			}
+		}
 	}
 	if in.WorkingDirectory != nil {
 		in, out := &in.WorkingDirectory, &out.WorkingDirectory
@@ -875,6 +1097,11 @@ func (in *ContainerDefinition) DeepCopy() *ContainerDefinition {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ContainerDependency) DeepCopyInto(out *ContainerDependency) {
 	*out = *in
+	if in.Condition != nil {
+		in, out := &in.Condition, &out.Condition
+		*out = new(string)
+		**out = **in
+	}
 	if in.ContainerName != nil {
 		in, out := &in.ContainerName, &out.ContainerName
 		*out = new(string)
@@ -931,6 +1158,10 @@ func (in *ContainerInstance) DeepCopyInto(out *ContainerInstance) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.RegisteredAt != nil {
+		in, out := &in.RegisteredAt, &out.RegisteredAt
+		*out = (*in).DeepCopy()
+	}
 	if in.RunningTasksCount != nil {
 		in, out := &in.RunningTasksCount, &out.RunningTasksCount
 		*out = new(int64)
@@ -983,10 +1214,58 @@ func (in *ContainerOverride) DeepCopyInto(out *ContainerOverride) {
 			}
 		}
 	}
+	if in.CPU != nil {
+		in, out := &in.CPU, &out.CPU
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Environment != nil {
+		in, out := &in.Environment, &out.Environment
+		*out = make([]*KeyValuePair, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(KeyValuePair)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.EnvironmentFiles != nil {
+		in, out := &in.EnvironmentFiles, &out.EnvironmentFiles
+		*out = make([]*EnvironmentFile, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(EnvironmentFile)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Memory != nil {
+		in, out := &in.Memory, &out.Memory
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MemoryReservation != nil {
+		in, out := &in.MemoryReservation, &out.MemoryReservation
+		*out = new(int64)
+		**out = **in
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
 		*out = new(string)
 		**out = **in
+	}
+	if in.ResourceRequirements != nil {
+		in, out := &in.ResourceRequirements, &out.ResourceRequirements
+		*out = make([]*ResourceRequirement, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(ResourceRequirement)
+				(*in).DeepCopyInto(*out)
+			}
+		}
 	}
 }
 
@@ -1006,6 +1285,11 @@ func (in *ContainerStateChange) DeepCopyInto(out *ContainerStateChange) {
 	if in.ContainerName != nil {
 		in, out := &in.ContainerName, &out.ContainerName
 		*out = new(string)
+		**out = **in
+	}
+	if in.ExitCode != nil {
+		in, out := &in.ExitCode, &out.ExitCode
+		*out = new(int64)
 		**out = **in
 	}
 	if in.ImageDigest != nil {
@@ -1053,6 +1337,10 @@ func (in *Deployment) DeepCopyInto(out *Deployment) {
 				(*in).DeepCopyInto(*out)
 			}
 		}
+	}
+	if in.CreatedAt != nil {
+		in, out := &in.CreatedAt, &out.CreatedAt
+		*out = (*in).DeepCopy()
 	}
 	if in.DesiredCount != nil {
 		in, out := &in.DesiredCount, &out.DesiredCount
@@ -1103,6 +1391,10 @@ func (in *Deployment) DeepCopyInto(out *Deployment) {
 		in, out := &in.TaskDefinition, &out.TaskDefinition
 		*out = new(string)
 		**out = **in
+	}
+	if in.UpdatedAt != nil {
+		in, out := &in.UpdatedAt, &out.UpdatedAt
+		*out = (*in).DeepCopy()
 	}
 }
 
@@ -1178,6 +1470,31 @@ func (in *DeploymentCircuitBreaker) DeepCopy() *DeploymentCircuitBreaker {
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *DeploymentConfiguration) DeepCopyInto(out *DeploymentConfiguration) {
+	*out = *in
+	if in.MaximumPercent != nil {
+		in, out := &in.MaximumPercent, &out.MaximumPercent
+		*out = new(int64)
+		**out = **in
+	}
+	if in.MinimumHealthyPercent != nil {
+		in, out := &in.MinimumHealthyPercent, &out.MinimumHealthyPercent
+		*out = new(int64)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new DeploymentConfiguration.
+func (in *DeploymentConfiguration) DeepCopy() *DeploymentConfiguration {
+	if in == nil {
+		return nil
+	}
+	out := new(DeploymentConfiguration)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *Device) DeepCopyInto(out *Device) {
 	*out = *in
 	if in.ContainerPath != nil {
@@ -1189,6 +1506,17 @@ func (in *Device) DeepCopyInto(out *Device) {
 		in, out := &in.HostPath, &out.HostPath
 		*out = new(string)
 		**out = **in
+	}
+	if in.Permissions != nil {
+		in, out := &in.Permissions, &out.Permissions
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
 	}
 }
 
@@ -1205,8 +1533,50 @@ func (in *Device) DeepCopy() *Device {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *DockerVolumeConfiguration) DeepCopyInto(out *DockerVolumeConfiguration) {
 	*out = *in
+	if in.Autoprovision != nil {
+		in, out := &in.Autoprovision, &out.Autoprovision
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Driver != nil {
 		in, out := &in.Driver, &out.Driver
+		*out = new(string)
+		**out = **in
+	}
+	if in.DriverOpts != nil {
+		in, out := &in.DriverOpts, &out.DriverOpts
+		*out = make(map[string]*string, len(*in))
+		for key, val := range *in {
+			var outVal *string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				inVal := (*in)[key]
+				in, out := &inVal, &outVal
+				*out = new(string)
+				**out = **in
+			}
+			(*out)[key] = outVal
+		}
+	}
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make(map[string]*string, len(*in))
+		for key, val := range *in {
+			var outVal *string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				inVal := (*in)[key]
+				in, out := &inVal, &outVal
+				*out = new(string)
+				**out = **in
+			}
+			(*out)[key] = outVal
+		}
+	}
+	if in.Scope != nil {
+		in, out := &in.Scope, &out.Scope
 		*out = new(string)
 		**out = **in
 	}
@@ -1256,6 +1626,11 @@ func (in *EFSAuthorizationConfig) DeepCopyInto(out *EFSAuthorizationConfig) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.IAM != nil {
+		in, out := &in.IAM, &out.IAM
+		*out = new(string)
+		**out = **in
+	}
 }
 
 // DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new EFSAuthorizationConfig.
@@ -1271,6 +1646,11 @@ func (in *EFSAuthorizationConfig) DeepCopy() *EFSAuthorizationConfig {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *EFSVolumeConfiguration) DeepCopyInto(out *EFSVolumeConfiguration) {
 	*out = *in
+	if in.AuthorizationConfig != nil {
+		in, out := &in.AuthorizationConfig, &out.AuthorizationConfig
+		*out = new(EFSAuthorizationConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.FileSystemID != nil {
 		in, out := &in.FileSystemID, &out.FileSystemID
 		*out = new(string)
@@ -1279,6 +1659,16 @@ func (in *EFSVolumeConfiguration) DeepCopyInto(out *EFSVolumeConfiguration) {
 	if in.RootDirectory != nil {
 		in, out := &in.RootDirectory, &out.RootDirectory
 		*out = new(string)
+		**out = **in
+	}
+	if in.TransitEncryption != nil {
+		in, out := &in.TransitEncryption, &out.TransitEncryption
+		*out = new(string)
+		**out = **in
+	}
+	if in.TransitEncryptionPort != nil {
+		in, out := &in.TransitEncryptionPort, &out.TransitEncryptionPort
+		*out = new(int64)
 		**out = **in
 	}
 }
@@ -1296,6 +1686,11 @@ func (in *EFSVolumeConfiguration) DeepCopy() *EFSVolumeConfiguration {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *EnvironmentFile) DeepCopyInto(out *EnvironmentFile) {
 	*out = *in
+	if in.Type != nil {
+		in, out := &in.Type, &out.Type
+		*out = new(string)
+		**out = **in
+	}
 	if in.Value != nil {
 		in, out := &in.Value, &out.Value
 		*out = new(string)
@@ -1431,6 +1826,11 @@ func (in *FSxWindowsFileServerAuthorizationConfig) DeepCopy() *FSxWindowsFileSer
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *FSxWindowsFileServerVolumeConfiguration) DeepCopyInto(out *FSxWindowsFileServerVolumeConfiguration) {
 	*out = *in
+	if in.AuthorizationConfig != nil {
+		in, out := &in.AuthorizationConfig, &out.AuthorizationConfig
+		*out = new(FSxWindowsFileServerAuthorizationConfig)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.FileSystemID != nil {
 		in, out := &in.FileSystemID, &out.FileSystemID
 		*out = new(string)
@@ -1484,6 +1884,42 @@ func (in *Failure) DeepCopy() *Failure {
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *FirelensConfiguration) DeepCopyInto(out *FirelensConfiguration) {
+	*out = *in
+	if in.Options != nil {
+		in, out := &in.Options, &out.Options
+		*out = make(map[string]*string, len(*in))
+		for key, val := range *in {
+			var outVal *string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				inVal := (*in)[key]
+				in, out := &inVal, &outVal
+				*out = new(string)
+				**out = **in
+			}
+			(*out)[key] = outVal
+		}
+	}
+	if in.Type != nil {
+		in, out := &in.Type, &out.Type
+		*out = new(string)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new FirelensConfiguration.
+func (in *FirelensConfiguration) DeepCopy() *FirelensConfiguration {
+	if in == nil {
+		return nil
+	}
+	out := new(FirelensConfiguration)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *HealthCheck) DeepCopyInto(out *HealthCheck) {
 	*out = *in
 	if in.Command != nil {
@@ -1496,6 +1932,26 @@ func (in *HealthCheck) DeepCopyInto(out *HealthCheck) {
 				**out = **in
 			}
 		}
+	}
+	if in.Interval != nil {
+		in, out := &in.Interval, &out.Interval
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Retries != nil {
+		in, out := &in.Retries, &out.Retries
+		*out = new(int64)
+		**out = **in
+	}
+	if in.StartPeriod != nil {
+		in, out := &in.StartPeriod, &out.StartPeriod
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Timeout != nil {
+		in, out := &in.Timeout, &out.Timeout
+		*out = new(int64)
+		**out = **in
 	}
 }
 
@@ -1605,6 +2061,29 @@ func (in *InferenceAcceleratorOverride) DeepCopy() *InferenceAcceleratorOverride
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *InstanceHealthCheckResult) DeepCopyInto(out *InstanceHealthCheckResult) {
+	*out = *in
+	if in.LastStatusChange != nil {
+		in, out := &in.LastStatusChange, &out.LastStatusChange
+		*out = (*in).DeepCopy()
+	}
+	if in.LastUpdated != nil {
+		in, out := &in.LastUpdated, &out.LastUpdated
+		*out = (*in).DeepCopy()
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new InstanceHealthCheckResult.
+func (in *InstanceHealthCheckResult) DeepCopy() *InstanceHealthCheckResult {
+	if in == nil {
+		return nil
+	}
+	out := new(InstanceHealthCheckResult)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *KernelCapabilities) DeepCopyInto(out *KernelCapabilities) {
 	*out = *in
 	if in.Add != nil {
@@ -1667,11 +2146,78 @@ func (in *KeyValuePair) DeepCopy() *KeyValuePair {
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *LinuxParameters) DeepCopyInto(out *LinuxParameters) {
+	*out = *in
+	if in.Capabilities != nil {
+		in, out := &in.Capabilities, &out.Capabilities
+		*out = new(KernelCapabilities)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Devices != nil {
+		in, out := &in.Devices, &out.Devices
+		*out = make([]*Device, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Device)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.InitProcessEnabled != nil {
+		in, out := &in.InitProcessEnabled, &out.InitProcessEnabled
+		*out = new(bool)
+		**out = **in
+	}
+	if in.MaxSwap != nil {
+		in, out := &in.MaxSwap, &out.MaxSwap
+		*out = new(int64)
+		**out = **in
+	}
+	if in.SharedMemorySize != nil {
+		in, out := &in.SharedMemorySize, &out.SharedMemorySize
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Swappiness != nil {
+		in, out := &in.Swappiness, &out.Swappiness
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Tmpfs != nil {
+		in, out := &in.Tmpfs, &out.Tmpfs
+		*out = make([]*Tmpfs, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Tmpfs)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new LinuxParameters.
+func (in *LinuxParameters) DeepCopy() *LinuxParameters {
+	if in == nil {
+		return nil
+	}
+	out := new(LinuxParameters)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *LoadBalancer) DeepCopyInto(out *LoadBalancer) {
 	*out = *in
 	if in.ContainerName != nil {
 		in, out := &in.ContainerName, &out.ContainerName
 		*out = new(string)
+		**out = **in
+	}
+	if in.ContainerPort != nil {
+		in, out := &in.ContainerPort, &out.ContainerPort
+		*out = new(int64)
 		**out = **in
 	}
 	if in.LoadBalancerName != nil {
@@ -1697,8 +2243,59 @@ func (in *LoadBalancer) DeepCopy() *LoadBalancer {
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *LogConfiguration) DeepCopyInto(out *LogConfiguration) {
+	*out = *in
+	if in.LogDriver != nil {
+		in, out := &in.LogDriver, &out.LogDriver
+		*out = new(string)
+		**out = **in
+	}
+	if in.Options != nil {
+		in, out := &in.Options, &out.Options
+		*out = make(map[string]*string, len(*in))
+		for key, val := range *in {
+			var outVal *string
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				inVal := (*in)[key]
+				in, out := &inVal, &outVal
+				*out = new(string)
+				**out = **in
+			}
+			(*out)[key] = outVal
+		}
+	}
+	if in.SecretOptions != nil {
+		in, out := &in.SecretOptions, &out.SecretOptions
+		*out = make([]*Secret, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Secret)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new LogConfiguration.
+func (in *LogConfiguration) DeepCopy() *LogConfiguration {
+	if in == nil {
+		return nil
+	}
+	out := new(LogConfiguration)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ManagedAgent) DeepCopyInto(out *ManagedAgent) {
 	*out = *in
+	if in.LastStartedAt != nil {
+		in, out := &in.LastStartedAt, &out.LastStartedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.LastStatus != nil {
 		in, out := &in.LastStatus, &out.LastStatus
 		*out = new(string)
@@ -1759,6 +2356,11 @@ func (in *MountPoint) DeepCopyInto(out *MountPoint) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ReadOnly != nil {
+		in, out := &in.ReadOnly, &out.ReadOnly
+		*out = new(bool)
+		**out = **in
+	}
 	if in.SourceVolume != nil {
 		in, out := &in.SourceVolume, &out.SourceVolume
 		*out = new(string)
@@ -1784,13 +2386,28 @@ func (in *NetworkBinding) DeepCopyInto(out *NetworkBinding) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ContainerPort != nil {
+		in, out := &in.ContainerPort, &out.ContainerPort
+		*out = new(int64)
+		**out = **in
+	}
 	if in.ContainerPortRange != nil {
 		in, out := &in.ContainerPortRange, &out.ContainerPortRange
 		*out = new(string)
 		**out = **in
 	}
+	if in.HostPort != nil {
+		in, out := &in.HostPort, &out.HostPort
+		*out = new(int64)
+		**out = **in
+	}
 	if in.HostPortRange != nil {
 		in, out := &in.HostPortRange, &out.HostPortRange
+		*out = new(string)
+		**out = **in
+	}
+	if in.Protocol != nil {
+		in, out := &in.Protocol, &out.Protocol
 		*out = new(string)
 		**out = **in
 	}
@@ -1899,13 +2516,33 @@ func (in *PlatformDevice) DeepCopy() *PlatformDevice {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *PortMapping) DeepCopyInto(out *PortMapping) {
 	*out = *in
+	if in.AppProtocol != nil {
+		in, out := &in.AppProtocol, &out.AppProtocol
+		*out = new(string)
+		**out = **in
+	}
+	if in.ContainerPort != nil {
+		in, out := &in.ContainerPort, &out.ContainerPort
+		*out = new(int64)
+		**out = **in
+	}
 	if in.ContainerPortRange != nil {
 		in, out := &in.ContainerPortRange, &out.ContainerPortRange
 		*out = new(string)
 		**out = **in
 	}
+	if in.HostPort != nil {
+		in, out := &in.HostPort, &out.HostPort
+		*out = new(int64)
+		**out = **in
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
+		*out = new(string)
+		**out = **in
+	}
+	if in.Protocol != nil {
+		in, out := &in.Protocol, &out.Protocol
 		*out = new(string)
 		**out = **in
 	}
@@ -1924,6 +2561,10 @@ func (in *PortMapping) DeepCopy() *PortMapping {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ProtectedTask) DeepCopyInto(out *ProtectedTask) {
 	*out = *in
+	if in.ExpirationDate != nil {
+		in, out := &in.ExpirationDate, &out.ExpirationDate
+		*out = (*in).DeepCopy()
+	}
 	if in.ProtectionEnabled != nil {
 		in, out := &in.ProtectionEnabled, &out.ProtectionEnabled
 		*out = new(bool)
@@ -1951,6 +2592,22 @@ func (in *ProxyConfiguration) DeepCopyInto(out *ProxyConfiguration) {
 	*out = *in
 	if in.ContainerName != nil {
 		in, out := &in.ContainerName, &out.ContainerName
+		*out = new(string)
+		**out = **in
+	}
+	if in.Properties != nil {
+		in, out := &in.Properties, &out.Properties
+		*out = make([]*KeyValuePair, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(KeyValuePair)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Type != nil {
+		in, out := &in.Type, &out.Type
 		*out = new(string)
 		**out = **in
 	}
@@ -2030,6 +2687,11 @@ func (in *Resource) DeepCopy() *Resource {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ResourceRequirement) DeepCopyInto(out *ResourceRequirement) {
 	*out = *in
+	if in.Type != nil {
+		in, out := &in.Type, &out.Type
+		*out = new(string)
+		**out = **in
+	}
 	if in.Value != nil {
 		in, out := &in.Value, &out.Value
 		*out = new(string)
@@ -2043,6 +2705,31 @@ func (in *ResourceRequirement) DeepCopy() *ResourceRequirement {
 		return nil
 	}
 	out := new(ResourceRequirement)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *RuntimePlatform) DeepCopyInto(out *RuntimePlatform) {
+	*out = *in
+	if in.CPUArchitecture != nil {
+		in, out := &in.CPUArchitecture, &out.CPUArchitecture
+		*out = new(string)
+		**out = **in
+	}
+	if in.OperatingSystemFamily != nil {
+		in, out := &in.OperatingSystemFamily, &out.OperatingSystemFamily
+		*out = new(string)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new RuntimePlatform.
+func (in *RuntimePlatform) DeepCopy() *RuntimePlatform {
+	if in == nil {
+		return nil
+	}
+	out := new(RuntimePlatform)
 	in.DeepCopyInto(out)
 	return out
 }
@@ -2091,6 +2778,10 @@ func (in *Service) DeepCopyInto(out *Service) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.CreatedAt != nil {
+		in, out := &in.CreatedAt, &out.CreatedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.CreatedBy != nil {
 		in, out := &in.CreatedBy, &out.CreatedBy
 		*out = new(string)
@@ -2109,6 +2800,11 @@ func (in *Service) DeepCopyInto(out *Service) {
 	if in.EnableExecuteCommand != nil {
 		in, out := &in.EnableExecuteCommand, &out.EnableExecuteCommand
 		*out = new(bool)
+		**out = **in
+	}
+	if in.HealthCheckGracePeriodSeconds != nil {
+		in, out := &in.HealthCheckGracePeriodSeconds, &out.HealthCheckGracePeriodSeconds
+		*out = new(int64)
 		**out = **in
 	}
 	if in.PendingCount != nil {
@@ -2182,8 +2878,8 @@ func (in *Service) DeepCopy() *Service {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ServiceConnecTTLSCertificateAuthority) DeepCopyInto(out *ServiceConnecTTLSCertificateAuthority) {
 	*out = *in
-	if in.AWSPcaAuthorityARN != nil {
-		in, out := &in.AWSPcaAuthorityARN, &out.AWSPcaAuthorityARN
+	if in.AWSPCAAuthorityARN != nil {
+		in, out := &in.AWSPCAAuthorityARN, &out.AWSPCAAuthorityARN
 		*out = new(string)
 		**out = **in
 	}
@@ -2251,6 +2947,11 @@ func (in *ServiceConnectConfiguration) DeepCopyInto(out *ServiceConnectConfigura
 		in, out := &in.Enabled, &out.Enabled
 		*out = new(bool)
 		**out = **in
+	}
+	if in.LogConfiguration != nil {
+		in, out := &in.LogConfiguration, &out.LogConfiguration
+		*out = new(LogConfiguration)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Namespace != nil {
 		in, out := &in.Namespace, &out.Namespace
@@ -2322,6 +3023,10 @@ func (in *ServiceConnectServiceResource) DeepCopy() *ServiceConnectServiceResour
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ServiceEvent) DeepCopyInto(out *ServiceEvent) {
 	*out = *in
+	if in.CreatedAt != nil {
+		in, out := &in.CreatedAt, &out.CreatedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.ID != nil {
 		in, out := &in.ID, &out.ID
 		*out = new(string)
@@ -2345,11 +3050,56 @@ func (in *ServiceEvent) DeepCopy() *ServiceEvent {
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *ServiceManagedEBSVolumeConfiguration) DeepCopyInto(out *ServiceManagedEBSVolumeConfiguration) {
+	*out = *in
+	if in.Encrypted != nil {
+		in, out := &in.Encrypted, &out.Encrypted
+		*out = new(bool)
+		**out = **in
+	}
+	if in.IOPS != nil {
+		in, out := &in.IOPS, &out.IOPS
+		*out = new(int64)
+		**out = **in
+	}
+	if in.SizeInGiB != nil {
+		in, out := &in.SizeInGiB, &out.SizeInGiB
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Throughput != nil {
+		in, out := &in.Throughput, &out.Throughput
+		*out = new(int64)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new ServiceManagedEBSVolumeConfiguration.
+func (in *ServiceManagedEBSVolumeConfiguration) DeepCopy() *ServiceManagedEBSVolumeConfiguration {
+	if in == nil {
+		return nil
+	}
+	out := new(ServiceManagedEBSVolumeConfiguration)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *ServiceRegistry) DeepCopyInto(out *ServiceRegistry) {
 	*out = *in
 	if in.ContainerName != nil {
 		in, out := &in.ContainerName, &out.ContainerName
 		*out = new(string)
+		**out = **in
+	}
+	if in.ContainerPort != nil {
+		in, out := &in.ContainerPort, &out.ContainerPort
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Port != nil {
+		in, out := &in.Port, &out.Port
+		*out = new(int64)
 		**out = **in
 	}
 	if in.RegistryARN != nil {
@@ -2498,6 +3248,10 @@ func (in *Task) DeepCopyInto(out *Task) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ConnectivityAt != nil {
+		in, out := &in.ConnectivityAt, &out.ConnectivityAt
+		*out = (*in).DeepCopy()
+	}
 	if in.ContainerInstanceARN != nil {
 		in, out := &in.ContainerInstanceARN, &out.ContainerInstanceARN
 		*out = new(string)
@@ -2507,6 +3261,10 @@ func (in *Task) DeepCopyInto(out *Task) {
 		in, out := &in.CPU, &out.CPU
 		*out = new(string)
 		**out = **in
+	}
+	if in.CreatedAt != nil {
+		in, out := &in.CreatedAt, &out.CreatedAt
+		*out = (*in).DeepCopy()
 	}
 	if in.DesiredStatus != nil {
 		in, out := &in.DesiredStatus, &out.DesiredStatus
@@ -2518,10 +3276,30 @@ func (in *Task) DeepCopyInto(out *Task) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.EphemeralStorage != nil {
+		in, out := &in.EphemeralStorage, &out.EphemeralStorage
+		*out = new(EphemeralStorage)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.ExecutionStoppedAt != nil {
+		in, out := &in.ExecutionStoppedAt, &out.ExecutionStoppedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.Group != nil {
 		in, out := &in.Group, &out.Group
 		*out = new(string)
 		**out = **in
+	}
+	if in.InferenceAccelerators != nil {
+		in, out := &in.InferenceAccelerators, &out.InferenceAccelerators
+		*out = make([]*InferenceAccelerator, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(InferenceAccelerator)
+				(*in).DeepCopyInto(*out)
+			}
+		}
 	}
 	if in.LastStatus != nil {
 		in, out := &in.LastStatus, &out.LastStatus
@@ -2543,15 +3321,35 @@ func (in *Task) DeepCopyInto(out *Task) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.PullStartedAt != nil {
+		in, out := &in.PullStartedAt, &out.PullStartedAt
+		*out = (*in).DeepCopy()
+	}
+	if in.PullStoppedAt != nil {
+		in, out := &in.PullStoppedAt, &out.PullStoppedAt
+		*out = (*in).DeepCopy()
+	}
+	if in.StartedAt != nil {
+		in, out := &in.StartedAt, &out.StartedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.StartedBy != nil {
 		in, out := &in.StartedBy, &out.StartedBy
 		*out = new(string)
 		**out = **in
 	}
+	if in.StoppedAt != nil {
+		in, out := &in.StoppedAt, &out.StoppedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.StoppedReason != nil {
 		in, out := &in.StoppedReason, &out.StoppedReason
 		*out = new(string)
 		**out = **in
+	}
+	if in.StoppingAt != nil {
+		in, out := &in.StoppingAt, &out.StoppingAt
+		*out = (*in).DeepCopy()
 	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
@@ -2589,46 +3387,10 @@ func (in *Task) DeepCopy() *Task {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *TaskDefinition) DeepCopyInto(out *TaskDefinition) {
 	*out = *in
-	if in.CPU != nil {
-		in, out := &in.CPU, &out.CPU
-		*out = new(string)
-		**out = **in
-	}
-	if in.ExecutionRoleARN != nil {
-		in, out := &in.ExecutionRoleARN, &out.ExecutionRoleARN
-		*out = new(string)
-		**out = **in
-	}
-	if in.Family != nil {
-		in, out := &in.Family, &out.Family
-		*out = new(string)
-		**out = **in
-	}
-	if in.Memory != nil {
-		in, out := &in.Memory, &out.Memory
-		*out = new(string)
-		**out = **in
-	}
-	if in.RegisteredBy != nil {
-		in, out := &in.RegisteredBy, &out.RegisteredBy
-		*out = new(string)
-		**out = **in
-	}
-	if in.Revision != nil {
-		in, out := &in.Revision, &out.Revision
-		*out = new(int64)
-		**out = **in
-	}
-	if in.TaskDefinitionARN != nil {
-		in, out := &in.TaskDefinitionARN, &out.TaskDefinitionARN
-		*out = new(string)
-		**out = **in
-	}
-	if in.TaskRoleARN != nil {
-		in, out := &in.TaskRoleARN, &out.TaskRoleARN
-		*out = new(string)
-		**out = **in
-	}
+	out.TypeMeta = in.TypeMeta
+	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	in.Spec.DeepCopyInto(&out.Spec)
+	in.Status.DeepCopyInto(&out.Status)
 }
 
 // DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskDefinition.
@@ -2641,11 +3403,56 @@ func (in *TaskDefinition) DeepCopy() *TaskDefinition {
 	return out
 }
 
+// DeepCopyObject is an autogenerated deepcopy function, copying the receiver, creating a new runtime.Object.
+func (in *TaskDefinition) DeepCopyObject() runtime.Object {
+	if c := in.DeepCopy(); c != nil {
+		return c
+	}
+	return nil
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskDefinitionList) DeepCopyInto(out *TaskDefinitionList) {
+	*out = *in
+	out.TypeMeta = in.TypeMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	if in.Items != nil {
+		in, out := &in.Items, &out.Items
+		*out = make([]TaskDefinition, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskDefinitionList.
+func (in *TaskDefinitionList) DeepCopy() *TaskDefinitionList {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskDefinitionList)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyObject is an autogenerated deepcopy function, copying the receiver, creating a new runtime.Object.
+func (in *TaskDefinitionList) DeepCopyObject() runtime.Object {
+	if c := in.DeepCopy(); c != nil {
+		return c
+	}
+	return nil
+}
+
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *TaskDefinitionPlacementConstraint) DeepCopyInto(out *TaskDefinitionPlacementConstraint) {
 	*out = *in
 	if in.Expression != nil {
 		in, out := &in.Expression, &out.Expression
+		*out = new(string)
+		**out = **in
+	}
+	if in.Type != nil {
+		in, out := &in.Type, &out.Type
 		*out = new(string)
 		**out = **in
 	}
@@ -2662,12 +3469,464 @@ func (in *TaskDefinitionPlacementConstraint) DeepCopy() *TaskDefinitionPlacement
 }
 
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskDefinitionSpec) DeepCopyInto(out *TaskDefinitionSpec) {
+	*out = *in
+	if in.ContainerDefinitions != nil {
+		in, out := &in.ContainerDefinitions, &out.ContainerDefinitions
+		*out = make([]*ContainerDefinition, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(ContainerDefinition)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.CPU != nil {
+		in, out := &in.CPU, &out.CPU
+		*out = new(string)
+		**out = **in
+	}
+	if in.EphemeralStorage != nil {
+		in, out := &in.EphemeralStorage, &out.EphemeralStorage
+		*out = new(EphemeralStorage)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.ExecutionRoleARN != nil {
+		in, out := &in.ExecutionRoleARN, &out.ExecutionRoleARN
+		*out = new(string)
+		**out = **in
+	}
+	if in.Family != nil {
+		in, out := &in.Family, &out.Family
+		*out = new(string)
+		**out = **in
+	}
+	if in.InferenceAccelerators != nil {
+		in, out := &in.InferenceAccelerators, &out.InferenceAccelerators
+		*out = make([]*InferenceAccelerator, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(InferenceAccelerator)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.IPCMode != nil {
+		in, out := &in.IPCMode, &out.IPCMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.Memory != nil {
+		in, out := &in.Memory, &out.Memory
+		*out = new(string)
+		**out = **in
+	}
+	if in.NetworkMode != nil {
+		in, out := &in.NetworkMode, &out.NetworkMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.PIDMode != nil {
+		in, out := &in.PIDMode, &out.PIDMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.PlacementConstraints != nil {
+		in, out := &in.PlacementConstraints, &out.PlacementConstraints
+		*out = make([]*TaskDefinitionPlacementConstraint, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(TaskDefinitionPlacementConstraint)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.ProxyConfiguration != nil {
+		in, out := &in.ProxyConfiguration, &out.ProxyConfiguration
+		*out = new(ProxyConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.RequiresCompatibilities != nil {
+		in, out := &in.RequiresCompatibilities, &out.RequiresCompatibilities
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
+	}
+	if in.RuntimePlatform != nil {
+		in, out := &in.RuntimePlatform, &out.RuntimePlatform
+		*out = new(RuntimePlatform)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Tags != nil {
+		in, out := &in.Tags, &out.Tags
+		*out = make([]*Tag, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Tag)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.TaskRoleARN != nil {
+		in, out := &in.TaskRoleARN, &out.TaskRoleARN
+		*out = new(string)
+		**out = **in
+	}
+	if in.TaskRoleRef != nil {
+		in, out := &in.TaskRoleRef, &out.TaskRoleRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Volumes != nil {
+		in, out := &in.Volumes, &out.Volumes
+		*out = make([]*Volume, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Volume)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskDefinitionSpec.
+func (in *TaskDefinitionSpec) DeepCopy() *TaskDefinitionSpec {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskDefinitionSpec)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskDefinitionStatus) DeepCopyInto(out *TaskDefinitionStatus) {
+	*out = *in
+	if in.ACKResourceMetadata != nil {
+		in, out := &in.ACKResourceMetadata, &out.ACKResourceMetadata
+		*out = new(corev1alpha1.ResourceMetadata)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Conditions != nil {
+		in, out := &in.Conditions, &out.Conditions
+		*out = make([]*corev1alpha1.Condition, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(corev1alpha1.Condition)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Compatibilities != nil {
+		in, out := &in.Compatibilities, &out.Compatibilities
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
+	}
+	if in.DeregisteredAt != nil {
+		in, out := &in.DeregisteredAt, &out.DeregisteredAt
+		*out = (*in).DeepCopy()
+	}
+	if in.RegisteredAt != nil {
+		in, out := &in.RegisteredAt, &out.RegisteredAt
+		*out = (*in).DeepCopy()
+	}
+	if in.RegisteredBy != nil {
+		in, out := &in.RegisteredBy, &out.RegisteredBy
+		*out = new(string)
+		**out = **in
+	}
+	if in.RequiresAttributes != nil {
+		in, out := &in.RequiresAttributes, &out.RequiresAttributes
+		*out = make([]*Attribute, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Attribute)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.Revision != nil {
+		in, out := &in.Revision, &out.Revision
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Status != nil {
+		in, out := &in.Status, &out.Status
+		*out = new(string)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskDefinitionStatus.
+func (in *TaskDefinitionStatus) DeepCopy() *TaskDefinitionStatus {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskDefinitionStatus)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskDefinition_SDK) DeepCopyInto(out *TaskDefinition_SDK) {
+	*out = *in
+	if in.Compatibilities != nil {
+		in, out := &in.Compatibilities, &out.Compatibilities
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
+	}
+	if in.ContainerDefinitions != nil {
+		in, out := &in.ContainerDefinitions, &out.ContainerDefinitions
+		*out = make([]*ContainerDefinition, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(ContainerDefinition)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.CPU != nil {
+		in, out := &in.CPU, &out.CPU
+		*out = new(string)
+		**out = **in
+	}
+	if in.DeregisteredAt != nil {
+		in, out := &in.DeregisteredAt, &out.DeregisteredAt
+		*out = (*in).DeepCopy()
+	}
+	if in.EphemeralStorage != nil {
+		in, out := &in.EphemeralStorage, &out.EphemeralStorage
+		*out = new(EphemeralStorage)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.ExecutionRoleARN != nil {
+		in, out := &in.ExecutionRoleARN, &out.ExecutionRoleARN
+		*out = new(string)
+		**out = **in
+	}
+	if in.Family != nil {
+		in, out := &in.Family, &out.Family
+		*out = new(string)
+		**out = **in
+	}
+	if in.InferenceAccelerators != nil {
+		in, out := &in.InferenceAccelerators, &out.InferenceAccelerators
+		*out = make([]*InferenceAccelerator, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(InferenceAccelerator)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.IPCMode != nil {
+		in, out := &in.IPCMode, &out.IPCMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.Memory != nil {
+		in, out := &in.Memory, &out.Memory
+		*out = new(string)
+		**out = **in
+	}
+	if in.NetworkMode != nil {
+		in, out := &in.NetworkMode, &out.NetworkMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.PIDMode != nil {
+		in, out := &in.PIDMode, &out.PIDMode
+		*out = new(string)
+		**out = **in
+	}
+	if in.PlacementConstraints != nil {
+		in, out := &in.PlacementConstraints, &out.PlacementConstraints
+		*out = make([]*TaskDefinitionPlacementConstraint, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(TaskDefinitionPlacementConstraint)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.ProxyConfiguration != nil {
+		in, out := &in.ProxyConfiguration, &out.ProxyConfiguration
+		*out = new(ProxyConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.RegisteredAt != nil {
+		in, out := &in.RegisteredAt, &out.RegisteredAt
+		*out = (*in).DeepCopy()
+	}
+	if in.RegisteredBy != nil {
+		in, out := &in.RegisteredBy, &out.RegisteredBy
+		*out = new(string)
+		**out = **in
+	}
+	if in.RequiresAttributes != nil {
+		in, out := &in.RequiresAttributes, &out.RequiresAttributes
+		*out = make([]*Attribute, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Attribute)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+	if in.RequiresCompatibilities != nil {
+		in, out := &in.RequiresCompatibilities, &out.RequiresCompatibilities
+		*out = make([]*string, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(string)
+				**out = **in
+			}
+		}
+	}
+	if in.Revision != nil {
+		in, out := &in.Revision, &out.Revision
+		*out = new(int64)
+		**out = **in
+	}
+	if in.RuntimePlatform != nil {
+		in, out := &in.RuntimePlatform, &out.RuntimePlatform
+		*out = new(RuntimePlatform)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Status != nil {
+		in, out := &in.Status, &out.Status
+		*out = new(string)
+		**out = **in
+	}
+	if in.TaskDefinitionARN != nil {
+		in, out := &in.TaskDefinitionARN, &out.TaskDefinitionARN
+		*out = new(string)
+		**out = **in
+	}
+	if in.TaskRoleARN != nil {
+		in, out := &in.TaskRoleARN, &out.TaskRoleARN
+		*out = new(string)
+		**out = **in
+	}
+	if in.Volumes != nil {
+		in, out := &in.Volumes, &out.Volumes
+		*out = make([]*Volume, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Volume)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskDefinition_SDK.
+func (in *TaskDefinition_SDK) DeepCopy() *TaskDefinition_SDK {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskDefinition_SDK)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskManagedEBSVolumeConfiguration) DeepCopyInto(out *TaskManagedEBSVolumeConfiguration) {
+	*out = *in
+	if in.Encrypted != nil {
+		in, out := &in.Encrypted, &out.Encrypted
+		*out = new(bool)
+		**out = **in
+	}
+	if in.IOPS != nil {
+		in, out := &in.IOPS, &out.IOPS
+		*out = new(int64)
+		**out = **in
+	}
+	if in.SizeInGiB != nil {
+		in, out := &in.SizeInGiB, &out.SizeInGiB
+		*out = new(int64)
+		**out = **in
+	}
+	if in.Throughput != nil {
+		in, out := &in.Throughput, &out.Throughput
+		*out = new(int64)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskManagedEBSVolumeConfiguration.
+func (in *TaskManagedEBSVolumeConfiguration) DeepCopy() *TaskManagedEBSVolumeConfiguration {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskManagedEBSVolumeConfiguration)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
+func (in *TaskManagedEBSVolumeTerminationPolicy) DeepCopyInto(out *TaskManagedEBSVolumeTerminationPolicy) {
+	*out = *in
+	if in.DeleteOnTermination != nil {
+		in, out := &in.DeleteOnTermination, &out.DeleteOnTermination
+		*out = new(bool)
+		**out = **in
+	}
+}
+
+// DeepCopy is an autogenerated deepcopy function, copying the receiver, creating a new TaskManagedEBSVolumeTerminationPolicy.
+func (in *TaskManagedEBSVolumeTerminationPolicy) DeepCopy() *TaskManagedEBSVolumeTerminationPolicy {
+	if in == nil {
+		return nil
+	}
+	out := new(TaskManagedEBSVolumeTerminationPolicy)
+	in.DeepCopyInto(out)
+	return out
+}
+
+// DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *TaskOverride) DeepCopyInto(out *TaskOverride) {
 	*out = *in
 	if in.CPU != nil {
 		in, out := &in.CPU, &out.CPU
 		*out = new(string)
 		**out = **in
+	}
+	if in.EphemeralStorage != nil {
+		in, out := &in.EphemeralStorage, &out.EphemeralStorage
+		*out = new(EphemeralStorage)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ExecutionRoleARN != nil {
 		in, out := &in.ExecutionRoleARN, &out.ExecutionRoleARN
@@ -2720,6 +3979,10 @@ func (in *TaskSet) DeepCopyInto(out *TaskSet) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.CreatedAt != nil {
+		in, out := &in.CreatedAt, &out.CreatedAt
+		*out = (*in).DeepCopy()
+	}
 	if in.ExternalID != nil {
 		in, out := &in.ExternalID, &out.ExternalID
 		*out = new(string)
@@ -2755,6 +4018,10 @@ func (in *TaskSet) DeepCopyInto(out *TaskSet) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.StabilityStatusAt != nil {
+		in, out := &in.StabilityStatusAt, &out.StabilityStatusAt
+		*out = (*in).DeepCopy()
+	}
 	if in.StartedBy != nil {
 		in, out := &in.StartedBy, &out.StartedBy
 		*out = new(string)
@@ -2785,6 +4052,10 @@ func (in *TaskSet) DeepCopyInto(out *TaskSet) {
 		in, out := &in.TaskSetARN, &out.TaskSetARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.UpdatedAt != nil {
+		in, out := &in.UpdatedAt, &out.UpdatedAt
+		*out = (*in).DeepCopy()
 	}
 }
 
@@ -2842,6 +4113,11 @@ func (in *Ulimit) DeepCopyInto(out *Ulimit) {
 		*out = new(int64)
 		**out = **in
 	}
+	if in.Name != nil {
+		in, out := &in.Name, &out.Name
+		*out = new(string)
+		**out = **in
+	}
 	if in.SoftLimit != nil {
 		in, out := &in.SoftLimit, &out.SoftLimit
 		*out = new(int64)
@@ -2892,6 +4168,31 @@ func (in *VersionInfo) DeepCopy() *VersionInfo {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *Volume) DeepCopyInto(out *Volume) {
 	*out = *in
+	if in.ConfiguredAtLaunch != nil {
+		in, out := &in.ConfiguredAtLaunch, &out.ConfiguredAtLaunch
+		*out = new(bool)
+		**out = **in
+	}
+	if in.DockerVolumeConfiguration != nil {
+		in, out := &in.DockerVolumeConfiguration, &out.DockerVolumeConfiguration
+		*out = new(DockerVolumeConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.EFSVolumeConfiguration != nil {
+		in, out := &in.EFSVolumeConfiguration, &out.EFSVolumeConfiguration
+		*out = new(EFSVolumeConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.FsxWindowsFileServerVolumeConfiguration != nil {
+		in, out := &in.FsxWindowsFileServerVolumeConfiguration, &out.FsxWindowsFileServerVolumeConfiguration
+		*out = new(FSxWindowsFileServerVolumeConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Host != nil {
+		in, out := &in.Host, &out.Host
+		*out = new(HostVolumeProperties)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name
 		*out = new(string)
@@ -2912,6 +4213,11 @@ func (in *Volume) DeepCopy() *Volume {
 // DeepCopyInto is an autogenerated deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (in *VolumeFrom) DeepCopyInto(out *VolumeFrom) {
 	*out = *in
+	if in.ReadOnly != nil {
+		in, out := &in.ReadOnly, &out.ReadOnly
+		*out = new(bool)
+		**out = **in
+	}
 	if in.SourceContainer != nil {
 		in, out := &in.SourceContainer, &out.SourceContainer
 		*out = new(string)

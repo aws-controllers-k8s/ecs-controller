@@ -54,9 +54,10 @@ type AttachmentStateChange struct {
 // to your resources. For more information, see Attributes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html#attributes)
 // in the Amazon Elastic Container Service Developer Guide.
 type Attribute struct {
-	Name     *string `json:"name,omitempty"`
-	TargetID *string `json:"targetID,omitempty"`
-	Value    *string `json:"value,omitempty"`
+	Name       *string `json:"name,omitempty"`
+	TargetID   *string `json:"targetID,omitempty"`
+	TargetType *string `json:"targetType,omitempty"`
+	Value      *string `json:"value,omitempty"`
 }
 
 // The details of the Auto Scaling group for the capacity provider.
@@ -191,6 +192,7 @@ type Cluster_SDK struct {
 type Container struct {
 	ContainerARN      *string `json:"containerARN,omitempty"`
 	CPU               *string `json:"cpu,omitempty"`
+	ExitCode          *int64  `json:"exitCode,omitempty"`
 	Image             *string `json:"image,omitempty"`
 	ImageDigest       *string `json:"imageDigest,omitempty"`
 	LastStatus        *string `json:"lastStatus,omitempty"`
@@ -205,19 +207,188 @@ type Container struct {
 // Container definitions are used in task definitions to describe the different
 // containers that are launched as part of a task.
 type ContainerDefinition struct {
-	Command               []*string `json:"command,omitempty"`
-	CPU                   *int64    `json:"cpu,omitempty"`
-	CredentialSpecs       []*string `json:"credentialSpecs,omitempty"`
-	DNSSearchDomains      []*string `json:"dnsSearchDomains,omitempty"`
-	DNSServers            []*string `json:"dnsServers,omitempty"`
-	DockerSecurityOptions []*string `json:"dockerSecurityOptions,omitempty"`
-	EntryPoint            []*string `json:"entryPoint,omitempty"`
-	Hostname              *string   `json:"hostname,omitempty"`
-	Image                 *string   `json:"image,omitempty"`
-	Links                 []*string `json:"links,omitempty"`
-	Name                  *string   `json:"name,omitempty"`
-	User                  *string   `json:"user,omitempty"`
-	WorkingDirectory      *string   `json:"workingDirectory,omitempty"`
+	Command               []*string              `json:"command,omitempty"`
+	CPU                   *int64                 `json:"cpu,omitempty"`
+	CredentialSpecs       []*string              `json:"credentialSpecs,omitempty"`
+	DependsOn             []*ContainerDependency `json:"dependsOn,omitempty"`
+	DisableNetworking     *bool                  `json:"disableNetworking,omitempty"`
+	DNSSearchDomains      []*string              `json:"dnsSearchDomains,omitempty"`
+	DNSServers            []*string              `json:"dnsServers,omitempty"`
+	DockerLabels          map[string]*string     `json:"dockerLabels,omitempty"`
+	DockerSecurityOptions []*string              `json:"dockerSecurityOptions,omitempty"`
+	EntryPoint            []*string              `json:"entryPoint,omitempty"`
+	Environment           []*KeyValuePair        `json:"environment,omitempty"`
+	EnvironmentFiles      []*EnvironmentFile     `json:"environmentFiles,omitempty"`
+	Essential             *bool                  `json:"essential,omitempty"`
+	ExtraHosts            []*HostEntry           `json:"extraHosts,omitempty"`
+	// The FireLens configuration for the container. This is used to specify and
+	// configure a log router for container logs. For more information, see Custom
+	// log routing (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	FirelensConfiguration *FirelensConfiguration `json:"firelensConfiguration,omitempty"`
+	// An object representing a container health check. Health check parameters
+	// that are specified in a container definition override any Docker health checks
+	// that exist in the container image (such as those specified in a parent image
+	// or from the image's Dockerfile). This configuration maps to the HEALTHCHECK
+	// parameter of docker run (https://docs.docker.com/engine/reference/run/).
+	//
+	// The Amazon ECS container agent only monitors and reports on the health checks
+	// specified in the task definition. Amazon ECS does not monitor Docker health
+	// checks that are embedded in a container image and not specified in the container
+	// definition. Health check parameters that are specified in a container definition
+	// override any Docker health checks that exist in the container image.
+	//
+	// You can view the health status of both individual containers and a task with
+	// the DescribeTasks API operation or when viewing the task details in the console.
+	//
+	// The health check is designed to make sure that your containers survive agent
+	// restarts, upgrades, or temporary unavailability.
+	//
+	// The following describes the possible healthStatus values for a container:
+	//
+	//    * HEALTHY-The container health check has passed successfully.
+	//
+	//    * UNHEALTHY-The container health check has failed.
+	//
+	//    * UNKNOWN-The container health check is being evaluated, there's no container
+	//    health check defined, or Amazon ECS doesn't have the health status of
+	//    the container.
+	//
+	// The following describes the possible healthStatus values based on the container
+	// health checker status of essential containers in the task with the following
+	// priority order (high to low):
+	//
+	//    * UNHEALTHY-One or more essential containers have failed their health
+	//    check.
+	//
+	//    * UNKNOWN-Any essential container running within the task is in an UNKNOWN
+	//    state and no other essential containers have an UNHEALTHY state.
+	//
+	//    * HEALTHY-All essential containers within the task have passed their health
+	//    checks.
+	//
+	// Consider the following task health example with 2 containers.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, the task health
+	//    is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is HEALTHY, the task health
+	//    is UNHEALTHY.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, the task health
+	//    is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is HEALTHY, the task health
+	//    is HEALTHY.
+	//
+	// Consider the following task health example with 3 containers.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+	//    is UNKNOWN, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+	//    is HEALTHY, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is HEALTHY, and Container3
+	//    is HEALTHY, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+	//    HEALTHY, the task health is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+	//    UNKNOWN, the task health is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is HEALTHY, and Container3 is
+	//    HEALTHY, the task health is HEALTHY.
+	//
+	// If a task is run manually, and not as part of a service, the task will continue
+	// its lifecycle regardless of its health status. For tasks that are part of
+	// a service, if the task reports as unhealthy then the task will be stopped
+	// and the service scheduler will replace it.
+	//
+	// The following are notes about container health check support:
+	//
+	//    * When the Amazon ECS agent cannot connect to the Amazon ECS service,
+	//    the service reports the container as UNHEALTHY.
+	//
+	//    * The health check statuses are the "last heard from" response from the
+	//    Amazon ECS agent. There are no assumptions made about the status of the
+	//    container health checks.
+	//
+	//    * Container health checks require version 1.17.0 or greater of the Amazon
+	//    ECS container agent. For more information, see Updating the Amazon ECS
+	//    container agent (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html).
+	//
+	//    * Container health checks are supported for Fargate tasks if you're using
+	//    platform version 1.1.0 or greater. For more information, see Fargate platform
+	//    versions (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/platform_versions.html).
+	//
+	//    * Container health checks aren't supported for tasks that are part of
+	//    a service that's configured to use a Classic Load Balancer.
+	HealthCheck *HealthCheck `json:"healthCheck,omitempty"`
+	Hostname    *string      `json:"hostname,omitempty"`
+	Image       *string      `json:"image,omitempty"`
+	Interactive *bool        `json:"interactive,omitempty"`
+	Links       []*string    `json:"links,omitempty"`
+	// The Linux-specific options that are applied to the container, such as Linux
+	// KernelCapabilities (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_KernelCapabilities.html).
+	LinuxParameters *LinuxParameters `json:"linuxParameters,omitempty"`
+	// The log configuration for the container. This parameter maps to LogConfig
+	// in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
+	// section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
+	// and the --log-driver option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+	//
+	// By default, containers use the same logging driver that the Docker daemon
+	// uses. However, the container might use a different logging driver than the
+	// Docker daemon by specifying a log driver configuration in the container definition.
+	// For more information about the options for different supported log drivers,
+	// see Configure logging drivers (https://docs.docker.com/engine/admin/logging/overview/)
+	// in the Docker documentation.
+	//
+	// Understand the following when specifying a log configuration for your containers.
+	//
+	//    * Amazon ECS currently supports a subset of the logging drivers available
+	//    to the Docker daemon. Additional log drivers may be available in future
+	//    releases of the Amazon ECS container agent. For tasks on Fargate, the
+	//    supported log drivers are awslogs, splunk, and awsfirelens. For tasks
+	//    hosted on Amazon EC2 instances, the supported log drivers are awslogs,
+	//    fluentd, gelf, json-file, journald, logentries,syslog, splunk, and awsfirelens.
+	//
+	//    * This parameter requires version 1.18 of the Docker Remote API or greater
+	//    on your container instance.
+	//
+	//    * For tasks that are hosted on Amazon EC2 instances, the Amazon ECS container
+	//    agent must register the available logging drivers with the ECS_AVAILABLE_LOGGING_DRIVERS
+	//    environment variable before containers placed on that instance can use
+	//    these log configuration options. For more information, see Amazon ECS
+	//    container agent configuration (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html)
+	//    in the Amazon Elastic Container Service Developer Guide.
+	//
+	//    * For tasks that are on Fargate, because you don't have access to the
+	//    underlying infrastructure your tasks are hosted on, any additional software
+	//    needed must be installed outside of the task. For example, the Fluentd
+	//    output aggregators or a remote host running Logstash to send Gelf logs
+	//    to.
+	LogConfiguration       *LogConfiguration `json:"logConfiguration,omitempty"`
+	Memory                 *int64            `json:"memory,omitempty"`
+	MemoryReservation      *int64            `json:"memoryReservation,omitempty"`
+	MountPoints            []*MountPoint     `json:"mountPoints,omitempty"`
+	Name                   *string           `json:"name,omitempty"`
+	PortMappings           []*PortMapping    `json:"portMappings,omitempty"`
+	Privileged             *bool             `json:"privileged,omitempty"`
+	PseudoTerminal         *bool             `json:"pseudoTerminal,omitempty"`
+	ReadonlyRootFilesystem *bool             `json:"readonlyRootFilesystem,omitempty"`
+	// The repository credentials for private registry authentication.
+	RepositoryCredentials *RepositoryCredentials `json:"repositoryCredentials,omitempty"`
+	ResourceRequirements  []*ResourceRequirement `json:"resourceRequirements,omitempty"`
+	Secrets               []*Secret              `json:"secrets,omitempty"`
+	StartTimeout          *int64                 `json:"startTimeout,omitempty"`
+	StopTimeout           *int64                 `json:"stopTimeout,omitempty"`
+	SystemControls        []*SystemControl       `json:"systemControls,omitempty"`
+	Ulimits               []*Ulimit              `json:"ulimits,omitempty"`
+	User                  *string                `json:"user,omitempty"`
+	VolumesFrom           []*VolumeFrom          `json:"volumesFrom,omitempty"`
+	WorkingDirectory      *string                `json:"workingDirectory,omitempty"`
 }
 
 // The dependencies defined for container startup and shutdown. A container
@@ -248,6 +419,7 @@ type ContainerDefinition struct {
 // dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
 // in the Amazon Elastic Container Service Developer Guide.
 type ContainerDependency struct {
+	Condition     *string `json:"condition,omitempty"`
 	ContainerName *string `json:"containerName,omitempty"`
 }
 
@@ -260,6 +432,7 @@ type ContainerInstance struct {
 	ContainerInstanceARN *string       `json:"containerInstanceARN,omitempty"`
 	EC2InstanceID        *string       `json:"ec2InstanceID,omitempty"`
 	PendingTasksCount    *int64        `json:"pendingTasksCount,omitempty"`
+	RegisteredAt         *metav1.Time  `json:"registeredAt,omitempty"`
 	RunningTasksCount    *int64        `json:"runningTasksCount,omitempty"`
 	Status               *string       `json:"status,omitempty"`
 	StatusReason         *string       `json:"statusReason,omitempty"`
@@ -276,13 +449,20 @@ type ContainerInstance struct {
 // through environment variables (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar.html)
 // in the Amazon ECS Developer Guide.
 type ContainerOverride struct {
-	Command []*string `json:"command,omitempty"`
-	Name    *string   `json:"name,omitempty"`
+	Command              []*string              `json:"command,omitempty"`
+	CPU                  *int64                 `json:"cpu,omitempty"`
+	Environment          []*KeyValuePair        `json:"environment,omitempty"`
+	EnvironmentFiles     []*EnvironmentFile     `json:"environmentFiles,omitempty"`
+	Memory               *int64                 `json:"memory,omitempty"`
+	MemoryReservation    *int64                 `json:"memoryReservation,omitempty"`
+	Name                 *string                `json:"name,omitempty"`
+	ResourceRequirements []*ResourceRequirement `json:"resourceRequirements,omitempty"`
 }
 
 // An object that represents a change in state for a container.
 type ContainerStateChange struct {
 	ContainerName *string `json:"containerName,omitempty"`
+	ExitCode      *int64  `json:"exitCode,omitempty"`
 	ImageDigest   *string `json:"imageDigest,omitempty"`
 	Reason        *string `json:"reason,omitempty"`
 	RuntimeID     *string `json:"runtimeID,omitempty"`
@@ -293,6 +473,7 @@ type ContainerStateChange struct {
 // service uses the ECS deployment controller type.
 type Deployment struct {
 	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	CreatedAt                *metav1.Time                    `json:"createdAt,omitempty"`
 	DesiredCount             *int64                          `json:"desiredCount,omitempty"`
 	FailedTasks              *int64                          `json:"failedTasks,omitempty"`
 	ID                       *string                         `json:"id,omitempty"`
@@ -303,6 +484,7 @@ type Deployment struct {
 	RunningCount             *int64                          `json:"runningCount,omitempty"`
 	Status                   *string                         `json:"status,omitempty"`
 	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
+	UpdatedAt                *metav1.Time                    `json:"updatedAt,omitempty"`
 }
 
 // One of the methods which provide a way for you to quickly identify when a
@@ -341,10 +523,18 @@ type DeploymentCircuitBreaker struct {
 	Rollback *bool `json:"rollback,omitempty"`
 }
 
+// Optional deployment parameters that control how many tasks run during a deployment
+// and the ordering of stopping and starting tasks.
+type DeploymentConfiguration struct {
+	MaximumPercent        *int64 `json:"maximumPercent,omitempty"`
+	MinimumHealthyPercent *int64 `json:"minimumHealthyPercent,omitempty"`
+}
+
 // An object representing a container instance host device.
 type Device struct {
-	ContainerPath *string `json:"containerPath,omitempty"`
-	HostPath      *string `json:"hostPath,omitempty"`
+	ContainerPath *string   `json:"containerPath,omitempty"`
+	HostPath      *string   `json:"hostPath,omitempty"`
+	Permissions   []*string `json:"permissions,omitempty"`
 }
 
 // This parameter is specified when you're using Docker volumes. Docker volumes
@@ -352,7 +542,11 @@ type Device struct {
 // only support the use of the local driver. To use bind mounts, specify a host
 // instead.
 type DockerVolumeConfiguration struct {
-	Driver *string `json:"driver,omitempty"`
+	Autoprovision *bool              `json:"autoprovision,omitempty"`
+	Driver        *string            `json:"driver,omitempty"`
+	DriverOpts    map[string]*string `json:"driverOpts,omitempty"`
+	Labels        map[string]*string `json:"labels,omitempty"`
+	Scope         *string            `json:"scope,omitempty"`
 }
 
 // The tag specifications of an Amazon EBS volume.
@@ -363,6 +557,7 @@ type EBSTagSpecification struct {
 // The authorization configuration details for the Amazon EFS file system.
 type EFSAuthorizationConfig struct {
 	AccessPointID *string `json:"accessPointID,omitempty"`
+	IAM           *string `json:"iam,omitempty"`
 }
 
 // This parameter is specified when you're using an Amazon Elastic File System
@@ -370,8 +565,12 @@ type EFSAuthorizationConfig struct {
 // (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type EFSVolumeConfiguration struct {
-	FileSystemID  *string `json:"fileSystemID,omitempty"`
-	RootDirectory *string `json:"rootDirectory,omitempty"`
+	// The authorization configuration details for the Amazon EFS file system.
+	AuthorizationConfig   *EFSAuthorizationConfig `json:"authorizationConfig,omitempty"`
+	FileSystemID          *string                 `json:"fileSystemID,omitempty"`
+	RootDirectory         *string                 `json:"rootDirectory,omitempty"`
+	TransitEncryption     *string                 `json:"transitEncryption,omitempty"`
+	TransitEncryptionPort *int64                  `json:"transitEncryptionPort,omitempty"`
 }
 
 // A list of files containing the environment variables to pass to a container.
@@ -402,6 +601,7 @@ type EFSVolumeConfiguration struct {
 //
 //   - The container entry point interperts the VARIABLE values.
 type EnvironmentFile struct {
+	Type  *string `json:"type_,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
@@ -460,8 +660,16 @@ type FSxWindowsFileServerAuthorizationConfig struct {
 // Server volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/wfsx-volumes.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type FSxWindowsFileServerVolumeConfiguration struct {
-	FileSystemID  *string `json:"fileSystemID,omitempty"`
-	RootDirectory *string `json:"rootDirectory,omitempty"`
+	// The authorization configuration details for Amazon FSx for Windows File Server
+	// file system. See FSxWindowsFileServerVolumeConfiguration (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_FSxWindowsFileServerVolumeConfiguration.html)
+	// in the Amazon ECS API Reference.
+	//
+	// For more information and the input format, see Amazon FSx for Windows File
+	// Server Volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/wfsx-volumes.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	AuthorizationConfig *FSxWindowsFileServerAuthorizationConfig `json:"authorizationConfig,omitempty"`
+	FileSystemID        *string                                  `json:"fileSystemID,omitempty"`
+	RootDirectory       *string                                  `json:"rootDirectory,omitempty"`
 }
 
 // A failed resource. For a list of common causes, see API failure reasons (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/api_failures_messages.html)
@@ -470,6 +678,15 @@ type Failure struct {
 	ARN    *string `json:"arn,omitempty"`
 	Detail *string `json:"detail,omitempty"`
 	Reason *string `json:"reason,omitempty"`
+}
+
+// The FireLens configuration for the container. This is used to specify and
+// configure a log router for container logs. For more information, see Custom
+// log routing (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type FirelensConfiguration struct {
+	Options map[string]*string `json:"options,omitempty"`
+	Type    *string            `json:"type_,omitempty"`
 }
 
 // An object representing a container health check. Health check parameters
@@ -572,7 +789,11 @@ type Failure struct {
 //   - Container health checks aren't supported for tasks that are part of
 //     a service that's configured to use a Classic Load Balancer.
 type HealthCheck struct {
-	Command []*string `json:"command,omitempty"`
+	Command     []*string `json:"command,omitempty"`
+	Interval    *int64    `json:"interval,omitempty"`
+	Retries     *int64    `json:"retries,omitempty"`
+	StartPeriod *int64    `json:"startPeriod,omitempty"`
+	Timeout     *int64    `json:"timeout,omitempty"`
 }
 
 // Hostnames and IP address entries that are added to the /etc/hosts file of
@@ -605,6 +826,12 @@ type InferenceAcceleratorOverride struct {
 	DeviceType *string `json:"deviceType,omitempty"`
 }
 
+// An object representing the result of a container instance health status check.
+type InstanceHealthCheckResult struct {
+	LastStatusChange *metav1.Time `json:"lastStatusChange,omitempty"`
+	LastUpdated      *metav1.Time `json:"lastUpdated,omitempty"`
+}
+
 // The Linux capabilities for the container that are added to or dropped from
 // the default configuration provided by Docker. For more information about
 // the default capabilities and the non-default available capabilities, see
@@ -623,6 +850,25 @@ type KeyValuePair struct {
 	Value *string `json:"value,omitempty"`
 }
 
+// The Linux-specific options that are applied to the container, such as Linux
+// KernelCapabilities (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_KernelCapabilities.html).
+type LinuxParameters struct {
+	// The Linux capabilities for the container that are added to or dropped from
+	// the default configuration provided by Docker. For more information about
+	// the default capabilities and the non-default available capabilities, see
+	// Runtime privilege and Linux capabilities (https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)
+	// in the Docker run reference. For more detailed information about these Linux
+	// capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
+	// Linux manual page.
+	Capabilities       *KernelCapabilities `json:"capabilities,omitempty"`
+	Devices            []*Device           `json:"devices,omitempty"`
+	InitProcessEnabled *bool               `json:"initProcessEnabled,omitempty"`
+	MaxSwap            *int64              `json:"maxSwap,omitempty"`
+	SharedMemorySize   *int64              `json:"sharedMemorySize,omitempty"`
+	Swappiness         *int64              `json:"swappiness,omitempty"`
+	Tmpfs              []*Tmpfs            `json:"tmpfs,omitempty"`
+}
+
 // The load balancer configuration to use with a service or task set.
 //
 // When you add, update, or remove a load balancer configuration, Amazon ECS
@@ -637,14 +883,58 @@ type KeyValuePair struct {
 // in the Amazon Elastic Container Service Developer Guide.
 type LoadBalancer struct {
 	ContainerName    *string `json:"containerName,omitempty"`
+	ContainerPort    *int64  `json:"containerPort,omitempty"`
 	LoadBalancerName *string `json:"loadBalancerName,omitempty"`
 	TargetGroupARN   *string `json:"targetGroupARN,omitempty"`
 }
 
+// The log configuration for the container. This parameter maps to LogConfig
+// in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
+// section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
+// and the --log-driver option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+//
+// By default, containers use the same logging driver that the Docker daemon
+// uses. However, the container might use a different logging driver than the
+// Docker daemon by specifying a log driver configuration in the container definition.
+// For more information about the options for different supported log drivers,
+// see Configure logging drivers (https://docs.docker.com/engine/admin/logging/overview/)
+// in the Docker documentation.
+//
+// Understand the following when specifying a log configuration for your containers.
+//
+//   - Amazon ECS currently supports a subset of the logging drivers available
+//     to the Docker daemon. Additional log drivers may be available in future
+//     releases of the Amazon ECS container agent. For tasks on Fargate, the
+//     supported log drivers are awslogs, splunk, and awsfirelens. For tasks
+//     hosted on Amazon EC2 instances, the supported log drivers are awslogs,
+//     fluentd, gelf, json-file, journald, logentries,syslog, splunk, and awsfirelens.
+//
+//   - This parameter requires version 1.18 of the Docker Remote API or greater
+//     on your container instance.
+//
+//   - For tasks that are hosted on Amazon EC2 instances, the Amazon ECS container
+//     agent must register the available logging drivers with the ECS_AVAILABLE_LOGGING_DRIVERS
+//     environment variable before containers placed on that instance can use
+//     these log configuration options. For more information, see Amazon ECS
+//     container agent configuration (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html)
+//     in the Amazon Elastic Container Service Developer Guide.
+//
+//   - For tasks that are on Fargate, because you don't have access to the
+//     underlying infrastructure your tasks are hosted on, any additional software
+//     needed must be installed outside of the task. For example, the Fluentd
+//     output aggregators or a remote host running Logstash to send Gelf logs
+//     to.
+type LogConfiguration struct {
+	LogDriver     *string            `json:"logDriver,omitempty"`
+	Options       map[string]*string `json:"options,omitempty"`
+	SecretOptions []*Secret          `json:"secretOptions,omitempty"`
+}
+
 // Details about the managed agent status for the container.
 type ManagedAgent struct {
-	LastStatus *string `json:"lastStatus,omitempty"`
-	Reason     *string `json:"reason,omitempty"`
+	LastStartedAt *metav1.Time `json:"lastStartedAt,omitempty"`
+	LastStatus    *string      `json:"lastStatus,omitempty"`
+	Reason        *string      `json:"reason,omitempty"`
 }
 
 // An object representing a change in state for a managed agent.
@@ -657,6 +947,7 @@ type ManagedAgentStateChange struct {
 // The details for a volume mount point that's used in a container definition.
 type MountPoint struct {
 	ContainerPath *string `json:"containerPath,omitempty"`
+	ReadOnly      *bool   `json:"readOnly,omitempty"`
 	SourceVolume  *string `json:"sourceVolume,omitempty"`
 }
 
@@ -666,8 +957,11 @@ type MountPoint struct {
 // of DescribeTasks API responses.
 type NetworkBinding struct {
 	BindIP             *string `json:"bindIP,omitempty"`
+	ContainerPort      *int64  `json:"containerPort,omitempty"`
 	ContainerPortRange *string `json:"containerPortRange,omitempty"`
+	HostPort           *int64  `json:"hostPort,omitempty"`
 	HostPortRange      *string `json:"hostPortRange,omitempty"`
+	Protocol           *string `json:"protocol,omitempty"`
 }
 
 // An object representing the elastic network interface for tasks that use the
@@ -723,16 +1017,21 @@ type PlatformDevice struct {
 // port assignments are visible in the networkBindings section of DescribeTasks
 // API responses.
 type PortMapping struct {
+	AppProtocol        *string `json:"appProtocol,omitempty"`
+	ContainerPort      *int64  `json:"containerPort,omitempty"`
 	ContainerPortRange *string `json:"containerPortRange,omitempty"`
+	HostPort           *int64  `json:"hostPort,omitempty"`
 	Name               *string `json:"name,omitempty"`
+	Protocol           *string `json:"protocol,omitempty"`
 }
 
 // An object representing the protection status details for a task. You can
 // set the protection status with the UpdateTaskProtection API and get the status
 // of tasks with the GetTaskProtection API.
 type ProtectedTask struct {
-	ProtectionEnabled *bool   `json:"protectionEnabled,omitempty"`
-	TaskARN           *string `json:"taskARN,omitempty"`
+	ExpirationDate    *metav1.Time `json:"expirationDate,omitempty"`
+	ProtectionEnabled *bool        `json:"protectionEnabled,omitempty"`
+	TaskARN           *string      `json:"taskARN,omitempty"`
 }
 
 // The configuration details for the App Mesh proxy.
@@ -744,7 +1043,9 @@ type ProtectedTask struct {
 // then they contain the required versions of the container agent and ecs-init.
 // For more information, see Amazon ECS-optimized Linux AMI (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html)
 type ProxyConfiguration struct {
-	ContainerName *string `json:"containerName,omitempty"`
+	ContainerName *string         `json:"containerName,omitempty"`
+	Properties    []*KeyValuePair `json:"properties,omitempty"`
+	Type          *string         `json:"type_,omitempty"`
 }
 
 // The repository credentials for private registry authentication.
@@ -766,7 +1067,17 @@ type Resource struct {
 // or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
 // in the Amazon Elastic Container Service Developer Guide
 type ResourceRequirement struct {
+	Type  *string `json:"type_,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+// Information about the platform for the Amazon ECS service or task.
+//
+// For more information about RuntimePlatform, see RuntimePlatform (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform)
+// in the Amazon Elastic Container Service Developer Guide.
+type RuntimePlatform struct {
+	CPUArchitecture       *string `json:"cpuArchitecture,omitempty"`
+	OperatingSystemFamily *string `json:"operatingSystemFamily,omitempty"`
 }
 
 // An object representing the secret to expose to your container. Secrets can
@@ -787,28 +1098,30 @@ type Secret struct {
 
 // Details on a service within a cluster.
 type Service struct {
-	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
-	ClusterARN               *string                         `json:"clusterARN,omitempty"`
-	CreatedBy                *string                         `json:"createdBy,omitempty"`
-	DesiredCount             *int64                          `json:"desiredCount,omitempty"`
-	EnableECSManagedTags     *bool                           `json:"enableECSManagedTags,omitempty"`
-	EnableExecuteCommand     *bool                           `json:"enableExecuteCommand,omitempty"`
-	PendingCount             *int64                          `json:"pendingCount,omitempty"`
-	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
-	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
-	RoleARN                  *string                         `json:"roleARN,omitempty"`
-	RunningCount             *int64                          `json:"runningCount,omitempty"`
-	ServiceARN               *string                         `json:"serviceARN,omitempty"`
-	ServiceName              *string                         `json:"serviceName,omitempty"`
-	Status                   *string                         `json:"status,omitempty"`
-	Tags                     []*Tag                          `json:"tags,omitempty"`
-	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
+	CapacityProviderStrategy      []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	ClusterARN                    *string                         `json:"clusterARN,omitempty"`
+	CreatedAt                     *metav1.Time                    `json:"createdAt,omitempty"`
+	CreatedBy                     *string                         `json:"createdBy,omitempty"`
+	DesiredCount                  *int64                          `json:"desiredCount,omitempty"`
+	EnableECSManagedTags          *bool                           `json:"enableECSManagedTags,omitempty"`
+	EnableExecuteCommand          *bool                           `json:"enableExecuteCommand,omitempty"`
+	HealthCheckGracePeriodSeconds *int64                          `json:"healthCheckGracePeriodSeconds,omitempty"`
+	PendingCount                  *int64                          `json:"pendingCount,omitempty"`
+	PlatformFamily                *string                         `json:"platformFamily,omitempty"`
+	PlatformVersion               *string                         `json:"platformVersion,omitempty"`
+	RoleARN                       *string                         `json:"roleARN,omitempty"`
+	RunningCount                  *int64                          `json:"runningCount,omitempty"`
+	ServiceARN                    *string                         `json:"serviceARN,omitempty"`
+	ServiceName                   *string                         `json:"serviceName,omitempty"`
+	Status                        *string                         `json:"status,omitempty"`
+	Tags                          []*Tag                          `json:"tags,omitempty"`
+	TaskDefinition                *string                         `json:"taskDefinition,omitempty"`
 }
 
 // An object that represents the Amazon Web Services Private Certificate Authority
 // certificate.
 type ServiceConnecTTLSCertificateAuthority struct {
-	AWSPcaAuthorityARN *string `json:"awsPcaAuthorityARN,omitempty"`
+	AWSPCAAuthorityARN *string `json:"awsPCAAuthorityARN,omitempty"`
 }
 
 // An object that represents the configuration for Service Connect TLS.
@@ -845,8 +1158,45 @@ type ServiceConnectClientAlias struct {
 // see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type ServiceConnectConfiguration struct {
-	Enabled   *bool   `json:"enabled,omitempty"`
-	Namespace *string `json:"namespace,omitempty"`
+	Enabled *bool `json:"enabled,omitempty"`
+	// The log configuration for the container. This parameter maps to LogConfig
+	// in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
+	// section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
+	// and the --log-driver option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+	//
+	// By default, containers use the same logging driver that the Docker daemon
+	// uses. However, the container might use a different logging driver than the
+	// Docker daemon by specifying a log driver configuration in the container definition.
+	// For more information about the options for different supported log drivers,
+	// see Configure logging drivers (https://docs.docker.com/engine/admin/logging/overview/)
+	// in the Docker documentation.
+	//
+	// Understand the following when specifying a log configuration for your containers.
+	//
+	//    * Amazon ECS currently supports a subset of the logging drivers available
+	//    to the Docker daemon. Additional log drivers may be available in future
+	//    releases of the Amazon ECS container agent. For tasks on Fargate, the
+	//    supported log drivers are awslogs, splunk, and awsfirelens. For tasks
+	//    hosted on Amazon EC2 instances, the supported log drivers are awslogs,
+	//    fluentd, gelf, json-file, journald, logentries,syslog, splunk, and awsfirelens.
+	//
+	//    * This parameter requires version 1.18 of the Docker Remote API or greater
+	//    on your container instance.
+	//
+	//    * For tasks that are hosted on Amazon EC2 instances, the Amazon ECS container
+	//    agent must register the available logging drivers with the ECS_AVAILABLE_LOGGING_DRIVERS
+	//    environment variable before containers placed on that instance can use
+	//    these log configuration options. For more information, see Amazon ECS
+	//    container agent configuration (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html)
+	//    in the Amazon Elastic Container Service Developer Guide.
+	//
+	//    * For tasks that are on Fargate, because you don't have access to the
+	//    underlying infrastructure your tasks are hosted on, any additional software
+	//    needed must be installed outside of the task. For example, the Fluentd
+	//    output aggregators or a remote host running Logstash to send Gelf logs
+	//    to.
+	LogConfiguration *LogConfiguration `json:"logConfiguration,omitempty"`
+	Namespace        *string           `json:"namespace,omitempty"`
 }
 
 // The Service Connect service object configuration. For more information, see
@@ -873,8 +1223,22 @@ type ServiceConnectServiceResource struct {
 
 // The details for an event that's associated with a service.
 type ServiceEvent struct {
-	ID      *string `json:"id,omitempty"`
-	Message *string `json:"message,omitempty"`
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	ID        *string      `json:"id,omitempty"`
+	Message   *string      `json:"message,omitempty"`
+}
+
+// The configuration for the Amazon EBS volume that Amazon ECS creates and manages
+// on your behalf. These settings are used to create each Amazon EBS volume,
+// with one volume created for each task in the service.
+//
+// Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
+// parameters.
+type ServiceManagedEBSVolumeConfiguration struct {
+	Encrypted  *bool  `json:"encrypted,omitempty"`
+	IOPS       *int64 `json:"iops,omitempty"`
+	SizeInGiB  *int64 `json:"sizeInGiB,omitempty"`
+	Throughput *int64 `json:"throughput,omitempty"`
 }
 
 // The details for the service registry.
@@ -887,6 +1251,8 @@ type ServiceEvent struct {
 // the updated service registry configuration.
 type ServiceRegistry struct {
 	ContainerName *string `json:"containerName,omitempty"`
+	ContainerPort *int64  `json:"containerPort,omitempty"`
+	Port          *int64  `json:"port,omitempty"`
 	RegistryARN   *string `json:"registryARN,omitempty"`
 }
 
@@ -978,36 +1344,42 @@ type Task struct {
 	AvailabilityZone     *string       `json:"availabilityZone,omitempty"`
 	CapacityProviderName *string       `json:"capacityProviderName,omitempty"`
 	ClusterARN           *string       `json:"clusterARN,omitempty"`
+	ConnectivityAt       *metav1.Time  `json:"connectivityAt,omitempty"`
 	ContainerInstanceARN *string       `json:"containerInstanceARN,omitempty"`
 	CPU                  *string       `json:"cpu,omitempty"`
+	CreatedAt            *metav1.Time  `json:"createdAt,omitempty"`
 	DesiredStatus        *string       `json:"desiredStatus,omitempty"`
 	EnableExecuteCommand *bool         `json:"enableExecuteCommand,omitempty"`
-	Group                *string       `json:"group,omitempty"`
-	LastStatus           *string       `json:"lastStatus,omitempty"`
-	Memory               *string       `json:"memory,omitempty"`
-	PlatformFamily       *string       `json:"platformFamily,omitempty"`
-	PlatformVersion      *string       `json:"platformVersion,omitempty"`
-	StartedBy            *string       `json:"startedBy,omitempty"`
-	StoppedReason        *string       `json:"stoppedReason,omitempty"`
-	Tags                 []*Tag        `json:"tags,omitempty"`
-	TaskARN              *string       `json:"taskARN,omitempty"`
-	TaskDefinitionARN    *string       `json:"taskDefinitionARN,omitempty"`
-}
-
-// The details of a task definition which describes the container and volume
-// definitions of an Amazon Elastic Container Service task. You can specify
-// which Docker images to use, the required resources, and other configurations
-// related to launching the task definition through an Amazon ECS service or
-// task.
-type TaskDefinition struct {
-	CPU               *string `json:"cpu,omitempty"`
-	ExecutionRoleARN  *string `json:"executionRoleARN,omitempty"`
-	Family            *string `json:"family,omitempty"`
-	Memory            *string `json:"memory,omitempty"`
-	RegisteredBy      *string `json:"registeredBy,omitempty"`
-	Revision          *int64  `json:"revision,omitempty"`
-	TaskDefinitionARN *string `json:"taskDefinitionARN,omitempty"`
-	TaskRoleARN       *string `json:"taskRoleARN,omitempty"`
+	// The amount of ephemeral storage to allocate for the task. This parameter
+	// is used to expand the total amount of ephemeral storage available, beyond
+	// the default amount, for tasks hosted on Fargate. For more information, see
+	// Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html)
+	// in the Amazon ECS Developer Guide;.
+	//
+	// For tasks using the Fargate launch type, the task requires the following
+	// platforms:
+	//
+	//    * Linux platform version 1.4.0 or later.
+	//
+	//    * Windows platform version 1.0.0 or later.
+	EphemeralStorage      *EphemeralStorage       `json:"ephemeralStorage,omitempty"`
+	ExecutionStoppedAt    *metav1.Time            `json:"executionStoppedAt,omitempty"`
+	Group                 *string                 `json:"group,omitempty"`
+	InferenceAccelerators []*InferenceAccelerator `json:"inferenceAccelerators,omitempty"`
+	LastStatus            *string                 `json:"lastStatus,omitempty"`
+	Memory                *string                 `json:"memory,omitempty"`
+	PlatformFamily        *string                 `json:"platformFamily,omitempty"`
+	PlatformVersion       *string                 `json:"platformVersion,omitempty"`
+	PullStartedAt         *metav1.Time            `json:"pullStartedAt,omitempty"`
+	PullStoppedAt         *metav1.Time            `json:"pullStoppedAt,omitempty"`
+	StartedAt             *metav1.Time            `json:"startedAt,omitempty"`
+	StartedBy             *string                 `json:"startedBy,omitempty"`
+	StoppedAt             *metav1.Time            `json:"stoppedAt,omitempty"`
+	StoppedReason         *string                 `json:"stoppedReason,omitempty"`
+	StoppingAt            *metav1.Time            `json:"stoppingAt,omitempty"`
+	Tags                  []*Tag                  `json:"tags,omitempty"`
+	TaskARN               *string                 `json:"taskARN,omitempty"`
+	TaskDefinitionARN     *string                 `json:"taskDefinitionARN,omitempty"`
 }
 
 // The constraint on task placement in the task definition. For more information,
@@ -1017,14 +1389,100 @@ type TaskDefinition struct {
 // Task placement constraints aren't supported for tasks run on Fargate.
 type TaskDefinitionPlacementConstraint struct {
 	Expression *string `json:"expression,omitempty"`
+	Type       *string `json:"type_,omitempty"`
+}
+
+// The details of a task definition which describes the container and volume
+// definitions of an Amazon Elastic Container Service task. You can specify
+// which Docker images to use, the required resources, and other configurations
+// related to launching the task definition through an Amazon ECS service or
+// task.
+type TaskDefinition_SDK struct {
+	Compatibilities      []*string              `json:"compatibilities,omitempty"`
+	ContainerDefinitions []*ContainerDefinition `json:"containerDefinitions,omitempty"`
+	CPU                  *string                `json:"cpu,omitempty"`
+	DeregisteredAt       *metav1.Time           `json:"deregisteredAt,omitempty"`
+	// The amount of ephemeral storage to allocate for the task. This parameter
+	// is used to expand the total amount of ephemeral storage available, beyond
+	// the default amount, for tasks hosted on Fargate. For more information, see
+	// Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html)
+	// in the Amazon ECS Developer Guide;.
+	//
+	// For tasks using the Fargate launch type, the task requires the following
+	// platforms:
+	//
+	//    * Linux platform version 1.4.0 or later.
+	//
+	//    * Windows platform version 1.0.0 or later.
+	EphemeralStorage      *EphemeralStorage                    `json:"ephemeralStorage,omitempty"`
+	ExecutionRoleARN      *string                              `json:"executionRoleARN,omitempty"`
+	Family                *string                              `json:"family,omitempty"`
+	InferenceAccelerators []*InferenceAccelerator              `json:"inferenceAccelerators,omitempty"`
+	IPCMode               *string                              `json:"ipcMode,omitempty"`
+	Memory                *string                              `json:"memory,omitempty"`
+	NetworkMode           *string                              `json:"networkMode,omitempty"`
+	PIDMode               *string                              `json:"pidMode,omitempty"`
+	PlacementConstraints  []*TaskDefinitionPlacementConstraint `json:"placementConstraints,omitempty"`
+	// The configuration details for the App Mesh proxy.
+	//
+	// For tasks that use the EC2 launch type, the container instances require at
+	// least version 1.26.0 of the container agent and at least version 1.26.0-1
+	// of the ecs-init package to use a proxy configuration. If your container instances
+	// are launched from the Amazon ECS optimized AMI version 20190301 or later,
+	// then they contain the required versions of the container agent and ecs-init.
+	// For more information, see Amazon ECS-optimized Linux AMI (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html)
+	ProxyConfiguration      *ProxyConfiguration `json:"proxyConfiguration,omitempty"`
+	RegisteredAt            *metav1.Time        `json:"registeredAt,omitempty"`
+	RegisteredBy            *string             `json:"registeredBy,omitempty"`
+	RequiresAttributes      []*Attribute        `json:"requiresAttributes,omitempty"`
+	RequiresCompatibilities []*string           `json:"requiresCompatibilities,omitempty"`
+	Revision                *int64              `json:"revision,omitempty"`
+	// Information about the platform for the Amazon ECS service or task.
+	//
+	// For more information about RuntimePlatform, see RuntimePlatform (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform)
+	// in the Amazon Elastic Container Service Developer Guide.
+	RuntimePlatform   *RuntimePlatform `json:"runtimePlatform,omitempty"`
+	Status            *string          `json:"status,omitempty"`
+	TaskDefinitionARN *string          `json:"taskDefinitionARN,omitempty"`
+	TaskRoleARN       *string          `json:"taskRoleARN,omitempty"`
+	Volumes           []*Volume        `json:"volumes,omitempty"`
+}
+
+// The configuration for the Amazon EBS volume that Amazon ECS creates and manages
+// on your behalf. These settings are used to create each Amazon EBS volume,
+// with one volume created for each task.
+type TaskManagedEBSVolumeConfiguration struct {
+	Encrypted  *bool  `json:"encrypted,omitempty"`
+	IOPS       *int64 `json:"iops,omitempty"`
+	SizeInGiB  *int64 `json:"sizeInGiB,omitempty"`
+	Throughput *int64 `json:"throughput,omitempty"`
+}
+
+// The termination policy for the Amazon EBS volume when the task exits. For
+// more information, see Amazon ECS volume termination policy (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html#ebs-volume-types).
+type TaskManagedEBSVolumeTerminationPolicy struct {
+	DeleteOnTermination *bool `json:"deleteOnTermination,omitempty"`
 }
 
 // The overrides that are associated with a task.
 type TaskOverride struct {
-	CPU              *string `json:"cpu,omitempty"`
-	ExecutionRoleARN *string `json:"executionRoleARN,omitempty"`
-	Memory           *string `json:"memory,omitempty"`
-	TaskRoleARN      *string `json:"taskRoleARN,omitempty"`
+	CPU *string `json:"cpu,omitempty"`
+	// The amount of ephemeral storage to allocate for the task. This parameter
+	// is used to expand the total amount of ephemeral storage available, beyond
+	// the default amount, for tasks hosted on Fargate. For more information, see
+	// Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html)
+	// in the Amazon ECS Developer Guide;.
+	//
+	// For tasks using the Fargate launch type, the task requires the following
+	// platforms:
+	//
+	//    * Linux platform version 1.4.0 or later.
+	//
+	//    * Windows platform version 1.0.0 or later.
+	EphemeralStorage *EphemeralStorage `json:"ephemeralStorage,omitempty"`
+	ExecutionRoleARN *string           `json:"executionRoleARN,omitempty"`
+	Memory           *string           `json:"memory,omitempty"`
+	TaskRoleARN      *string           `json:"taskRoleARN,omitempty"`
 }
 
 // Information about a set of Amazon ECS tasks in either an CodeDeploy or an
@@ -1035,6 +1493,7 @@ type TaskSet struct {
 	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
 	ClusterARN               *string                         `json:"clusterARN,omitempty"`
 	ComputedDesiredCount     *int64                          `json:"computedDesiredCount,omitempty"`
+	CreatedAt                *metav1.Time                    `json:"createdAt,omitempty"`
 	ExternalID               *string                         `json:"externalID,omitempty"`
 	ID                       *string                         `json:"id,omitempty"`
 	PendingCount             *int64                          `json:"pendingCount,omitempty"`
@@ -1042,11 +1501,13 @@ type TaskSet struct {
 	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
 	RunningCount             *int64                          `json:"runningCount,omitempty"`
 	ServiceARN               *string                         `json:"serviceARN,omitempty"`
+	StabilityStatusAt        *metav1.Time                    `json:"stabilityStatusAt,omitempty"`
 	StartedBy                *string                         `json:"startedBy,omitempty"`
 	Status                   *string                         `json:"status,omitempty"`
 	Tags                     []*Tag                          `json:"tags,omitempty"`
 	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
 	TaskSetARN               *string                         `json:"taskSetARN,omitempty"`
+	UpdatedAt                *metav1.Time                    `json:"updatedAt,omitempty"`
 }
 
 // The container path, mount options, and size of the tmpfs mount.
@@ -1066,8 +1527,9 @@ type Tmpfs struct {
 //
 // You can specify the ulimit settings for a container in a task definition.
 type Ulimit struct {
-	HardLimit *int64 `json:"hardLimit,omitempty"`
-	SoftLimit *int64 `json:"softLimit,omitempty"`
+	HardLimit *int64  `json:"hardLimit,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	SoftLimit *int64  `json:"softLimit,omitempty"`
 }
 
 // The Docker and Amazon ECS container agent version information about a container
@@ -1087,10 +1549,32 @@ type VersionInfo struct {
 // If an empty volume configuration is specified, by default Amazon ECS uses
 // a host volume. For more information, see Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
 type Volume struct {
-	Name *string `json:"name,omitempty"`
+	ConfiguredAtLaunch *bool `json:"configuredAtLaunch,omitempty"`
+	// This parameter is specified when you're using Docker volumes. Docker volumes
+	// are only supported when you're using the EC2 launch type. Windows containers
+	// only support the use of the local driver. To use bind mounts, specify a host
+	// instead.
+	DockerVolumeConfiguration *DockerVolumeConfiguration `json:"dockerVolumeConfiguration,omitempty"`
+	// This parameter is specified when you're using an Amazon Elastic File System
+	// file system for task storage. For more information, see Amazon EFS volumes
+	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	EFSVolumeConfiguration *EFSVolumeConfiguration `json:"efsVolumeConfiguration,omitempty"`
+	// This parameter is specified when you're using Amazon FSx for Windows File
+	// Server (https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html)
+	// file system for task storage.
+	//
+	// For more information and the input format, see Amazon FSx for Windows File
+	// Server volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/wfsx-volumes.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	FsxWindowsFileServerVolumeConfiguration *FSxWindowsFileServerVolumeConfiguration `json:"fsxWindowsFileServerVolumeConfiguration,omitempty"`
+	// Details on a container instance bind mount host volume.
+	Host *HostVolumeProperties `json:"host,omitempty"`
+	Name *string               `json:"name,omitempty"`
 }
 
 // Details on a data volume from another container in the same task definition.
 type VolumeFrom struct {
+	ReadOnly        *bool   `json:"readOnly,omitempty"`
 	SourceContainer *string `json:"sourceContainer,omitempty"`
 }

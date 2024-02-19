@@ -10,6 +10,7 @@ rules:
   - ecs.services.k8s.aws
   resources:
   - clusters
+  - taskdefinitions
   verbs:
   - create
   - delete
@@ -22,6 +23,7 @@ rules:
   - ecs.services.k8s.aws
   resources:
   - clusters
+  - taskdefinitions
   verbs:
   - get
   - patch
