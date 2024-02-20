@@ -1,14 +1,14 @@
 ignore:
   resource_names:
   # Cluster
-  - Service
+  # Service
   - CapacityProvider
   # TaskDefinition
   - TaskSet
   field_paths:
   - DescribeTaskDefinitionOutput.Tags
   - RegisterTaskDefinitionOutput.Tags
-
+  - CreateServiceInput.ClientToken
 operations:
   DescribeClusters:
     operation_type:
@@ -29,6 +29,11 @@ operations:
     - ReadOne
     resource_name: TaskDefinition
     output_wrapper_field_path: TaskDefinition
+  DescribeServices:
+    operation_type:
+    - ReadMany
+    resource_name: Service
+    output_wrapper_field_path: Services
 resources: 
   Cluster: 
     fields:
@@ -110,6 +115,16 @@ resources:
           path: Status.ACKResourceMetadata.ARN
           resource: Role
           service_name: iam
+      ContainerDefinitions.EnvironmentFiles.Type:
+        go_tag: json:"type,omitempty"
+      ContainerDefinitions.FirelensConfiguration.Type:
+        go_tag: json:"type,omitempty"
+      ContainerDefinitions.ResourceRequirements.Type:
+        go_tag: json:"type,omitempty"
+      ProxyConfiguration.Type:
+        go_tag: json:"type,omitempty"
+      PlacementConstraints.Type:
+        go_tag: json:"type,omitempty"
     hooks:
       sdk_read_one_post_build_request:
         template_path: hooks/task_definition/sdk_read_one_post_build_request.go.tpl
@@ -130,3 +145,76 @@ resources:
             # This is a hack to trick the code generator into thinking that the
             # required field is actually called Family.
             TaskDefinition: Family
+            ClusterName: Name
+  Service:
+    fields:
+      Name:
+        is_primary_key: true
+        print:
+          name: SERVICE
+      Cluster:
+        references:
+          resource: Cluster
+          path: Spec.Name
+        print:
+          name: CLUSTER
+      DeploymentController.Type:
+        go_tag: json:"type,omitempty"
+      PlacementConstraints.Type:
+        go_tag: json:"type,omitempty"
+      PlacementStrategy.Type:
+        go_tag: json:"type,omitempty"
+      TaskDefinition:
+        print:
+          name: TASKDEFINITION
+        references:
+          resource: TaskDefinition
+          path: Spec.Family
+      DesiredCount:
+        print:
+          name: DESIRED
+      PENDINGCOUNT:
+        print:
+          name: PENDING
+      RunningCount:
+        print:
+          name: RUNNING
+      Status:
+        print:
+          name: STATUS
+      Role:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: Role
+          service_name: iam
+    list_operation:
+      match_fields:
+      - Name
+    hooks:
+      sdk_read_many_post_build_request:
+        template_path: hooks/service/sdk_read_many_post_build_request.go.tpl
+      sdk_read_many_pre_set_output:
+        template_path: hooks/service/sdk_read_many_pre_set_output.go.tpl
+      sdk_update_post_build_request:
+        template_path: hooks/service/sdk_update_post_build_request.go.tpl
+      sdk_delete_pre_build_request:
+        template_path: hooks/service/sdk_delete_pre_build_request.go.tpl
+      sdk_delete_post_build_request:
+        template_path: hooks/service/sdk_delete_post_build_request.go.tpl
+    renames:
+      operations:
+        CreateService:
+          input_fields:
+            ServiceName: Name
+        DeleteService:
+          input_fields:
+            ServiceName: Name
+        UpdateService:
+          input_fields:
+            ServiceName: Name
+        DescribeServices:
+          input_fields:
+            ServiceName: Name
+    exceptions:
+      terminal_codes:
+      - InvalidParameterException

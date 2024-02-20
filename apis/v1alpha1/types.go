@@ -31,6 +31,7 @@ var (
 // An object representing the networking details for a task or service. For
 // example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
 type AWSVPCConfiguration struct {
+	AssignPublicIP *string   `json:"assignPublicIP,omitempty"`
 	SecurityGroups []*string `json:"securityGroups,omitempty"`
 	Subnets        []*string `json:"subnets,omitempty"`
 }
@@ -477,14 +478,32 @@ type Deployment struct {
 	DesiredCount             *int64                          `json:"desiredCount,omitempty"`
 	FailedTasks              *int64                          `json:"failedTasks,omitempty"`
 	ID                       *string                         `json:"id,omitempty"`
-	PendingCount             *int64                          `json:"pendingCount,omitempty"`
-	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
-	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
-	RolloutStateReason       *string                         `json:"rolloutStateReason,omitempty"`
-	RunningCount             *int64                          `json:"runningCount,omitempty"`
-	Status                   *string                         `json:"status,omitempty"`
-	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
-	UpdatedAt                *metav1.Time                    `json:"updatedAt,omitempty"`
+	LaunchType               *string                         `json:"launchType,omitempty"`
+	// The network configuration for a task or service.
+	NetworkConfiguration *NetworkConfiguration `json:"networkConfiguration,omitempty"`
+	PendingCount         *int64                `json:"pendingCount,omitempty"`
+	PlatformFamily       *string               `json:"platformFamily,omitempty"`
+	PlatformVersion      *string               `json:"platformVersion,omitempty"`
+	RolloutState         *string               `json:"rolloutState,omitempty"`
+	RolloutStateReason   *string               `json:"rolloutStateReason,omitempty"`
+	RunningCount         *int64                `json:"runningCount,omitempty"`
+	// The Service Connect configuration of your Amazon ECS service. The configuration
+	// for this service to discover and connect to services, and be discovered by,
+	// and connected from, other services within a namespace.
+	//
+	// Tasks that run in a namespace can use short names to connect to services
+	// in the namespace. Tasks can connect to services across all of the clusters
+	// in the namespace. Tasks connect through a managed proxy container that collects
+	// logs and metrics for increased visibility. Only the tasks that Amazon ECS
+	// services create are supported with Service Connect. For more information,
+	// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	ServiceConnectConfiguration *ServiceConnectConfiguration     `json:"serviceConnectConfiguration,omitempty"`
+	ServiceConnectResources     []*ServiceConnectServiceResource `json:"serviceConnectResources,omitempty"`
+	Status                      *string                          `json:"status,omitempty"`
+	TaskDefinition              *string                          `json:"taskDefinition,omitempty"`
+	UpdatedAt                   *metav1.Time                     `json:"updatedAt,omitempty"`
+	VolumeConfigurations        []*ServiceVolumeConfiguration    `json:"volumeConfigurations,omitempty"`
 }
 
 // One of the methods which provide a way for you to quickly identify when a
@@ -526,8 +545,43 @@ type DeploymentCircuitBreaker struct {
 // Optional deployment parameters that control how many tasks run during a deployment
 // and the ordering of stopping and starting tasks.
 type DeploymentConfiguration struct {
-	MaximumPercent        *int64 `json:"maximumPercent,omitempty"`
-	MinimumHealthyPercent *int64 `json:"minimumHealthyPercent,omitempty"`
+	// One of the methods which provide a way for you to quickly identify when a
+	// deployment has failed, and then to optionally roll back the failure to the
+	// last working deployment.
+	//
+	// When the alarms are generated, Amazon ECS sets the service deployment to
+	// failed. Set the rollback parameter to have Amazon ECS to roll back your service
+	// to the last completed deployment after a failure.
+	//
+	// You can only use the DeploymentAlarms method to detect failures when the
+	// DeploymentController is set to ECS (rolling update).
+	//
+	// For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
+	// in the Amazon Elastic Container Service Developer Guide .
+	Alarms *DeploymentAlarms `json:"alarms,omitempty"`
+	//
+	// The deployment circuit breaker can only be used for services using the rolling
+	// update (ECS) deployment type.
+	//
+	// The deployment circuit breaker determines whether a service deployment will
+	// fail if the service can't reach a steady state. If it is turned on, a service
+	// deployment will transition to a failed state and stop launching new tasks.
+	// You can also configure Amazon ECS to roll back your service to the last completed
+	// deployment after a failure. For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// For more information about API failure reasons, see API failure reasons (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/api_failures_messages.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	DeploymentCircuitBreaker *DeploymentCircuitBreaker `json:"deploymentCircuitBreaker,omitempty"`
+	MaximumPercent           *int64                    `json:"maximumPercent,omitempty"`
+	MinimumHealthyPercent    *int64                    `json:"minimumHealthyPercent,omitempty"`
+}
+
+// The deployment controller to use for the service. For more information, see
+// Amazon ECS deployment types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-types.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type DeploymentController struct {
+	Type *string `json:"type,omitempty"`
 }
 
 // An object representing a container instance host device.
@@ -551,7 +605,9 @@ type DockerVolumeConfiguration struct {
 
 // The tag specifications of an Amazon EBS volume.
 type EBSTagSpecification struct {
-	Tags []*Tag `json:"tags,omitempty"`
+	PropagateTags *string `json:"propagateTags,omitempty"`
+	ResourceType  *string `json:"resourceType,omitempty"`
+	Tags          []*Tag  `json:"tags,omitempty"`
 }
 
 // The authorization configuration details for the Amazon EFS file system.
@@ -601,7 +657,7 @@ type EFSVolumeConfiguration struct {
 //
 //   - The container entry point interperts the VARIABLE values.
 type EnvironmentFile struct {
-	Type  *string `json:"type_,omitempty"`
+	Type  *string `json:"type,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
@@ -686,7 +742,7 @@ type Failure struct {
 // in the Amazon Elastic Container Service Developer Guide.
 type FirelensConfiguration struct {
 	Options map[string]*string `json:"options,omitempty"`
-	Type    *string            `json:"type_,omitempty"`
+	Type    *string            `json:"type,omitempty"`
 }
 
 // An object representing a container health check. Health check parameters
@@ -964,6 +1020,13 @@ type NetworkBinding struct {
 	Protocol           *string `json:"protocol,omitempty"`
 }
 
+// The network configuration for a task or service.
+type NetworkConfiguration struct {
+	// An object representing the networking details for a task or service. For
+	// example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
+	AWSVPCConfiguration *AWSVPCConfiguration `json:"awsVPCConfiguration,omitempty"`
+}
+
 // An object representing the elastic network interface for tasks that use the
 // awsvpc network mode.
 type NetworkInterface struct {
@@ -980,6 +1043,7 @@ type NetworkInterface struct {
 // supported.
 type PlacementConstraint struct {
 	Expression *string `json:"expression,omitempty"`
+	Type       *string `json:"type,omitempty"`
 }
 
 // The task placement strategy for a task or service. For more information,
@@ -987,6 +1051,7 @@ type PlacementConstraint struct {
 // in the Amazon Elastic Container Service Developer Guide.
 type PlacementStrategy struct {
 	Field *string `json:"field,omitempty"`
+	Type  *string `json:"type,omitempty"`
 }
 
 // The devices that are available on the container instance. The only supported
@@ -1045,7 +1110,7 @@ type ProtectedTask struct {
 type ProxyConfiguration struct {
 	ContainerName *string         `json:"containerName,omitempty"`
 	Properties    []*KeyValuePair `json:"properties,omitempty"`
-	Type          *string         `json:"type_,omitempty"`
+	Type          *string         `json:"type,omitempty"`
 }
 
 // The repository credentials for private registry authentication.
@@ -1055,6 +1120,7 @@ type RepositoryCredentials struct {
 
 // Describes the resources available for a container instance.
 type Resource struct {
+	DoubleValue    *float64  `json:"doubleValue,omitempty"`
 	IntegerValue   *int64    `json:"integerValue,omitempty"`
 	Name           *string   `json:"name,omitempty"`
 	StringSetValue []*string `json:"stringSetValue,omitempty"`
@@ -1067,7 +1133,7 @@ type Resource struct {
 // or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
 // in the Amazon Elastic Container Service Developer Guide
 type ResourceRequirement struct {
-	Type  *string `json:"type_,omitempty"`
+	Type  *string `json:"type,omitempty"`
 	Value *string `json:"value,omitempty"`
 }
 
@@ -1078,6 +1144,13 @@ type ResourceRequirement struct {
 type RuntimePlatform struct {
 	CPUArchitecture       *string `json:"cpuArchitecture,omitempty"`
 	OperatingSystemFamily *string `json:"operatingSystemFamily,omitempty"`
+}
+
+// A floating-point percentage of the desired number of tasks to place and keep
+// running in the task set.
+type Scale struct {
+	Unit  *string  `json:"unit,omitempty"`
+	Value *float64 `json:"value,omitempty"`
 }
 
 // An object representing the secret to expose to your container. Secrets can
@@ -1096,28 +1169,6 @@ type Secret struct {
 	ValueFrom *string `json:"valueFrom,omitempty"`
 }
 
-// Details on a service within a cluster.
-type Service struct {
-	CapacityProviderStrategy      []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
-	ClusterARN                    *string                         `json:"clusterARN,omitempty"`
-	CreatedAt                     *metav1.Time                    `json:"createdAt,omitempty"`
-	CreatedBy                     *string                         `json:"createdBy,omitempty"`
-	DesiredCount                  *int64                          `json:"desiredCount,omitempty"`
-	EnableECSManagedTags          *bool                           `json:"enableECSManagedTags,omitempty"`
-	EnableExecuteCommand          *bool                           `json:"enableExecuteCommand,omitempty"`
-	HealthCheckGracePeriodSeconds *int64                          `json:"healthCheckGracePeriodSeconds,omitempty"`
-	PendingCount                  *int64                          `json:"pendingCount,omitempty"`
-	PlatformFamily                *string                         `json:"platformFamily,omitempty"`
-	PlatformVersion               *string                         `json:"platformVersion,omitempty"`
-	RoleARN                       *string                         `json:"roleARN,omitempty"`
-	RunningCount                  *int64                          `json:"runningCount,omitempty"`
-	ServiceARN                    *string                         `json:"serviceARN,omitempty"`
-	ServiceName                   *string                         `json:"serviceName,omitempty"`
-	Status                        *string                         `json:"status,omitempty"`
-	Tags                          []*Tag                          `json:"tags,omitempty"`
-	TaskDefinition                *string                         `json:"taskDefinition,omitempty"`
-}
-
 // An object that represents the Amazon Web Services Private Certificate Authority
 // certificate.
 type ServiceConnecTTLSCertificateAuthority struct {
@@ -1126,8 +1177,11 @@ type ServiceConnecTTLSCertificateAuthority struct {
 
 // An object that represents the configuration for Service Connect TLS.
 type ServiceConnecTTLSConfiguration struct {
-	KMSKey  *string `json:"kmsKey,omitempty"`
-	RoleARN *string `json:"roleARN,omitempty"`
+	// An object that represents the Amazon Web Services Private Certificate Authority
+	// certificate.
+	IssuerCertificateAuthority *ServiceConnecTTLSCertificateAuthority `json:"issuerCertificateAuthority,omitempty"`
+	KMSKey                     *string                                `json:"kmsKey,omitempty"`
+	RoleARN                    *string                                `json:"roleARN,omitempty"`
 }
 
 // Each alias ("endpoint") is a fully-qualified name and port number that other
@@ -1144,6 +1198,7 @@ type ServiceConnecTTLSConfiguration struct {
 // in the Amazon Elastic Container Service Developer Guide.
 type ServiceConnectClientAlias struct {
 	DNSName *string `json:"dnsName,omitempty"`
+	Port    *int64  `json:"port,omitempty"`
 }
 
 // The Service Connect configuration of your Amazon ECS service. The configuration
@@ -1195,16 +1250,26 @@ type ServiceConnectConfiguration struct {
 	//    needed must be installed outside of the task. For example, the Fluentd
 	//    output aggregators or a remote host running Logstash to send Gelf logs
 	//    to.
-	LogConfiguration *LogConfiguration `json:"logConfiguration,omitempty"`
-	Namespace        *string           `json:"namespace,omitempty"`
+	LogConfiguration *LogConfiguration        `json:"logConfiguration,omitempty"`
+	Namespace        *string                  `json:"namespace,omitempty"`
+	Services         []*ServiceConnectService `json:"services,omitempty"`
 }
 
 // The Service Connect service object configuration. For more information, see
 // Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type ServiceConnectService struct {
-	DiscoveryName *string `json:"discoveryName,omitempty"`
-	PortName      *string `json:"portName,omitempty"`
+	ClientAliases       []*ServiceConnectClientAlias `json:"clientAliases,omitempty"`
+	DiscoveryName       *string                      `json:"discoveryName,omitempty"`
+	IngressPortOverride *int64                       `json:"ingressPortOverride,omitempty"`
+	PortName            *string                      `json:"portName,omitempty"`
+	// An object that represents the timeout configurations for Service Connect.
+	//
+	// If idleTimeout is set to a time that is less than perRequestTimeout, the
+	// connection will close when the idleTimeout is reached and not the perRequestTimeout.
+	Timeout *TimeoutConfiguration `json:"timeout,omitempty"`
+	// An object that represents the configuration for Service Connect TLS.
+	TLS *ServiceConnecTTLSConfiguration `json:"tls,omitempty"`
 }
 
 // The Service Connect resource. Each configuration maps a discovery name to
@@ -1235,10 +1300,16 @@ type ServiceEvent struct {
 // Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
 // parameters.
 type ServiceManagedEBSVolumeConfiguration struct {
-	Encrypted  *bool  `json:"encrypted,omitempty"`
-	IOPS       *int64 `json:"iops,omitempty"`
-	SizeInGiB  *int64 `json:"sizeInGiB,omitempty"`
-	Throughput *int64 `json:"throughput,omitempty"`
+	Encrypted         *bool                  `json:"encrypted,omitempty"`
+	FilesystemType    *string                `json:"filesystemType,omitempty"`
+	IOPS              *int64                 `json:"iops,omitempty"`
+	KMSKeyID          *string                `json:"kmsKeyID,omitempty"`
+	RoleARN           *string                `json:"roleARN,omitempty"`
+	SizeInGiB         *int64                 `json:"sizeInGiB,omitempty"`
+	SnapshotID        *string                `json:"snapshotID,omitempty"`
+	TagSpecifications []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
+	Throughput        *int64                 `json:"throughput,omitempty"`
+	VolumeType        *string                `json:"volumeType,omitempty"`
 }
 
 // The details for the service registry.
@@ -1254,6 +1325,61 @@ type ServiceRegistry struct {
 	ContainerPort *int64  `json:"containerPort,omitempty"`
 	Port          *int64  `json:"port,omitempty"`
 	RegistryARN   *string `json:"registryARN,omitempty"`
+}
+
+// The configuration for a volume specified in the task definition as a volume
+// that is configured at launch time. Currently, the only supported volume type
+// is an Amazon EBS volume.
+type ServiceVolumeConfiguration struct {
+	// The configuration for the Amazon EBS volume that Amazon ECS creates and manages
+	// on your behalf. These settings are used to create each Amazon EBS volume,
+	// with one volume created for each task in the service.
+	//
+	// Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
+	// parameters.
+	ManagedEBSVolume *ServiceManagedEBSVolumeConfiguration `json:"managedEBSVolume,omitempty"`
+	Name             *string                               `json:"name,omitempty"`
+}
+
+// Details on a service within a cluster.
+type Service_SDK struct {
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	ClusterARN               *string                         `json:"clusterARN,omitempty"`
+	CreatedAt                *metav1.Time                    `json:"createdAt,omitempty"`
+	CreatedBy                *string                         `json:"createdBy,omitempty"`
+	// Optional deployment parameters that control how many tasks run during a deployment
+	// and the ordering of stopping and starting tasks.
+	DeploymentConfiguration *DeploymentConfiguration `json:"deploymentConfiguration,omitempty"`
+	// The deployment controller to use for the service. For more information, see
+	// Amazon ECS deployment types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-types.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	DeploymentController          *DeploymentController `json:"deploymentController,omitempty"`
+	Deployments                   []*Deployment         `json:"deployments,omitempty"`
+	DesiredCount                  *int64                `json:"desiredCount,omitempty"`
+	EnableECSManagedTags          *bool                 `json:"enableECSManagedTags,omitempty"`
+	EnableExecuteCommand          *bool                 `json:"enableExecuteCommand,omitempty"`
+	Events                        []*ServiceEvent       `json:"events,omitempty"`
+	HealthCheckGracePeriodSeconds *int64                `json:"healthCheckGracePeriodSeconds,omitempty"`
+	LaunchType                    *string               `json:"launchType,omitempty"`
+	LoadBalancers                 []*LoadBalancer       `json:"loadBalancers,omitempty"`
+	// The network configuration for a task or service.
+	NetworkConfiguration *NetworkConfiguration  `json:"networkConfiguration,omitempty"`
+	PendingCount         *int64                 `json:"pendingCount,omitempty"`
+	PlacementConstraints []*PlacementConstraint `json:"placementConstraints,omitempty"`
+	PlacementStrategy    []*PlacementStrategy   `json:"placementStrategy,omitempty"`
+	PlatformFamily       *string                `json:"platformFamily,omitempty"`
+	PlatformVersion      *string                `json:"platformVersion,omitempty"`
+	PropagateTags        *string                `json:"propagateTags,omitempty"`
+	RoleARN              *string                `json:"roleARN,omitempty"`
+	RunningCount         *int64                 `json:"runningCount,omitempty"`
+	SchedulingStrategy   *string                `json:"schedulingStrategy,omitempty"`
+	ServiceARN           *string                `json:"serviceARN,omitempty"`
+	ServiceName          *string                `json:"serviceName,omitempty"`
+	ServiceRegistries    []*ServiceRegistry     `json:"serviceRegistries,omitempty"`
+	Status               *string                `json:"status,omitempty"`
+	Tags                 []*Tag                 `json:"tags,omitempty"`
+	TaskDefinition       *string                `json:"taskDefinition,omitempty"`
+	TaskSets             []*TaskSet             `json:"taskSets,omitempty"`
 }
 
 // The details for the execute command session.
@@ -1367,6 +1493,7 @@ type Task struct {
 	Group                 *string                 `json:"group,omitempty"`
 	InferenceAccelerators []*InferenceAccelerator `json:"inferenceAccelerators,omitempty"`
 	LastStatus            *string                 `json:"lastStatus,omitempty"`
+	LaunchType            *string                 `json:"launchType,omitempty"`
 	Memory                *string                 `json:"memory,omitempty"`
 	PlatformFamily        *string                 `json:"platformFamily,omitempty"`
 	PlatformVersion       *string                 `json:"platformVersion,omitempty"`
@@ -1389,7 +1516,7 @@ type Task struct {
 // Task placement constraints aren't supported for tasks run on Fargate.
 type TaskDefinitionPlacementConstraint struct {
 	Expression *string `json:"expression,omitempty"`
-	Type       *string `json:"type_,omitempty"`
+	Type       *string `json:"type,omitempty"`
 }
 
 // The details of a task definition which describes the container and volume
@@ -1452,10 +1579,16 @@ type TaskDefinition_SDK struct {
 // on your behalf. These settings are used to create each Amazon EBS volume,
 // with one volume created for each task.
 type TaskManagedEBSVolumeConfiguration struct {
-	Encrypted  *bool  `json:"encrypted,omitempty"`
-	IOPS       *int64 `json:"iops,omitempty"`
-	SizeInGiB  *int64 `json:"sizeInGiB,omitempty"`
-	Throughput *int64 `json:"throughput,omitempty"`
+	Encrypted         *bool                  `json:"encrypted,omitempty"`
+	FilesystemType    *string                `json:"filesystemType,omitempty"`
+	IOPS              *int64                 `json:"iops,omitempty"`
+	KMSKeyID          *string                `json:"kmsKeyID,omitempty"`
+	RoleARN           *string                `json:"roleARN,omitempty"`
+	SizeInGiB         *int64                 `json:"sizeInGiB,omitempty"`
+	SnapshotID        *string                `json:"snapshotID,omitempty"`
+	TagSpecifications []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
+	Throughput        *int64                 `json:"throughput,omitempty"`
+	VolumeType        *string                `json:"volumeType,omitempty"`
 }
 
 // The termination policy for the Amazon EBS volume when the task exits. For
@@ -1496,18 +1629,42 @@ type TaskSet struct {
 	CreatedAt                *metav1.Time                    `json:"createdAt,omitempty"`
 	ExternalID               *string                         `json:"externalID,omitempty"`
 	ID                       *string                         `json:"id,omitempty"`
-	PendingCount             *int64                          `json:"pendingCount,omitempty"`
-	PlatformFamily           *string                         `json:"platformFamily,omitempty"`
-	PlatformVersion          *string                         `json:"platformVersion,omitempty"`
-	RunningCount             *int64                          `json:"runningCount,omitempty"`
-	ServiceARN               *string                         `json:"serviceARN,omitempty"`
-	StabilityStatusAt        *metav1.Time                    `json:"stabilityStatusAt,omitempty"`
-	StartedBy                *string                         `json:"startedBy,omitempty"`
-	Status                   *string                         `json:"status,omitempty"`
-	Tags                     []*Tag                          `json:"tags,omitempty"`
-	TaskDefinition           *string                         `json:"taskDefinition,omitempty"`
-	TaskSetARN               *string                         `json:"taskSetARN,omitempty"`
-	UpdatedAt                *metav1.Time                    `json:"updatedAt,omitempty"`
+	LaunchType               *string                         `json:"launchType,omitempty"`
+	LoadBalancers            []*LoadBalancer                 `json:"loadBalancers,omitempty"`
+	// The network configuration for a task or service.
+	NetworkConfiguration *NetworkConfiguration `json:"networkConfiguration,omitempty"`
+	PendingCount         *int64                `json:"pendingCount,omitempty"`
+	PlatformFamily       *string               `json:"platformFamily,omitempty"`
+	PlatformVersion      *string               `json:"platformVersion,omitempty"`
+	RunningCount         *int64                `json:"runningCount,omitempty"`
+	// A floating-point percentage of the desired number of tasks to place and keep
+	// running in the task set.
+	Scale             *Scale             `json:"scale,omitempty"`
+	ServiceARN        *string            `json:"serviceARN,omitempty"`
+	ServiceRegistries []*ServiceRegistry `json:"serviceRegistries,omitempty"`
+	StabilityStatus   *string            `json:"stabilityStatus,omitempty"`
+	StabilityStatusAt *metav1.Time       `json:"stabilityStatusAt,omitempty"`
+	StartedBy         *string            `json:"startedBy,omitempty"`
+	Status            *string            `json:"status,omitempty"`
+	Tags              []*Tag             `json:"tags,omitempty"`
+	TaskDefinition    *string            `json:"taskDefinition,omitempty"`
+	TaskSetARN        *string            `json:"taskSetARN,omitempty"`
+	UpdatedAt         *metav1.Time       `json:"updatedAt,omitempty"`
+}
+
+// Configuration settings for the task volume that was configuredAtLaunch that
+// weren't set during RegisterTaskDef.
+type TaskVolumeConfiguration struct {
+	Name *string `json:"name,omitempty"`
+}
+
+// An object that represents the timeout configurations for Service Connect.
+//
+// If idleTimeout is set to a time that is less than perRequestTimeout, the
+// connection will close when the idleTimeout is reached and not the perRequestTimeout.
+type TimeoutConfiguration struct {
+	IdleTimeoutSeconds       *int64 `json:"idleTimeoutSeconds,omitempty"`
+	PerRequestTimeoutSeconds *int64 `json:"perRequestTimeoutSeconds,omitempty"`
 }
 
 // The container path, mount options, and size of the tmpfs mount.

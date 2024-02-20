@@ -10,6 +10,7 @@ rules:
   - ecs.services.k8s.aws
   resources:
   - clusters
+  - services
   - taskdefinitions
   verbs:
   - get

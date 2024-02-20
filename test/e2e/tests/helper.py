@@ -46,3 +46,17 @@ class ECSValidator:
     
     def task_definition_exists(self, task_definition_name) -> bool:
         return self.get_task_definition(task_definition_name) is not None
+    
+    def get_service(self, cluster_name: str, service_name: str) -> dict:
+        try:
+            resp = self.ecs_client.describe_services(
+                cluster=cluster_name,
+                services=[service_name],
+            )
+            return resp
+
+        except Exception as e:
+            return None
+        
+    def service_exists(self, cluster_name, service_name) -> bool:
+        return self.get_service(cluster_name, service_name) is not None
