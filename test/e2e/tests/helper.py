@@ -29,8 +29,20 @@ class ECSValidator:
             return resp
 
         except Exception as e:
-            logging.debug(e)
             return None
 
     def cluster_exists(self, cluster_name) -> bool:
         return self.get_cluster(cluster_name) is not None
+
+    def get_task_definition(self, task_definition_arn: str) -> dict:
+        try:
+            resp = self.ecs_client.describe_task_definition(
+                taskDefinition=task_definition_arn,
+            )
+            return resp
+
+        except Exception as e:
+            return None
+    
+    def task_definition_exists(self, task_definition_name) -> bool:
+        return self.get_task_definition(task_definition_name) is not None

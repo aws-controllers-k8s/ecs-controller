@@ -1,0 +1,13 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: TaskDefinition
+metadata:
+  name: $TASK_DEFINITION_NAME
+spec:
+  family: $TASK_DEFINITION_NAME
+  cpu: "2048"
+  memory: "6144"
+  networkMode: "awsvpc"
+  requiresCompatibilities: ["FARGATE"]
+  containerDefinitions:
+  - image: nginx
+    name: mywebsite

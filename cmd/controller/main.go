@@ -18,6 +18,7 @@ package main
 import (
 	"os"
 
+	iamapitypes "github.com/aws-controllers-k8s/iam-controller/apis/v1alpha1"
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackcfg "github.com/aws-controllers-k8s/runtime/pkg/config"
 	ackrt "github.com/aws-controllers-k8s/runtime/pkg/runtime"
@@ -30,6 +31,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrlrt "sigs.k8s.io/controller-runtime"
 	ctrlrtcache "sigs.k8s.io/controller-runtime/pkg/cache"
+	ctrlrthealthz "sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrlrtmetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	ctrlrtwebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -39,6 +41,7 @@ import (
 	svcsdk "github.com/aws/aws-sdk-go/service/ecs"
 
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/cluster"
+	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/task_definition"
 
 	"github.com/aws-controllers-k8s/ecs-controller/pkg/version"
 )
@@ -56,6 +59,7 @@ func init() {
 
 	_ = svctypes.AddToScheme(scheme)
 	_ = ackv1alpha1.AddToScheme(scheme)
+	_ = iamapitypes.AddToScheme(scheme)
 }
 
 func main() {
@@ -116,6 +120,9 @@ func main() {
 		LeaderElection:          ackCfg.EnableLeaderElection,
 		LeaderElectionID:        "ack-" + awsServiceAPIGroup,
 		LeaderElectionNamespace: ackCfg.LeaderElectionNamespace,
+		HealthProbeBindAddress:  ackCfg.HealthzAddr,
+		LivenessEndpointName:    "/healthz",
+		ReadinessEndpointName:   "/readyz",
 	})
 	if err != nil {
 		setupLog.Error(
@@ -161,6 +168,21 @@ func main() {
 	if err = sc.BindControllerManager(mgr, ackCfg); err != nil {
 		setupLog.Error(
 			err, "unable bind to controller manager to service controller",
+			"aws.service", awsServiceAlias,
+		)
+		os.Exit(1)
+	}
+
+	if err = mgr.AddHealthzCheck("health", ctrlrthealthz.Ping); err != nil {
+		setupLog.Error(
+			err, "unable to set up health check",
+			"aws.service", awsServiceAlias,
+		)
+		os.Exit(1)
+	}
+	if err = mgr.AddReadyzCheck("check", ctrlrthealthz.Ping); err != nil {
+		setupLog.Error(
+			err, "unable to set up ready check",
 			"aws.service", awsServiceAlias,
 		)
 		os.Exit(1)

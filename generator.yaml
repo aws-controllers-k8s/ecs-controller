@@ -3,8 +3,12 @@ ignore:
   # Cluster
   - Service
   - CapacityProvider
-  - TaskDefinition
+  # TaskDefinition
   - TaskSet
+  field_paths:
+  - DescribeTaskDefinitionOutput.Tags
+  - RegisterTaskDefinitionOutput.Tags
+
 operations:
   DescribeClusters:
     operation_type:
@@ -14,11 +18,17 @@ operations:
   RegisterTaskDefinition:
     operation_type:
     - Create
+    - Update
     resource_name: TaskDefinition
   DeregisterTaskDefinition:
     operation_type:
     - Delete
     resource_name: TaskDefinition
+  DescribeTaskDefinition:
+    operation_type:
+    - ReadOne
+    resource_name: TaskDefinition
+    output_wrapper_field_path: TaskDefinition
 resources: 
   Cluster: 
     fields:
@@ -74,3 +84,49 @@ resources:
         DescribeClusters:
           input_fields:
             ClusterName: Name
+  TaskDefinition:
+    print:
+      order_by: index
+    fields:
+      Family:
+        is_primary_key: true
+        print:
+          name: FAMILY
+          index: 1
+      CPU:
+        print:
+          name: CPU
+          index: 2
+      Memory:
+        print:
+          name: MEMORY
+          index: 3
+      NetworkMode:
+        print:
+          name: NETWORKMODE
+          index: 4
+      TaskRoleArn:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: Role
+          service_name: iam
+    hooks:
+      sdk_read_one_post_build_request:
+        template_path: hooks/task_definition/sdk_read_one_post_build_request.go.tpl
+      sdk_delete_post_build_request:
+        template_path: hooks/task_definition/sdk_delete_post_build_request.go.tpl
+    exceptions:
+      errors:
+        404:
+          # Should the ECS controller plane return a 404 when a client tries to
+          # describe a non existing task definition? Probably...
+          code: ClientException
+      terminal_codes:
+      - InvalidParameterException
+    renames:
+      operations:
+        DescribeTaskDefinition:
+          input_fields:
+            # This is a hack to trick the code generator into thinking that the
+            # required field is actually called Family.
+            TaskDefinition: Family
