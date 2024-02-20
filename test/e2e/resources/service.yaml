@@ -1,0 +1,15 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Service
+metadata:
+  name: $SERVICE_NAME
+spec:
+  name: $SERVICE_NAME
+  taskDefinition: $TASK_DEFINITION_NAME
+  cluster: $CLUSTER_NAME
+  launchType: FARGATE
+  desiredCount: 2
+  networkConfiguration:
+    awsVPCConfiguration:
+      assignPublicIP: DISABLED
+      subnets:
+      - $PRIVATE_SUBNET

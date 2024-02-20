@@ -196,7 +196,7 @@ spec:
 
                              * The container entry point interperts the VARIABLE values.
                         properties:
-                          type_:
+                          type:
                             type: string
                           value:
                             type: string
@@ -227,7 +227,7 @@ spec:
                           additionalProperties:
                             type: string
                           type: object
-                        type_:
+                        type:
                           type: string
                       type: object
                     healthCheck:
@@ -620,7 +620,7 @@ spec:
                           or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
                           in the Amazon Elastic Container Service Developer Guide
                         properties:
-                          type_:
+                          type:
                             type: string
                           value:
                             type: string
@@ -1034,7 +1034,7 @@ spec:
                   properties:
                     expression:
                       type: string
-                    type_:
+                    type:
                       type: string
                   type: object
                 type: array
@@ -1063,7 +1063,7 @@ spec:
                           type: string
                       type: object
                     type: array
-                  type_:
+                  type:
                     type: string
                 type: object
               requiresCompatibilities:

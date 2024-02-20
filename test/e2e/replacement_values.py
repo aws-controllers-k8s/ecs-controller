@@ -11,8 +11,11 @@
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 """Stores the values used by each of the integration tests for replacing the
-EFS-specific test variables.
+ECS-specific test variables.
 """
 
+from e2e.bootstrap_resources import get_bootstrap_resources
+
 REPLACEMENT_VALUES = {
+    "PRIVATE_SUBNET": "subnet-08375cf693c05adc5"
 }

@@ -15,6 +15,7 @@
 import logging
 
 from acktest.bootstrapping import Resources, BootstrapFailureException
+from acktest.bootstrapping.vpc import VPC
 
 from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
@@ -22,9 +23,7 @@ from e2e.bootstrap_resources import BootstrapResources
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)
 
-    resources = BootstrapResources(
-        # TODO: Add bootstrapping when you have defined the resources
-    )
+    resources = BootstrapResources()
 
     try:
         resources.bootstrap()

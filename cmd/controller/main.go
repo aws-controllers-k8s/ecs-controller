@@ -41,6 +41,7 @@ import (
 	svcsdk "github.com/aws/aws-sdk-go/service/ecs"
 
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/cluster"
+	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/service"
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/task_definition"
 
 	"github.com/aws-controllers-k8s/ecs-controller/pkg/version"

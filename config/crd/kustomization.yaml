@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - common
   - bases/ecs.services.k8s.aws_clusters.yaml
+  - bases/ecs.services.k8s.aws_services.yaml
   - bases/ecs.services.k8s.aws_taskdefinitions.yaml

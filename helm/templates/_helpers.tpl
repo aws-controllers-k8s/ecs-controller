@@ -99,6 +99,26 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ecs.services.k8s.aws
+  resources:
+  - services/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ecs.services.k8s.aws
+  resources:
   - taskdefinitions
   verbs:
   - create

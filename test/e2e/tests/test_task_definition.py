@@ -74,7 +74,7 @@ def simple_task_definitions(ecs_client):
 
 @service_marker
 @pytest.mark.canary
-class TestAccessPoint:
+class TestTaskDefinition:
     def test_create_delete(self, ecs_client, simple_task_definitions):
         (ref, _, td_name) = simple_task_definitions
         assert td_name is not None
