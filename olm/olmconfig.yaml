@@ -1,0 +1,40 @@
+---
+annotations:
+  capabilityLevel: Basic Install
+  shortDescription: AWS ECS controller is a service controller for managing ECS resources
+    in Kubernetes
+displayName: AWS Controllers for Kubernetes - Amazon ECS
+description: |-
+  Manage Amazon Elastic Container Service (ECS) resources in AWS from within your Kubernetes cluster.
+
+
+  **About Amazon ECS**
+
+
+  Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built-in. It''s integrated with both AWS and third-party tools, such as Amazon Elastic Container Registry and Docker. This integration makes it easier for teams to focus on building the applications, not the environment. You can run and scale your container workloads across AWS Regions in the cloud, and on-premises, without the complexity of managing a control plane.
+
+
+  **About the AWS Controllers for Kubernetes**
+
+
+  This controller is a component of the [AWS Controller for Kubernetes](https://github.com/aws/aws-controllers-k8s)
+  project.
+
+
+  **Pre-Installation Steps**
+
+
+  Please follow the following link: [Red Hat OpenShift](https://aws-controllers-k8s.github.io/community/docs/user-docs/openshift/)
+samples:
+- kind: TaskDefinition
+  spec: '{}'
+- kind: Cluster
+  spec: '{}'
+- kind: Service
+  spec: '{}'
+maintainers:
+- name: "ecs maintainer team"
+  email: "ack-maintainers@amazon.com"
+links: 
+- name: Amazon ECS Developer Resources
+  url: https://aws.amazon.com/ecs/resources/
