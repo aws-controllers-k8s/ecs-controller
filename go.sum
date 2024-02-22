@@ -1,7 +1,7 @@
 github.com/aws-controllers-k8s/iam-controller v1.3.4 h1:C/CgvJQb6I6mtjgV10FtyWq81S6IhNG+dF4+mjxANEY=
 github.com/aws-controllers-k8s/iam-controller v1.3.4/go.mod h1:8S4IXeK3Y9HABtSwy0Y8X/iBmBH1L/ab1D1cZ0YVlg0=
-github.com/aws-controllers-k8s/runtime v0.30.1-0.20240217174305-eb1315466efb h1:Cdicq3reak7cXeuSYpJJEf8lyEHcE/ACnevC133vWGc=
-github.com/aws-controllers-k8s/runtime v0.30.1-0.20240217174305-eb1315466efb/go.mod h1:6qr9ULkjOHo0fTwEUkE+48IxHqNbHxvvf/9JzGoR8pM=
+github.com/aws-controllers-k8s/runtime v0.31.0 h1:/N5u2x9jB1JD8tGYe6P2rihA/ratHc5b8Au0YRjneyo=
+github.com/aws-controllers-k8s/runtime v0.31.0/go.mod h1:6qr9ULkjOHo0fTwEUkE+48IxHqNbHxvvf/9JzGoR8pM=
 github.com/aws/aws-sdk-go v1.50.20 h1:xfAnSDVf/azIWTVQXQODp89bubvCS85r70O3nuQ4dnE=
 github.com/aws/aws-sdk-go v1.50.20/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
