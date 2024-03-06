@@ -1,14 +1,16 @@
 module github.com/aws-controllers-k8s/ecs-controller
 
-go 1.22
+go 1.21
 
 require (
 	github.com/aws-controllers-k8s/iam-controller v1.3.4
-	github.com/aws-controllers-k8s/runtime v0.30.1-0.20240217174305-eb1315466efb
+	github.com/aws-controllers-k8s/runtime v0.32.0
 	github.com/aws/aws-sdk-go v1.50.20
 	github.com/go-logr/logr v1.4.1
+	github.com/spf13/pflag v1.0.5
 	k8s.io/api v0.29.0
 	k8s.io/apimachinery v0.29.2
+	k8s.io/client-go v0.29.0
 	sigs.k8s.io/controller-runtime v0.17.2
 )
 
@@ -49,7 +51,6 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/samber/lo v1.37.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
@@ -66,7 +67,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.29.0 // indirect
-	k8s.io/client-go v0.29.0 // indirect
 	k8s.io/component-base v0.29.0 // indirect
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
