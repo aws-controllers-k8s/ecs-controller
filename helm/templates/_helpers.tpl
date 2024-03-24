@@ -78,6 +78,34 @@ rules:
   - patch
   - watch
 - apiGroups:
+  - ec2.services.k8s.aws
+  resources:
+  - securitygroups
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ec2.services.k8s.aws
+  resources:
+  - securitygroups/status
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ec2.services.k8s.aws
+  resources:
+  - subnets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ec2.services.k8s.aws
+  resources:
+  - subnets/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - ecs.services.k8s.aws
   resources:
   - clusters
@@ -137,6 +165,34 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - elbv2.services.k8s.aws
+  resources:
+  - loadbalancers
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - elbv2.services.k8s.aws
+  resources:
+  - loadbalancers/status
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - elbv2.services.k8s.aws
+  resources:
+  - targetgroups
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - elbv2.services.k8s.aws
+  resources:
+  - targetgroups/status
+  verbs:
+  - get
+  - list
 - apiGroups:
   - iam.services.k8s.aws
   resources:

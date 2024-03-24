@@ -3,6 +3,8 @@ module github.com/aws-controllers-k8s/ecs-controller
 go 1.21
 
 require (
+	github.com/aws-controllers-k8s/ec2-controller v1.2.4
+	github.com/aws-controllers-k8s/elbv2-controller v0.0.6
 	github.com/aws-controllers-k8s/iam-controller v1.3.4
 	github.com/aws-controllers-k8s/runtime v0.32.0
 	github.com/aws/aws-sdk-go v1.50.20

@@ -31,9 +31,13 @@ var (
 // An object representing the networking details for a task or service. For
 // example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
 type AWSVPCConfiguration struct {
-	AssignPublicIP *string   `json:"assignPublicIP,omitempty"`
-	SecurityGroups []*string `json:"securityGroups,omitempty"`
-	Subnets        []*string `json:"subnets,omitempty"`
+	AssignPublicIP *string `json:"assignPublicIP,omitempty"`
+	// Reference field for SecurityGroups
+	SecurityGroupRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"securityGroupRefs,omitempty"`
+	SecurityGroups    []*string                                  `json:"securityGroups,omitempty"`
+	// Reference field for Subnets
+	SubnetRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"subnetRefs,omitempty"`
+	Subnets    []*string                                  `json:"subnets,omitempty"`
 }
 
 // An object representing a container instance or task attachment.
@@ -941,7 +945,11 @@ type LoadBalancer struct {
 	ContainerName    *string `json:"containerName,omitempty"`
 	ContainerPort    *int64  `json:"containerPort,omitempty"`
 	LoadBalancerName *string `json:"loadBalancerName,omitempty"`
-	TargetGroupARN   *string `json:"targetGroupARN,omitempty"`
+	// Reference field for LoadBalancerName
+	LoadBalancerRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"loadBalancerRef,omitempty"`
+	TargetGroupARN  *string                                  `json:"targetGroupARN,omitempty"`
+	// Reference field for TargetGroupARN
+	TargetGroupRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"targetGroupRef,omitempty"`
 }
 
 // The log configuration for the container. This parameter maps to LogConfig
