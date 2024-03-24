@@ -360,8 +360,32 @@ spec:
                       type: integer
                     loadBalancerName:
                       type: string
+                    loadBalancerRef:
+                      description: Reference field for LoadBalancerName
+                      properties:
+                        from:
+                          description: |-
+                            AWSResourceReference provides all the values necessary to reference another
+                            k8s resource for finding the identifier(Id/ARN/Name)
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                      type: object
                     targetGroupARN:
                       type: string
+                    targetGroupRef:
+                      description: Reference field for TargetGroupARN
+                      properties:
+                        from:
+                          description: |-
+                            AWSResourceReference provides all the values necessary to reference another
+                            k8s resource for finding the identifier(Id/ARN/Name)
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                      type: object
                   type: object
                 type: array
               name:
@@ -386,9 +410,45 @@ spec:
                     properties:
                       assignPublicIP:
                         type: string
+                      securityGroupRefs:
+                        description: Reference field for SecurityGroups
+                        items:
+                          description: "AWSResourceReferenceWrapper provides a wrapper
+                            around *AWSResourceReference\ntype to provide more user
+                            friendly syntax for references using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                            \ name: my-api"
+                          properties:
+                            from:
+                              description: |-
+                                AWSResourceReference provides all the values necessary to reference another
+                                k8s resource for finding the identifier(Id/ARN/Name)
+                              properties:
+                                name:
+                                  type: string
+                              type: object
+                          type: object
+                        type: array
                       securityGroups:
                         items:
                           type: string
+                        type: array
+                      subnetRefs:
+                        description: Reference field for Subnets
+                        items:
+                          description: "AWSResourceReferenceWrapper provides a wrapper
+                            around *AWSResourceReference\ntype to provide more user
+                            friendly syntax for references using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                            \ name: my-api"
+                          properties:
+                            from:
+                              description: |-
+                                AWSResourceReference provides all the values necessary to reference another
+                                k8s resource for finding the identifier(Id/ARN/Name)
+                              properties:
+                                name:
+                                  type: string
+                              type: object
+                          type: object
                         type: array
                       subnets:
                         items:
@@ -1079,9 +1139,47 @@ spec:
                           properties:
                             assignPublicIP:
                               type: string
+                            securityGroupRefs:
+                              description: Reference field for SecurityGroups
+                              items:
+                                description: "AWSResourceReferenceWrapper provides
+                                  a wrapper around *AWSResourceReference\ntype to
+                                  provide more user friendly syntax for references
+                                  using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                                  \ name: my-api"
+                                properties:
+                                  from:
+                                    description: |-
+                                      AWSResourceReference provides all the values necessary to reference another
+                                      k8s resource for finding the identifier(Id/ARN/Name)
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                type: object
+                              type: array
                             securityGroups:
                               items:
                                 type: string
+                              type: array
+                            subnetRefs:
+                              description: Reference field for Subnets
+                              items:
+                                description: "AWSResourceReferenceWrapper provides
+                                  a wrapper around *AWSResourceReference\ntype to
+                                  provide more user friendly syntax for references
+                                  using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                                  \ name: my-api"
+                                properties:
+                                  from:
+                                    description: |-
+                                      AWSResourceReference provides all the values necessary to reference another
+                                      k8s resource for finding the identifier(Id/ARN/Name)
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                type: object
                               type: array
                             subnets:
                               items:
@@ -1533,8 +1631,32 @@ spec:
                             type: integer
                           loadBalancerName:
                             type: string
+                          loadBalancerRef:
+                            description: Reference field for LoadBalancerName
+                            properties:
+                              from:
+                                description: |-
+                                  AWSResourceReference provides all the values necessary to reference another
+                                  k8s resource for finding the identifier(Id/ARN/Name)
+                                properties:
+                                  name:
+                                    type: string
+                                type: object
+                            type: object
                           targetGroupARN:
                             type: string
+                          targetGroupRef:
+                            description: Reference field for TargetGroupARN
+                            properties:
+                              from:
+                                description: |-
+                                  AWSResourceReference provides all the values necessary to reference another
+                                  k8s resource for finding the identifier(Id/ARN/Name)
+                                properties:
+                                  name:
+                                    type: string
+                                type: object
+                            type: object
                         type: object
                       type: array
                     networkConfiguration:
@@ -1547,9 +1669,47 @@ spec:
                           properties:
                             assignPublicIP:
                               type: string
+                            securityGroupRefs:
+                              description: Reference field for SecurityGroups
+                              items:
+                                description: "AWSResourceReferenceWrapper provides
+                                  a wrapper around *AWSResourceReference\ntype to
+                                  provide more user friendly syntax for references
+                                  using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                                  \ name: my-api"
+                                properties:
+                                  from:
+                                    description: |-
+                                      AWSResourceReference provides all the values necessary to reference another
+                                      k8s resource for finding the identifier(Id/ARN/Name)
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                type: object
+                              type: array
                             securityGroups:
                               items:
                                 type: string
+                              type: array
+                            subnetRefs:
+                              description: Reference field for Subnets
+                              items:
+                                description: "AWSResourceReferenceWrapper provides
+                                  a wrapper around *AWSResourceReference\ntype to
+                                  provide more user friendly syntax for references
+                                  using 'from' field\nEx:\nAPIIDRef:\n\n\n\tfrom:\n\t
+                                  \ name: my-api"
+                                properties:
+                                  from:
+                                    description: |-
+                                      AWSResourceReference provides all the values necessary to reference another
+                                      k8s resource for finding the identifier(Id/ARN/Name)
+                                    properties:
+                                      name:
+                                        type: string
+                                    type: object
+                                type: object
                               type: array
                             subnets:
                               items:

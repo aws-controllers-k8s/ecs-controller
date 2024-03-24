@@ -32,6 +32,17 @@ func (in *AWSVPCConfiguration) DeepCopyInto(out *AWSVPCConfiguration) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.SecurityGroupRefs != nil {
+		in, out := &in.SecurityGroupRefs, &out.SecurityGroupRefs
+		*out = make([]*corev1alpha1.AWSResourceReferenceWrapper, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+				(*in).DeepCopyInto(*out)
+			}
+		}
+	}
 	if in.SecurityGroups != nil {
 		in, out := &in.SecurityGroups, &out.SecurityGroups
 		*out = make([]*string, len(*in))
@@ -40,6 +51,17 @@ func (in *AWSVPCConfiguration) DeepCopyInto(out *AWSVPCConfiguration) {
 				in, out := &(*in)[i], &(*out)[i]
 				*out = new(string)
 				**out = **in
+			}
+		}
+	}
+	if in.SubnetRefs != nil {
+		in, out := &in.SubnetRefs, &out.SubnetRefs
+		*out = make([]*corev1alpha1.AWSResourceReferenceWrapper, len(*in))
+		for i := range *in {
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+				(*in).DeepCopyInto(*out)
 			}
 		}
 	}
@@ -2312,10 +2334,20 @@ func (in *LoadBalancer) DeepCopyInto(out *LoadBalancer) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.LoadBalancerRef != nil {
+		in, out := &in.LoadBalancerRef, &out.LoadBalancerRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.TargetGroupARN != nil {
 		in, out := &in.TargetGroupARN, &out.TargetGroupARN
 		*out = new(string)
 		**out = **in
+	}
+	if in.TargetGroupRef != nil {
+		in, out := &in.TargetGroupRef, &out.TargetGroupRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 }
 
