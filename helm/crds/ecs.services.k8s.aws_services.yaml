@@ -131,6 +131,8 @@ spec:
                     properties:
                       name:
                         type: string
+                      namespace:
+                        type: string
                     type: object
                 type: object
               deploymentConfiguration:
@@ -492,6 +494,8 @@ spec:
                     properties:
                       name:
                         type: string
+                      namespace:
+                        type: string
                     type: object
                 type: object
               schedulingStrategy:
@@ -826,6 +830,8 @@ spec:
                       k8s resource for finding the identifier(Id/ARN/Name)
                     properties:
                       name:
+                        type: string
+                      namespace:
                         type: string
                     type: object
                 type: object
