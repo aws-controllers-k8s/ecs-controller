@@ -55,6 +55,7 @@ rules:
   - ""
   resources:
   - configmaps
+  - secrets
   verbs:
   - get
   - list
@@ -69,57 +70,20 @@ rules:
   - list
   - watch
 - apiGroups:
-  - ""
+  - ec2.services.k8s.aws
   resources:
-  - secrets
+  - securitygroups
+  - securitygroups/status
+  - subnets
+  - subnets/status
   verbs:
   - get
   - list
-  - patch
-  - watch
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
   - clusters
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ecs.services.k8s.aws
-  resources:
-  - clusters/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ecs.services.k8s.aws
-  resources:
   - services
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - ecs.services.k8s.aws
-  resources:
-  - services/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - ecs.services.k8s.aws
-  resources:
   - taskdefinitions
   verbs:
   - create
@@ -132,21 +96,27 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - clusters/status
+  - services/status
   - taskdefinitions/status
   verbs:
   - get
   - patch
   - update
 - apiGroups:
-  - iam.services.k8s.aws
+  - elbv2.services.k8s.aws
   resources:
-  - roles
+  - loadbalancers
+  - loadbalancers/status
+  - targetgroups
+  - targetgroups/status
   verbs:
   - get
   - list
 - apiGroups:
   - iam.services.k8s.aws
   resources:
+  - roles
   - roles/status
   verbs:
   - get
@@ -155,25 +125,6 @@ rules:
   - services.k8s.aws
   resources:
   - adoptedresources
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - services.k8s.aws
-  resources:
-  - adoptedresources/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - services.k8s.aws
-  resources:
   - fieldexports
   verbs:
   - create
@@ -186,6 +137,7 @@ rules:
 - apiGroups:
   - services.k8s.aws
   resources:
+  - adoptedresources/status
   - fieldexports/status
   verbs:
   - get
