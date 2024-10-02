@@ -187,6 +187,26 @@ resources:
           path: Status.ACKResourceMetadata.ARN
           resource: Role
           service_name: iam
+      LoadBalancers.LoadBalancerName:
+        references:
+          path: Spec.Name
+          resource: LoadBalancer
+          service_name: elbv2
+      LoadBalancers.TargetGroupArn:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: TargetGroup
+          service_name: elbv2
+      NetworkConfiguration.AwsvpcConfiguration.Subnets:
+        references:
+          path: Status.SubnetID
+          resource: Subnet
+          service_name: ec2
+      NetworkConfiguration.AwsvpcConfiguration.SecurityGroups:
+        references:
+          path: Status.ID
+          resource: SecurityGroup
+          service_name: ec2
     list_operation:
       match_fields:
       - Name
