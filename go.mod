@@ -8,7 +8,7 @@ require (
 	github.com/aws-controllers-k8s/ec2-controller v1.2.26
 	github.com/aws-controllers-k8s/elbv2-controller v1.0.0
 	github.com/aws-controllers-k8s/iam-controller v1.3.4
-	github.com/aws-controllers-k8s/runtime v0.39.0
+	github.com/aws-controllers-k8s/runtime v0.40.0
 	github.com/aws/aws-sdk-go v1.50.20
 	github.com/go-logr/logr v1.4.2
 	github.com/spf13/pflag v1.0.5
