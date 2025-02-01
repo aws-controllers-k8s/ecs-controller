@@ -19,8 +19,8 @@ import (
 	"github.com/aws-controllers-k8s/ecs-controller/apis/v1alpha1"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
 
-	"github.com/aws/aws-sdk-go/aws/request"
-	svcsdk "github.com/aws/aws-sdk-go/service/ecs"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ecs"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 )
 
 type metricsRecorder interface {
@@ -28,9 +28,9 @@ type metricsRecorder interface {
 }
 
 type tagsClient interface {
-	TagResourceWithContext(context.Context, *svcsdk.TagResourceInput, ...request.Option) (*svcsdk.TagResourceOutput, error)
-	ListTagsForResourceWithContext(context.Context, *svcsdk.ListTagsForResourceInput, ...request.Option) (*svcsdk.ListTagsForResourceOutput, error)
-	UntagResourceWithContext(context.Context, *svcsdk.UntagResourceInput, ...request.Option) (*svcsdk.UntagResourceOutput, error)
+	TagResource(context.Context, *svcsdk.TagResourceInput, ...func(*svcsdk.Options)) (*svcsdk.TagResourceOutput, error)
+	ListTagsForResource(context.Context, *svcsdk.ListTagsForResourceInput, ...func(*svcsdk.Options)) (*svcsdk.ListTagsForResourceOutput, error)
+	UntagResource(context.Context, *svcsdk.UntagResourceInput, ...func(*svcsdk.Options)) (*svcsdk.UntagResourceOutput, error)
 }
 
 // syncTags examines the Tags in the supplied Resource and calls the
@@ -58,7 +58,7 @@ func SyncTags(
 	}
 
 	toAdd := map[string]*string{}
-	toDelete := []*string{}
+	toDelete := []string{}
 
 	for k, v := range desiredTags {
 		if ev, found := existingTags[k]; !found || *ev != *v {
@@ -69,7 +69,7 @@ func SyncTags(
 	for k, _ := range existingTags {
 		if _, found := desiredTags[k]; !found {
 			deleteKey := k
-			toDelete = append(toDelete, &deleteKey)
+			toDelete = append(toDelete, deleteKey)
 		}
 	}
 
@@ -89,7 +89,7 @@ func SyncTags(
 	}
 	if len(toDelete) > 0 {
 		for _, k := range toDelete {
-			rlog.Debug("removing tag from resource", "key", *k)
+			rlog.Debug("removing tag from resource", "key", k)
 		}
 		if err = removeTags(
 			ctx,
@@ -117,9 +117,9 @@ func addTags(
 	exit := rlog.Trace("rm.addTag")
 	defer func() { exit(err) }()
 
-	sdkTags := []*svcsdk.Tag{}
+	sdkTags := []svcsdktypes.Tag{}
 	for k, v := range tags {
-		sdkTags = append(sdkTags, &svcsdk.Tag{
+		sdkTags = append(sdkTags, svcsdktypes.Tag{
 			Key:   &k,
 			Value: v,
 		})
@@ -130,7 +130,7 @@ func addTags(
 		Tags:        sdkTags,
 	}
 
-	_, err = client.TagResourceWithContext(ctx, input)
+	_, err = client.TagResource(ctx, input)
 	mr.RecordAPICall("UPDATE", "TagResource", err)
 	return err
 }
@@ -141,7 +141,7 @@ func removeTags(
 	client tagsClient,
 	mr metricsRecorder,
 	resourceARN string,
-	tagKeys []*string, // the set of tag keys to delete
+	tagKeys []string, // the set of tag keys to delete
 ) (err error) {
 	rlog := ackrtlog.FromContext(ctx)
 	exit := rlog.Trace("rm.removeTag")
@@ -151,7 +151,7 @@ func removeTags(
 		ResourceArn: &resourceARN,
 		TagKeys:     tagKeys,
 	}
-	_, err = client.UntagResourceWithContext(ctx, input)
+	_, err = client.UntagResource(ctx, input)
 	mr.RecordAPICall("UPDATE", "UntagResource", err)
 	return err
 }

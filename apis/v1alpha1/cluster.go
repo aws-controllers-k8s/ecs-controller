@@ -60,6 +60,7 @@ type ClusterSpec struct {
 	//
 	// If a default capacity provider strategy isn't defined for a cluster when
 	// it was created, it can be defined later with the PutClusterCapacityProviders
+	// (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutClusterCapacityProviders.html)
 	// API operation.
 	DefaultCapacityProviderStrategy []*CapacityProviderStrategyItem `json:"defaultCapacityProviderStrategy,omitempty"`
 	// The name of your cluster. If you don't specify a name for your cluster, you
@@ -84,7 +85,8 @@ type ClusterSpec struct {
 	ServiceConnectDefaults *ClusterServiceConnectDefaultsRequest `json:"serviceConnectDefaults,omitempty"`
 	// The setting to use when creating a cluster. This parameter is used to turn
 	// on CloudWatch Container Insights for a cluster. If this value is specified,
-	// it overrides the containerInsights value set with PutAccountSetting or PutAccountSettingDefault.
+	// it overrides the containerInsights value set with PutAccountSetting (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutAccountSetting.html)
+	// or PutAccountSettingDefault (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutAccountSettingDefault.html).
 	Settings []*ClusterSetting `json:"settings,omitempty"`
 	// The metadata that you apply to the cluster to help you categorize and organize
 	// them. Each tag consists of a key and an optional value. You define both.
@@ -128,7 +130,7 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 	// The number of services that are running on the cluster in an ACTIVE state.
-	// You can view these services with ListServices.
+	// You can view these services with PListServices (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html).
 	// +kubebuilder:validation:Optional
 	ActiveServicesCount *int64 `json:"activeServicesCount,omitempty"`
 	// The resources attached to a cluster. When using a capacity provider with

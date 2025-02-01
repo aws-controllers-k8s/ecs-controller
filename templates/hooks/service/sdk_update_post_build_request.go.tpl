@@ -1,3 +1,3 @@
 	if desired.ko.Spec.Name != nil {
-		input.SetService(*desired.ko.Spec.Name)
+		input.Service = desired.ko.Spec.Name
 	}
