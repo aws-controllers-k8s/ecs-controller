@@ -88,9 +88,8 @@ type TaskDefinitionSpec struct {
 	EphemeralStorage *EphemeralStorage `json:"ephemeralStorage,omitempty"`
 	// The Amazon Resource Name (ARN) of the task execution role that grants the
 	// Amazon ECS container agent permission to make Amazon Web Services API calls
-	// on your behalf. The task execution IAM role is required depending on the
-	// requirements of your task. For more information, see Amazon ECS task execution
-	// IAM role (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)
+	// on your behalf. For informationabout the required IAM roles for Amazon ECS,
+	// see IAM roles for Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-ecs-iam-role-overview.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	ExecutionRoleARN *string `json:"executionRoleARN,omitempty"`
 	// You must specify a family for a task definition. You can use it track multiple
@@ -109,13 +108,10 @@ type TaskDefinitionSpec struct {
 	// If none is specified, then IPC resources within the containers of a task
 	// are private and not shared with other containers in a task or on the container
 	// instance. If no value is specified, then the IPC resource namespace sharing
-	// depends on the Docker daemon setting on the container instance. For more
-	// information, see IPC settings (https://docs.docker.com/engine/reference/run/#ipc-settings---ipc)
-	// in the Docker run reference.
+	// depends on the Docker daemon setting on the container instance.
 	//
 	// If the host IPC mode is used, be aware that there is a heightened risk of
-	// undesired IPC namespace expose. For more information, see Docker security
-	// (https://docs.docker.com/engine/security/security/).
+	// undesired IPC namespace expose.
 	//
 	// If you are setting namespaced kernel parameters using systemControls for
 	// the containers in the task, the following will apply to your IPC resource
@@ -174,12 +170,12 @@ type TaskDefinitionSpec struct {
 	//
 	// For Amazon ECS tasks on Fargate, the awsvpc network mode is required. For
 	// Amazon ECS tasks on Amazon EC2 Linux instances, any network mode can be used.
-	// For Amazon ECS tasks on Amazon EC2 Windows instances, <default> or awsvpc
-	// can be used. If the network mode is set to none, you cannot specify port
-	// mappings in your container definitions, and the tasks containers do not have
-	// external connectivity. The host and awsvpc network modes offer the highest
-	// networking performance for containers because they use the EC2 network stack
-	// instead of the virtualized network stack provided by the bridge mode.
+	// For Amazon ECS tasks on Amazon EC2 Windows instances, or awsvpc can be used.
+	// If the network mode is set to none, you cannot specify port mappings in your
+	// container definitions, and the tasks containers do not have external connectivity.
+	// The host and awsvpc network modes offer the highest networking performance
+	// for containers because they use the EC2 network stack instead of the virtualized
+	// network stack provided by the bridge mode.
 	//
 	// With the host and awsvpc network modes, exposed container ports are mapped
 	// directly to the corresponding host port (for the host network mode) or the
@@ -190,16 +186,13 @@ type TaskDefinitionSpec struct {
 	// root user (UID 0). It is considered best practice to use a non-root user.
 	//
 	// If the network mode is awsvpc, the task is allocated an elastic network interface,
-	// and you must specify a NetworkConfiguration value when you create a service
-	// or run a task with the task definition. For more information, see Task Networking
-	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html)
+	// and you must specify a NetworkConfiguration (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_NetworkConfiguration.html)
+	// value when you create a service or run a task with the task definition. For
+	// more information, see Task Networking (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
 	// If the network mode is host, you cannot run multiple instantiations of the
 	// same task on a single container instance when port mappings are used.
-	//
-	// For more information, see Network settings (https://docs.docker.com/engine/reference/run/#network-settings)
-	// in the Docker run reference.
 	NetworkMode *string `json:"networkMode,omitempty"`
 	// The process namespace to use for the containers in the task. The valid values
 	// are host or task. On Fargate for Linux containers, the only valid value is
@@ -214,11 +207,9 @@ type TaskDefinitionSpec struct {
 	// same process namespace.
 	//
 	// If no value is specified, the default is a private namespace for each container.
-	// For more information, see PID settings (https://docs.docker.com/engine/reference/run/#pid-settings---pid)
-	// in the Docker run reference.
 	//
 	// If the host PID mode is used, there's a heightened risk of undesired process
-	// namespace exposure. For more information, see Docker security (https://docs.docker.com/engine/security/security/).
+	// namespace exposure.
 	//
 	// This parameter is not supported for Windows containers.
 	//
@@ -247,9 +238,6 @@ type TaskDefinitionSpec struct {
 	RequiresCompatibilities []*string `json:"requiresCompatibilities,omitempty"`
 	// The operating system that your tasks definitions run on. A platform family
 	// is specified only for tasks using the Fargate launch type.
-	//
-	// When you specify a task definition in a service, this value must match the
-	// runtimePlatform value of the service.
 	RuntimePlatform *RuntimePlatform `json:"runtimePlatform,omitempty"`
 	// The metadata that you apply to the task definition to help you categorize
 	// and organize them. Each tag consists of a key and an optional value. You
@@ -303,8 +291,8 @@ type TaskDefinitionStatus struct {
 	// resource
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
-	// The task launch types the task definition validated against during task definition
-	// registration. For more information, see Amazon ECS launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html)
+	// Amazon ECS validates the task definition parameters with those supported
+	// by the launch type. For more information, see Amazon ECS launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	// +kubebuilder:validation:Optional
 	Compatibilities []*string `json:"compatibilities,omitempty"`
@@ -321,9 +309,9 @@ type TaskDefinitionStatus struct {
 	// instance is registered to your cluster, the Amazon ECS container agent assigns
 	// some standard attributes to the instance. You can apply custom attributes.
 	// These are specified as key-value pairs using the Amazon ECS console or the
-	// PutAttributes API. These attributes are used when determining task placement
-	// for tasks hosted on Amazon EC2 instances. For more information, see Attributes
-	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html#attributes)
+	// PutAttributes (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutAttributes.html)
+	// API. These attributes are used when determining task placement for tasks
+	// hosted on Amazon EC2 instances. For more information, see Attributes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html#attributes)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
 	// This parameter isn't supported for tasks run on Fargate.

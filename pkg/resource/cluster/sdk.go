@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 
@@ -28,8 +29,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ecs"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +43,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.ECS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.Cluster{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +51,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -72,19 +75,20 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
-	input.Clusters = []*string{r.ko.Spec.Name}
-	input.Include = []*string{
-		aws.String("ATTACHMENTS"),
-		aws.String("CONFIGURATIONS"),
-		aws.String("SETTINGS"),
-		aws.String("STATISTICS"),
-		aws.String("TAGS"),
+	input.Clusters = []string{*r.ko.Spec.Name}
+	input.Include = []svcsdktypes.ClusterField{
+		svcsdktypes.ClusterFieldAttachments,
+		svcsdktypes.ClusterFieldConfigurations,
+		svcsdktypes.ClusterFieldSettings,
+		svcsdktypes.ClusterFieldStatistics,
+		svcsdktypes.ClusterFieldTags,
 	}
 	var resp *svcsdk.DescribeClustersOutput
-	resp, err = rm.sdkapi.DescribeClustersWithContext(ctx, input)
+	resp, err = rm.sdkapi.DescribeClusters(ctx, input)
 	rm.metrics.RecordAPICall("READ_MANY", "DescribeClusters", err)
 	if err != nil {
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "UNKNOWN" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "UNKNOWN" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -96,11 +100,8 @@ func (rm *resourceManager) sdkFind(
 
 	found := false
 	for _, elem := range resp.Clusters {
-		if elem.ActiveServicesCount != nil {
-			ko.Status.ActiveServicesCount = elem.ActiveServicesCount
-		} else {
-			ko.Status.ActiveServicesCount = nil
-		}
+		activeServicesCountCopy := int64(elem.ActiveServicesCount)
+		ko.Status.ActiveServicesCount = &activeServicesCountCopy
 		if elem.Attachments != nil {
 			f1 := []*svcapitypes.Attachment{}
 			for _, f1iter := range elem.Attachments {
@@ -140,13 +141,7 @@ func (rm *resourceManager) sdkFind(
 			ko.Status.AttachmentsStatus = nil
 		}
 		if elem.CapacityProviders != nil {
-			f3 := []*string{}
-			for _, f3iter := range elem.CapacityProviders {
-				var f3elem string
-				f3elem = *f3iter
-				f3 = append(f3, &f3elem)
-			}
-			ko.Spec.CapacityProviders = f3
+			ko.Spec.CapacityProviders = aws.StringSlice(elem.CapacityProviders)
 		} else {
 			ko.Spec.CapacityProviders = nil
 		}
@@ -176,25 +171,21 @@ func (rm *resourceManager) sdkFind(
 				}
 				if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration != nil {
 					f6f0f1 := &svcapitypes.ExecuteCommandLogConfiguration{}
-					if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled != nil {
-						f6f0f1.CloudWatchEncryptionEnabled = elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
-					}
+					f6f0f1.CloudWatchEncryptionEnabled = &elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
 					if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName != nil {
 						f6f0f1.CloudWatchLogGroupName = elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName
 					}
 					if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName != nil {
 						f6f0f1.S3BucketName = elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName
 					}
-					if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled != nil {
-						f6f0f1.S3EncryptionEnabled = elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
-					}
+					f6f0f1.S3EncryptionEnabled = &elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
 					if elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix != nil {
 						f6f0f1.S3KeyPrefix = elem.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix
 					}
 					f6f0.LogConfiguration = f6f0f1
 				}
-				if elem.Configuration.ExecuteCommandConfiguration.Logging != nil {
-					f6f0.Logging = elem.Configuration.ExecuteCommandConfiguration.Logging
+				if elem.Configuration.ExecuteCommandConfiguration.Logging != "" {
+					f6f0.Logging = aws.String(string(elem.Configuration.ExecuteCommandConfiguration.Logging))
 				}
 				f6.ExecuteCommandConfiguration = f6f0
 			}
@@ -206,36 +197,25 @@ func (rm *resourceManager) sdkFind(
 			f7 := []*svcapitypes.CapacityProviderStrategyItem{}
 			for _, f7iter := range elem.DefaultCapacityProviderStrategy {
 				f7elem := &svcapitypes.CapacityProviderStrategyItem{}
-				if f7iter.Base != nil {
-					f7elem.Base = f7iter.Base
-				}
+				baseCopy := int64(f7iter.Base)
+				f7elem.Base = &baseCopy
 				if f7iter.CapacityProvider != nil {
 					f7elem.CapacityProvider = f7iter.CapacityProvider
 				}
-				if f7iter.Weight != nil {
-					f7elem.Weight = f7iter.Weight
-				}
+				weightCopy := int64(f7iter.Weight)
+				f7elem.Weight = &weightCopy
 				f7 = append(f7, f7elem)
 			}
 			ko.Spec.DefaultCapacityProviderStrategy = f7
 		} else {
 			ko.Spec.DefaultCapacityProviderStrategy = nil
 		}
-		if elem.PendingTasksCount != nil {
-			ko.Status.PendingTasksCount = elem.PendingTasksCount
-		} else {
-			ko.Status.PendingTasksCount = nil
-		}
-		if elem.RegisteredContainerInstancesCount != nil {
-			ko.Status.RegisteredContainerInstancesCount = elem.RegisteredContainerInstancesCount
-		} else {
-			ko.Status.RegisteredContainerInstancesCount = nil
-		}
-		if elem.RunningTasksCount != nil {
-			ko.Status.RunningTasksCount = elem.RunningTasksCount
-		} else {
-			ko.Status.RunningTasksCount = nil
-		}
+		pendingTasksCountCopy := int64(elem.PendingTasksCount)
+		ko.Status.PendingTasksCount = &pendingTasksCountCopy
+		registeredContainerInstancesCountCopy := int64(elem.RegisteredContainerInstancesCount)
+		ko.Status.RegisteredContainerInstancesCount = &registeredContainerInstancesCountCopy
+		runningTasksCountCopy := int64(elem.RunningTasksCount)
+		ko.Status.RunningTasksCount = &runningTasksCountCopy
 		if elem.ServiceConnectDefaults != nil {
 			f11 := &svcapitypes.ClusterServiceConnectDefaultsRequest{}
 			if elem.ServiceConnectDefaults.Namespace != nil {
@@ -249,8 +229,8 @@ func (rm *resourceManager) sdkFind(
 			f12 := []*svcapitypes.ClusterSetting{}
 			for _, f12iter := range elem.Settings {
 				f12elem := &svcapitypes.ClusterSetting{}
-				if f12iter.Name != nil {
-					f12elem.Name = f12iter.Name
+				if f12iter.Name != "" {
+					f12elem.Name = aws.String(string(f12iter.Name))
 				}
 				if f12iter.Value != nil {
 					f12elem.Value = f12iter.Value
@@ -362,7 +342,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.CreateClusterOutput
 	_ = resp
-	resp, err = rm.sdkapi.CreateClusterWithContext(ctx, input)
+	resp, err = rm.sdkapi.CreateCluster(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "CreateCluster", err)
 	if err != nil {
 		return nil, err
@@ -371,11 +351,8 @@ func (rm *resourceManager) sdkCreate(
 	// the original Kubernetes object we passed to the function
 	ko := desired.ko.DeepCopy()
 
-	if resp.Cluster.ActiveServicesCount != nil {
-		ko.Status.ActiveServicesCount = resp.Cluster.ActiveServicesCount
-	} else {
-		ko.Status.ActiveServicesCount = nil
-	}
+	activeServicesCountCopy := int64(resp.Cluster.ActiveServicesCount)
+	ko.Status.ActiveServicesCount = &activeServicesCountCopy
 	if resp.Cluster.Attachments != nil {
 		f1 := []*svcapitypes.Attachment{}
 		for _, f1iter := range resp.Cluster.Attachments {
@@ -415,13 +392,7 @@ func (rm *resourceManager) sdkCreate(
 		ko.Status.AttachmentsStatus = nil
 	}
 	if resp.Cluster.CapacityProviders != nil {
-		f3 := []*string{}
-		for _, f3iter := range resp.Cluster.CapacityProviders {
-			var f3elem string
-			f3elem = *f3iter
-			f3 = append(f3, &f3elem)
-		}
-		ko.Spec.CapacityProviders = f3
+		ko.Spec.CapacityProviders = aws.StringSlice(resp.Cluster.CapacityProviders)
 	} else {
 		ko.Spec.CapacityProviders = nil
 	}
@@ -446,25 +417,21 @@ func (rm *resourceManager) sdkCreate(
 			}
 			if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration != nil {
 				f6f0f1 := &svcapitypes.ExecuteCommandLogConfiguration{}
-				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled != nil {
-					f6f0f1.CloudWatchEncryptionEnabled = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
-				}
+				f6f0f1.CloudWatchEncryptionEnabled = &resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName != nil {
 					f6f0f1.CloudWatchLogGroupName = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName
 				}
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName != nil {
 					f6f0f1.S3BucketName = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName
 				}
-				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled != nil {
-					f6f0f1.S3EncryptionEnabled = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
-				}
+				f6f0f1.S3EncryptionEnabled = &resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix != nil {
 					f6f0f1.S3KeyPrefix = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix
 				}
 				f6f0.LogConfiguration = f6f0f1
 			}
-			if resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging != nil {
-				f6f0.Logging = resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging
+			if resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging != "" {
+				f6f0.Logging = aws.String(string(resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging))
 			}
 			f6.ExecuteCommandConfiguration = f6f0
 		}
@@ -476,36 +443,25 @@ func (rm *resourceManager) sdkCreate(
 		f7 := []*svcapitypes.CapacityProviderStrategyItem{}
 		for _, f7iter := range resp.Cluster.DefaultCapacityProviderStrategy {
 			f7elem := &svcapitypes.CapacityProviderStrategyItem{}
-			if f7iter.Base != nil {
-				f7elem.Base = f7iter.Base
-			}
+			baseCopy := int64(f7iter.Base)
+			f7elem.Base = &baseCopy
 			if f7iter.CapacityProvider != nil {
 				f7elem.CapacityProvider = f7iter.CapacityProvider
 			}
-			if f7iter.Weight != nil {
-				f7elem.Weight = f7iter.Weight
-			}
+			weightCopy := int64(f7iter.Weight)
+			f7elem.Weight = &weightCopy
 			f7 = append(f7, f7elem)
 		}
 		ko.Spec.DefaultCapacityProviderStrategy = f7
 	} else {
 		ko.Spec.DefaultCapacityProviderStrategy = nil
 	}
-	if resp.Cluster.PendingTasksCount != nil {
-		ko.Status.PendingTasksCount = resp.Cluster.PendingTasksCount
-	} else {
-		ko.Status.PendingTasksCount = nil
-	}
-	if resp.Cluster.RegisteredContainerInstancesCount != nil {
-		ko.Status.RegisteredContainerInstancesCount = resp.Cluster.RegisteredContainerInstancesCount
-	} else {
-		ko.Status.RegisteredContainerInstancesCount = nil
-	}
-	if resp.Cluster.RunningTasksCount != nil {
-		ko.Status.RunningTasksCount = resp.Cluster.RunningTasksCount
-	} else {
-		ko.Status.RunningTasksCount = nil
-	}
+	pendingTasksCountCopy := int64(resp.Cluster.PendingTasksCount)
+	ko.Status.PendingTasksCount = &pendingTasksCountCopy
+	registeredContainerInstancesCountCopy := int64(resp.Cluster.RegisteredContainerInstancesCount)
+	ko.Status.RegisteredContainerInstancesCount = &registeredContainerInstancesCountCopy
+	runningTasksCountCopy := int64(resp.Cluster.RunningTasksCount)
+	ko.Status.RunningTasksCount = &runningTasksCountCopy
 	if resp.Cluster.ServiceConnectDefaults != nil {
 		f11 := &svcapitypes.ClusterServiceConnectDefaultsRequest{}
 		if resp.Cluster.ServiceConnectDefaults.Namespace != nil {
@@ -519,8 +475,8 @@ func (rm *resourceManager) sdkCreate(
 		f12 := []*svcapitypes.ClusterSetting{}
 		for _, f12iter := range resp.Cluster.Settings {
 			f12elem := &svcapitypes.ClusterSetting{}
-			if f12iter.Name != nil {
-				f12elem.Name = f12iter.Name
+			if f12iter.Name != "" {
+				f12elem.Name = aws.String(string(f12iter.Name))
 			}
 			if f12iter.Value != nil {
 				f12elem.Value = f12iter.Value
@@ -591,101 +547,105 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.CreateClusterInput{}
 
 	if r.ko.Spec.CapacityProviders != nil {
-		f0 := []*string{}
-		for _, f0iter := range r.ko.Spec.CapacityProviders {
-			var f0elem string
-			f0elem = *f0iter
-			f0 = append(f0, &f0elem)
-		}
-		res.SetCapacityProviders(f0)
+		res.CapacityProviders = aws.ToStringSlice(r.ko.Spec.CapacityProviders)
 	}
 	if r.ko.Spec.Name != nil {
-		res.SetClusterName(*r.ko.Spec.Name)
+		res.ClusterName = r.ko.Spec.Name
 	}
 	if r.ko.Spec.Configuration != nil {
-		f2 := &svcsdk.ClusterConfiguration{}
+		f2 := &svcsdktypes.ClusterConfiguration{}
 		if r.ko.Spec.Configuration.ExecuteCommandConfiguration != nil {
-			f2f0 := &svcsdk.ExecuteCommandConfiguration{}
+			f2f0 := &svcsdktypes.ExecuteCommandConfiguration{}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID != nil {
-				f2f0.SetKmsKeyId(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID)
+				f2f0.KmsKeyId = r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID
 			}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration != nil {
-				f2f0f1 := &svcsdk.ExecuteCommandLogConfiguration{}
+				f2f0f1 := &svcsdktypes.ExecuteCommandLogConfiguration{}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled != nil {
-					f2f0f1.SetCloudWatchEncryptionEnabled(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled)
+					f2f0f1.CloudWatchEncryptionEnabled = *r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName != nil {
-					f2f0f1.SetCloudWatchLogGroupName(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName)
+					f2f0f1.CloudWatchLogGroupName = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName != nil {
-					f2f0f1.SetS3BucketName(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName)
+					f2f0f1.S3BucketName = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled != nil {
-					f2f0f1.SetS3EncryptionEnabled(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled)
+					f2f0f1.S3EncryptionEnabled = *r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix != nil {
-					f2f0f1.SetS3KeyPrefix(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix)
+					f2f0f1.S3KeyPrefix = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix
 				}
-				f2f0.SetLogConfiguration(f2f0f1)
+				f2f0.LogConfiguration = f2f0f1
 			}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging != nil {
-				f2f0.SetLogging(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging)
+				f2f0.Logging = svcsdktypes.ExecuteCommandLogging(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging)
 			}
-			f2.SetExecuteCommandConfiguration(f2f0)
+			f2.ExecuteCommandConfiguration = f2f0
 		}
-		res.SetConfiguration(f2)
+		res.Configuration = f2
 	}
 	if r.ko.Spec.DefaultCapacityProviderStrategy != nil {
-		f3 := []*svcsdk.CapacityProviderStrategyItem{}
+		f3 := []svcsdktypes.CapacityProviderStrategyItem{}
 		for _, f3iter := range r.ko.Spec.DefaultCapacityProviderStrategy {
-			f3elem := &svcsdk.CapacityProviderStrategyItem{}
+			f3elem := &svcsdktypes.CapacityProviderStrategyItem{}
 			if f3iter.Base != nil {
-				f3elem.SetBase(*f3iter.Base)
+				baseCopy0 := *f3iter.Base
+				if baseCopy0 > math.MaxInt32 || baseCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field base is of type int32")
+				}
+				baseCopy := int32(baseCopy0)
+				f3elem.Base = baseCopy
 			}
 			if f3iter.CapacityProvider != nil {
-				f3elem.SetCapacityProvider(*f3iter.CapacityProvider)
+				f3elem.CapacityProvider = f3iter.CapacityProvider
 			}
 			if f3iter.Weight != nil {
-				f3elem.SetWeight(*f3iter.Weight)
+				weightCopy0 := *f3iter.Weight
+				if weightCopy0 > math.MaxInt32 || weightCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field weight is of type int32")
+				}
+				weightCopy := int32(weightCopy0)
+				f3elem.Weight = weightCopy
 			}
-			f3 = append(f3, f3elem)
+			f3 = append(f3, *f3elem)
 		}
-		res.SetDefaultCapacityProviderStrategy(f3)
+		res.DefaultCapacityProviderStrategy = f3
 	}
 	if r.ko.Spec.ServiceConnectDefaults != nil {
-		f4 := &svcsdk.ClusterServiceConnectDefaultsRequest{}
+		f4 := &svcsdktypes.ClusterServiceConnectDefaultsRequest{}
 		if r.ko.Spec.ServiceConnectDefaults.Namespace != nil {
-			f4.SetNamespace(*r.ko.Spec.ServiceConnectDefaults.Namespace)
+			f4.Namespace = r.ko.Spec.ServiceConnectDefaults.Namespace
 		}
-		res.SetServiceConnectDefaults(f4)
+		res.ServiceConnectDefaults = f4
 	}
 	if r.ko.Spec.Settings != nil {
-		f5 := []*svcsdk.ClusterSetting{}
+		f5 := []svcsdktypes.ClusterSetting{}
 		for _, f5iter := range r.ko.Spec.Settings {
-			f5elem := &svcsdk.ClusterSetting{}
+			f5elem := &svcsdktypes.ClusterSetting{}
 			if f5iter.Name != nil {
-				f5elem.SetName(*f5iter.Name)
+				f5elem.Name = svcsdktypes.ClusterSettingName(*f5iter.Name)
 			}
 			if f5iter.Value != nil {
-				f5elem.SetValue(*f5iter.Value)
+				f5elem.Value = f5iter.Value
 			}
-			f5 = append(f5, f5elem)
+			f5 = append(f5, *f5elem)
 		}
-		res.SetSettings(f5)
+		res.Settings = f5
 	}
 	if r.ko.Spec.Tags != nil {
-		f6 := []*svcsdk.Tag{}
+		f6 := []svcsdktypes.Tag{}
 		for _, f6iter := range r.ko.Spec.Tags {
-			f6elem := &svcsdk.Tag{}
+			f6elem := &svcsdktypes.Tag{}
 			if f6iter.Key != nil {
-				f6elem.SetKey(*f6iter.Key)
+				f6elem.Key = f6iter.Key
 			}
 			if f6iter.Value != nil {
-				f6elem.SetValue(*f6iter.Value)
+				f6elem.Value = f6iter.Value
 			}
-			f6 = append(f6, f6elem)
+			f6 = append(f6, *f6elem)
 		}
-		res.SetTags(f6)
+		res.Tags = f6
 	}
 
 	return res, nil
@@ -725,7 +685,7 @@ func (rm *resourceManager) sdkUpdate(
 
 	var resp *svcsdk.UpdateClusterOutput
 	_ = resp
-	resp, err = rm.sdkapi.UpdateClusterWithContext(ctx, input)
+	resp, err = rm.sdkapi.UpdateCluster(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "UpdateCluster", err)
 	if err != nil {
 		return nil, err
@@ -734,11 +694,8 @@ func (rm *resourceManager) sdkUpdate(
 	// the original Kubernetes object we passed to the function
 	ko := desired.ko.DeepCopy()
 
-	if resp.Cluster.ActiveServicesCount != nil {
-		ko.Status.ActiveServicesCount = resp.Cluster.ActiveServicesCount
-	} else {
-		ko.Status.ActiveServicesCount = nil
-	}
+	activeServicesCountCopy := int64(resp.Cluster.ActiveServicesCount)
+	ko.Status.ActiveServicesCount = &activeServicesCountCopy
 	if resp.Cluster.Attachments != nil {
 		f1 := []*svcapitypes.Attachment{}
 		for _, f1iter := range resp.Cluster.Attachments {
@@ -778,13 +735,7 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Status.AttachmentsStatus = nil
 	}
 	if resp.Cluster.CapacityProviders != nil {
-		f3 := []*string{}
-		for _, f3iter := range resp.Cluster.CapacityProviders {
-			var f3elem string
-			f3elem = *f3iter
-			f3 = append(f3, &f3elem)
-		}
-		ko.Spec.CapacityProviders = f3
+		ko.Spec.CapacityProviders = aws.StringSlice(resp.Cluster.CapacityProviders)
 	} else {
 		ko.Spec.CapacityProviders = nil
 	}
@@ -809,25 +760,21 @@ func (rm *resourceManager) sdkUpdate(
 			}
 			if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration != nil {
 				f6f0f1 := &svcapitypes.ExecuteCommandLogConfiguration{}
-				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled != nil {
-					f6f0f1.CloudWatchEncryptionEnabled = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
-				}
+				f6f0f1.CloudWatchEncryptionEnabled = &resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName != nil {
 					f6f0f1.CloudWatchLogGroupName = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName
 				}
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName != nil {
 					f6f0f1.S3BucketName = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName
 				}
-				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled != nil {
-					f6f0f1.S3EncryptionEnabled = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
-				}
+				f6f0f1.S3EncryptionEnabled = &resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
 				if resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix != nil {
 					f6f0f1.S3KeyPrefix = resp.Cluster.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix
 				}
 				f6f0.LogConfiguration = f6f0f1
 			}
-			if resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging != nil {
-				f6f0.Logging = resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging
+			if resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging != "" {
+				f6f0.Logging = aws.String(string(resp.Cluster.Configuration.ExecuteCommandConfiguration.Logging))
 			}
 			f6.ExecuteCommandConfiguration = f6f0
 		}
@@ -839,36 +786,25 @@ func (rm *resourceManager) sdkUpdate(
 		f7 := []*svcapitypes.CapacityProviderStrategyItem{}
 		for _, f7iter := range resp.Cluster.DefaultCapacityProviderStrategy {
 			f7elem := &svcapitypes.CapacityProviderStrategyItem{}
-			if f7iter.Base != nil {
-				f7elem.Base = f7iter.Base
-			}
+			baseCopy := int64(f7iter.Base)
+			f7elem.Base = &baseCopy
 			if f7iter.CapacityProvider != nil {
 				f7elem.CapacityProvider = f7iter.CapacityProvider
 			}
-			if f7iter.Weight != nil {
-				f7elem.Weight = f7iter.Weight
-			}
+			weightCopy := int64(f7iter.Weight)
+			f7elem.Weight = &weightCopy
 			f7 = append(f7, f7elem)
 		}
 		ko.Spec.DefaultCapacityProviderStrategy = f7
 	} else {
 		ko.Spec.DefaultCapacityProviderStrategy = nil
 	}
-	if resp.Cluster.PendingTasksCount != nil {
-		ko.Status.PendingTasksCount = resp.Cluster.PendingTasksCount
-	} else {
-		ko.Status.PendingTasksCount = nil
-	}
-	if resp.Cluster.RegisteredContainerInstancesCount != nil {
-		ko.Status.RegisteredContainerInstancesCount = resp.Cluster.RegisteredContainerInstancesCount
-	} else {
-		ko.Status.RegisteredContainerInstancesCount = nil
-	}
-	if resp.Cluster.RunningTasksCount != nil {
-		ko.Status.RunningTasksCount = resp.Cluster.RunningTasksCount
-	} else {
-		ko.Status.RunningTasksCount = nil
-	}
+	pendingTasksCountCopy := int64(resp.Cluster.PendingTasksCount)
+	ko.Status.PendingTasksCount = &pendingTasksCountCopy
+	registeredContainerInstancesCountCopy := int64(resp.Cluster.RegisteredContainerInstancesCount)
+	ko.Status.RegisteredContainerInstancesCount = &registeredContainerInstancesCountCopy
+	runningTasksCountCopy := int64(resp.Cluster.RunningTasksCount)
+	ko.Status.RunningTasksCount = &runningTasksCountCopy
 	if resp.Cluster.ServiceConnectDefaults != nil {
 		f11 := &svcapitypes.ClusterServiceConnectDefaultsRequest{}
 		if resp.Cluster.ServiceConnectDefaults.Namespace != nil {
@@ -882,8 +818,8 @@ func (rm *resourceManager) sdkUpdate(
 		f12 := []*svcapitypes.ClusterSetting{}
 		for _, f12iter := range resp.Cluster.Settings {
 			f12elem := &svcapitypes.ClusterSetting{}
-			if f12iter.Name != nil {
-				f12elem.Name = f12iter.Name
+			if f12iter.Name != "" {
+				f12elem.Name = aws.String(string(f12iter.Name))
 			}
 			if f12iter.Value != nil {
 				f12elem.Value = f12iter.Value
@@ -946,58 +882,58 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	res := &svcsdk.UpdateClusterInput{}
 
 	if r.ko.Spec.Configuration != nil {
-		f1 := &svcsdk.ClusterConfiguration{}
+		f1 := &svcsdktypes.ClusterConfiguration{}
 		if r.ko.Spec.Configuration.ExecuteCommandConfiguration != nil {
-			f1f0 := &svcsdk.ExecuteCommandConfiguration{}
+			f1f0 := &svcsdktypes.ExecuteCommandConfiguration{}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID != nil {
-				f1f0.SetKmsKeyId(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID)
+				f1f0.KmsKeyId = r.ko.Spec.Configuration.ExecuteCommandConfiguration.KMSKeyID
 			}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration != nil {
-				f1f0f1 := &svcsdk.ExecuteCommandLogConfiguration{}
+				f1f0f1 := &svcsdktypes.ExecuteCommandLogConfiguration{}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled != nil {
-					f1f0f1.SetCloudWatchEncryptionEnabled(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled)
+					f1f0f1.CloudWatchEncryptionEnabled = *r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchEncryptionEnabled
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName != nil {
-					f1f0f1.SetCloudWatchLogGroupName(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName)
+					f1f0f1.CloudWatchLogGroupName = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.CloudWatchLogGroupName
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName != nil {
-					f1f0f1.SetS3BucketName(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName)
+					f1f0f1.S3BucketName = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3BucketName
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled != nil {
-					f1f0f1.SetS3EncryptionEnabled(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled)
+					f1f0f1.S3EncryptionEnabled = *r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3EncryptionEnabled
 				}
 				if r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix != nil {
-					f1f0f1.SetS3KeyPrefix(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix)
+					f1f0f1.S3KeyPrefix = r.ko.Spec.Configuration.ExecuteCommandConfiguration.LogConfiguration.S3KeyPrefix
 				}
-				f1f0.SetLogConfiguration(f1f0f1)
+				f1f0.LogConfiguration = f1f0f1
 			}
 			if r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging != nil {
-				f1f0.SetLogging(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging)
+				f1f0.Logging = svcsdktypes.ExecuteCommandLogging(*r.ko.Spec.Configuration.ExecuteCommandConfiguration.Logging)
 			}
-			f1.SetExecuteCommandConfiguration(f1f0)
+			f1.ExecuteCommandConfiguration = f1f0
 		}
-		res.SetConfiguration(f1)
+		res.Configuration = f1
 	}
 	if r.ko.Spec.ServiceConnectDefaults != nil {
-		f2 := &svcsdk.ClusterServiceConnectDefaultsRequest{}
+		f2 := &svcsdktypes.ClusterServiceConnectDefaultsRequest{}
 		if r.ko.Spec.ServiceConnectDefaults.Namespace != nil {
-			f2.SetNamespace(*r.ko.Spec.ServiceConnectDefaults.Namespace)
+			f2.Namespace = r.ko.Spec.ServiceConnectDefaults.Namespace
 		}
-		res.SetServiceConnectDefaults(f2)
+		res.ServiceConnectDefaults = f2
 	}
 	if r.ko.Spec.Settings != nil {
-		f3 := []*svcsdk.ClusterSetting{}
+		f3 := []svcsdktypes.ClusterSetting{}
 		for _, f3iter := range r.ko.Spec.Settings {
-			f3elem := &svcsdk.ClusterSetting{}
+			f3elem := &svcsdktypes.ClusterSetting{}
 			if f3iter.Name != nil {
-				f3elem.SetName(*f3iter.Name)
+				f3elem.Name = svcsdktypes.ClusterSettingName(*f3iter.Name)
 			}
 			if f3iter.Value != nil {
-				f3elem.SetValue(*f3iter.Value)
+				f3elem.Value = f3iter.Value
 			}
-			f3 = append(f3, f3elem)
+			f3 = append(f3, *f3elem)
 		}
-		res.SetSettings(f3)
+		res.Settings = f3
 	}
 
 	return res, nil
@@ -1020,7 +956,7 @@ func (rm *resourceManager) sdkDelete(
 	input.Cluster = r.ko.Spec.Name
 	var resp *svcsdk.DeleteClusterOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeleteClusterWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeleteCluster(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeleteCluster", err)
 	return nil, err
 }
@@ -1137,11 +1073,12 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 	if err == nil {
 		return false
 	}
-	awsErr, ok := ackerr.AWSError(err)
-	if !ok {
+
+	var terminalErr smithy.APIError
+	if !errors.As(err, &terminalErr) {
 		return false
 	}
-	switch awsErr.Code() {
+	switch terminalErr.ErrorCode() {
 	case "InvalidParameterException":
 		return true
 	default:

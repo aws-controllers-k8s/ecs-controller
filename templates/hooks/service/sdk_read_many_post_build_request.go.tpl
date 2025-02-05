@@ -1,9 +1,9 @@
 	if r.ko.Spec.Name != nil {
-		input.SetServices([]*string{r.ko.Spec.Name})
+		input.Services = []string{*r.ko.Spec.Name}
 	}
 	if r.ko.Spec.Cluster != nil {
-		input.SetCluster(*r.ko.Spec.Cluster)
+		input.Cluster = r.ko.Spec.Cluster
 	}
-	input.Include = []*string{
-		aws.String("TAGS"),
+	input.Include = []svcsdktypes.ServiceField{
+		svcsdktypes.ServiceFieldTags,
 	}

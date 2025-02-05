@@ -76,22 +76,33 @@ spec:
                 items:
                   description: |-
                     The details of a capacity provider strategy. A capacity provider strategy
-                    can be set when using the RunTask or CreateCluster APIs or as the default
-                    capacity provider strategy for a cluster with the CreateCluster API.
+                    can be set when using the RunTask (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_RunTask.html)or
+                    CreateCluster (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateCluster.html)
+                    APIs or as the default capacity provider strategy for a cluster with the
+                    CreateCluster API.
 
                     Only capacity providers that are already associated with a cluster and have
                     an ACTIVE or UPDATING status can be used in a capacity provider strategy.
-                    The PutClusterCapacityProviders API is used to associate a capacity provider
-                    with a cluster.
+                    The PutClusterCapacityProviders (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutClusterCapacityProviders.html)
+                    API is used to associate a capacity provider with a cluster.
 
                     If specifying a capacity provider that uses an Auto Scaling group, the capacity
                     provider must already be created. New Auto Scaling group capacity providers
-                    can be created with the CreateCapacityProvider API operation.
+                    can be created with the CreateClusterCapacityProvider (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateClusterCapacityProvider.html)
+                    API operation.
 
                     To use a Fargate capacity provider, specify either the FARGATE or FARGATE_SPOT
                     capacity providers. The Fargate capacity providers are available to all accounts
                     and only need to be associated with a cluster to be used in a capacity provider
                     strategy.
+
+                    With FARGATE_SPOT, you can run interruption tolerant tasks at a rate that's
+                    discounted compared to the FARGATE price. FARGATE_SPOT runs tasks on spare
+                    compute capacity. When Amazon Web Services needs the capacity back, your
+                    tasks are interrupted with a two-minute warning. FARGATE_SPOT supports Linux
+                    tasks with the X86_64 architecture on platform version 1.3.0 or later. FARGATE_SPOT
+                    supports Linux tasks with the ARM64 architecture on platform version 1.4.0
+                    or later.
 
                     A capacity provider strategy may contain a maximum of 6 capacity providers.
                   properties:
@@ -221,21 +232,17 @@ spec:
               healthCheckGracePeriodSeconds:
                 description: |-
                   The period of time, in seconds, that the Amazon ECS service scheduler ignores
-                  unhealthy Elastic Load Balancing target health checks after a task has first
-                  started. This is only used when your service is configured to use a load
-                  balancer. If your service has a load balancer defined and you don't specify
-                  a health check grace period value, the default value of 0 is used.
+                  unhealthy Elastic Load Balancing, VPC Lattice, and container health checks
+                  after a task has first started. If you don't specify a health check grace
+                  period value, the default value of 0 is used. If you don't use any of the
+                  health checks, then healthCheckGracePeriodSeconds is unused.
 
-                  If you do not use an Elastic Load Balancing, we recommend that you use the
-                  startPeriod in the task definition health check parameters. For more information,
-                  see Health check (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_HealthCheck.html).
-
-                  If your service's tasks take a while to start and respond to Elastic Load
-                  Balancing health checks, you can specify a health check grace period of up
-                  to 2,147,483,647 seconds (about 69 years). During that time, the Amazon ECS
-                  service scheduler ignores health check status. This grace period can prevent
-                  the service scheduler from marking tasks as unhealthy and stopping them before
-                  they have time to come up.
+                  If your service's tasks take a while to start and respond to health checks,
+                  you can specify a health check grace period of up to 2,147,483,647 seconds
+                  (about 69 years). During that time, the Amazon ECS service scheduler ignores
+                  health check status. This grace period can prevent the service scheduler
+                  from marking tasks as unhealthy and stopping them before they have time to
+                  come up.
                 format: int64
                 type: integer
               launchType:
@@ -249,7 +256,7 @@ spec:
                   Fargate Spot infrastructure is available for use but a capacity provider
                   strategy must be used. For more information, see Fargate capacity providers
                   (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-capacity-providers.html)
-                  in the Amazon ECS User Guide for Fargate.
+                  in the Amazon ECS Developer Guide.
 
                   The EC2 launch type runs your tasks on Amazon EC2 instances registered to
                   your cluster.
@@ -382,7 +389,7 @@ spec:
                   awsVPCConfiguration:
                     description: |-
                       An object representing the networking details for a task or service. For
-                      example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
+                      example awsVpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}.
                     properties:
                       assignPublicIP:
                         type: string
@@ -488,6 +495,10 @@ spec:
                   use the TagResource (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_TagResource.html)
                   API action.
 
+                  You must set this to a value other than NONE when you use Cost Explorer.
+                  For more information, see Amazon ECS usage reports (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/usage-reports.html)
+                  in the Amazon Elastic Container Service Developer Guide.
+
                   The default is NONE.
                 type: string
               role:
@@ -574,16 +585,12 @@ spec:
                   logConfiguration:
                     description: |-
                       The log configuration for the container. This parameter maps to LogConfig
-                      in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
-                      section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
-                      and the --log-driver option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+                      in the docker container create command and the --log-driver option to docker
+                      run.
 
                       By default, containers use the same logging driver that the Docker daemon
                       uses. However, the container might use a different logging driver than the
                       Docker daemon by specifying a log driver configuration in the container definition.
-                      For more information about the options for different supported log drivers,
-                      see Configure logging drivers (https://docs.docker.com/engine/admin/logging/overview/)
-                      in the Docker documentation.
 
                       Understand the following when specifying a log configuration for your containers.
 
@@ -592,7 +599,7 @@ spec:
                          releases of the Amazon ECS container agent. For tasks on Fargate, the
                          supported log drivers are awslogs, splunk, and awsfirelens. For tasks
                          hosted on Amazon EC2 instances, the supported log drivers are awslogs,
-                         fluentd, gelf, json-file, journald, logentries,syslog, splunk, and awsfirelens.
+                         fluentd, gelf, json-file, journald,syslog, splunk, and awsfirelens.
 
                          * This parameter requires version 1.18 of the Docker Remote API or greater
                          on your container instance.
@@ -692,13 +699,12 @@ spec:
                               type: integer
                           type: object
                         tls:
-                          description: An object that represents the configuration
+                          description: The key that encrypts and decrypts your resources
                             for Service Connect TLS.
                           properties:
                             issuerCertificateAuthority:
-                              description: |-
-                                An object that represents the Amazon Web Services Private Certificate Authority
-                                certificate.
+                              description: The certificate root authority that secures
+                                your service.
                               properties:
                                 awsPCAAuthorityARN:
                                   type: string
@@ -847,7 +853,10 @@ spec:
                       description: |-
                         The configuration for the Amazon EBS volume that Amazon ECS creates and manages
                         on your behalf. These settings are used to create each Amazon EBS volume,
-                        with one volume created for each task in the service.
+                        with one volume created for each task in the service. For information about
+                        the supported launch types and operating systems, see Supported operating
+                        systems and launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html#ebs-volumes-configuration)
+                        in the Amazon Elastic Container Service Developer Guide.
 
                         Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
                         parameters.
@@ -1016,22 +1025,33 @@ spec:
                       items:
                         description: |-
                           The details of a capacity provider strategy. A capacity provider strategy
-                          can be set when using the RunTask or CreateCluster APIs or as the default
-                          capacity provider strategy for a cluster with the CreateCluster API.
+                          can be set when using the RunTask (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_RunTask.html)or
+                          CreateCluster (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateCluster.html)
+                          APIs or as the default capacity provider strategy for a cluster with the
+                          CreateCluster API.
 
                           Only capacity providers that are already associated with a cluster and have
                           an ACTIVE or UPDATING status can be used in a capacity provider strategy.
-                          The PutClusterCapacityProviders API is used to associate a capacity provider
-                          with a cluster.
+                          The PutClusterCapacityProviders (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutClusterCapacityProviders.html)
+                          API is used to associate a capacity provider with a cluster.
 
                           If specifying a capacity provider that uses an Auto Scaling group, the capacity
                           provider must already be created. New Auto Scaling group capacity providers
-                          can be created with the CreateCapacityProvider API operation.
+                          can be created with the CreateClusterCapacityProvider (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateClusterCapacityProvider.html)
+                          API operation.
 
                           To use a Fargate capacity provider, specify either the FARGATE or FARGATE_SPOT
                           capacity providers. The Fargate capacity providers are available to all accounts
                           and only need to be associated with a cluster to be used in a capacity provider
                           strategy.
+
+                          With FARGATE_SPOT, you can run interruption tolerant tasks at a rate that's
+                          discounted compared to the FARGATE price. FARGATE_SPOT runs tasks on spare
+                          compute capacity. When Amazon Web Services needs the capacity back, your
+                          tasks are interrupted with a two-minute warning. FARGATE_SPOT supports Linux
+                          tasks with the X86_64 architecture on platform version 1.3.0 or later. FARGATE_SPOT
+                          supports Linux tasks with the ARM64 architecture on platform version 1.4.0
+                          or later.
 
                           A capacity provider strategy may contain a maximum of 6 capacity providers.
                         properties:
@@ -1064,7 +1084,7 @@ spec:
                         awsVPCConfiguration:
                           description: |-
                             An object representing the networking details for a task or service. For
-                            example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
+                            example awsVpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}.
                           properties:
                             assignPublicIP:
                               type: string
@@ -1153,16 +1173,12 @@ spec:
                         logConfiguration:
                           description: |-
                             The log configuration for the container. This parameter maps to LogConfig
-                            in the Create a container (https://docs.docker.com/engine/api/v1.35/#operation/ContainerCreate)
-                            section of the Docker Remote API (https://docs.docker.com/engine/api/v1.35/)
-                            and the --log-driver option to docker run (https://docs.docker.com/engine/reference/commandline/run/).
+                            in the docker container create command and the --log-driver option to docker
+                            run.
 
                             By default, containers use the same logging driver that the Docker daemon
                             uses. However, the container might use a different logging driver than the
                             Docker daemon by specifying a log driver configuration in the container definition.
-                            For more information about the options for different supported log drivers,
-                            see Configure logging drivers (https://docs.docker.com/engine/admin/logging/overview/)
-                            in the Docker documentation.
 
                             Understand the following when specifying a log configuration for your containers.
 
@@ -1171,7 +1187,7 @@ spec:
                                releases of the Amazon ECS container agent. For tasks on Fargate, the
                                supported log drivers are awslogs, splunk, and awsfirelens. For tasks
                                hosted on Amazon EC2 instances, the supported log drivers are awslogs,
-                               fluentd, gelf, json-file, journald, logentries,syslog, splunk, and awsfirelens.
+                               fluentd, gelf, json-file, journald,syslog, splunk, and awsfirelens.
 
                                * This parameter requires version 1.18 of the Docker Remote API or greater
                                on your container instance.
@@ -1271,13 +1287,12 @@ spec:
                                     type: integer
                                 type: object
                               tls:
-                                description: An object that represents the configuration
-                                  for Service Connect TLS.
+                                description: The key that encrypts and decrypts your
+                                  resources for Service Connect TLS.
                                 properties:
                                   issuerCertificateAuthority:
-                                    description: |-
-                                      An object that represents the Amazon Web Services Private Certificate Authority
-                                      certificate.
+                                    description: The certificate root authority that
+                                      secures your service.
                                     properties:
                                       awsPCAAuthorityARN:
                                         type: string
@@ -1327,7 +1342,10 @@ spec:
                             description: |-
                               The configuration for the Amazon EBS volume that Amazon ECS creates and manages
                               on your behalf. These settings are used to create each Amazon EBS volume,
-                              with one volume created for each task in the service.
+                              with one volume created for each task in the service. For information about
+                              the supported launch types and operating systems, see Supported operating
+                              systems and launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ebs-volumes.html#ebs-volumes-configuration)
+                              in the Amazon Elastic Container Service Developer Guide.
 
                               Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
                               parameters.
@@ -1467,22 +1485,33 @@ spec:
                       items:
                         description: |-
                           The details of a capacity provider strategy. A capacity provider strategy
-                          can be set when using the RunTask or CreateCluster APIs or as the default
-                          capacity provider strategy for a cluster with the CreateCluster API.
+                          can be set when using the RunTask (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_RunTask.html)or
+                          CreateCluster (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateCluster.html)
+                          APIs or as the default capacity provider strategy for a cluster with the
+                          CreateCluster API.
 
                           Only capacity providers that are already associated with a cluster and have
                           an ACTIVE or UPDATING status can be used in a capacity provider strategy.
-                          The PutClusterCapacityProviders API is used to associate a capacity provider
-                          with a cluster.
+                          The PutClusterCapacityProviders (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutClusterCapacityProviders.html)
+                          API is used to associate a capacity provider with a cluster.
 
                           If specifying a capacity provider that uses an Auto Scaling group, the capacity
                           provider must already be created. New Auto Scaling group capacity providers
-                          can be created with the CreateCapacityProvider API operation.
+                          can be created with the CreateClusterCapacityProvider (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_CreateClusterCapacityProvider.html)
+                          API operation.
 
                           To use a Fargate capacity provider, specify either the FARGATE or FARGATE_SPOT
                           capacity providers. The Fargate capacity providers are available to all accounts
                           and only need to be associated with a cluster to be used in a capacity provider
                           strategy.
+
+                          With FARGATE_SPOT, you can run interruption tolerant tasks at a rate that's
+                          discounted compared to the FARGATE price. FARGATE_SPOT runs tasks on spare
+                          compute capacity. When Amazon Web Services needs the capacity back, your
+                          tasks are interrupted with a two-minute warning. FARGATE_SPOT supports Linux
+                          tasks with the X86_64 architecture on platform version 1.3.0 or later. FARGATE_SPOT
+                          supports Linux tasks with the ARM64 architecture on platform version 1.4.0
+                          or later.
 
                           A capacity provider strategy may contain a maximum of 6 capacity providers.
                         properties:
@@ -1571,7 +1600,7 @@ spec:
                         awsVPCConfiguration:
                           description: |-
                             An object representing the networking details for a task or service. For
-                            example awsvpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}
+                            example awsVpcConfiguration={subnets=["subnet-12344321"],securityGroups=["sg-12344321"]}.
                           properties:
                             assignPublicIP:
                               type: string

@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"reflect"
 	"strings"
 
@@ -28,8 +29,10 @@ import (
 	ackerr "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	ackrequeue "github.com/aws-controllers-k8s/runtime/pkg/requeue"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
-	"github.com/aws/aws-sdk-go/aws"
-	svcsdk "github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	svcsdk "github.com/aws/aws-sdk-go-v2/service/ecs"
+	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	smithy "github.com/aws/smithy-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,8 +43,7 @@ import (
 var (
 	_ = &metav1.Time{}
 	_ = strings.ToLower("")
-	_ = &aws.JSONValue{}
-	_ = &svcsdk.ECS{}
+	_ = &svcsdk.Client{}
 	_ = &svcapitypes.TaskDefinition{}
 	_ = ackv1alpha1.AWSAccountID("")
 	_ = &ackerr.NotFound
@@ -49,6 +51,7 @@ var (
 	_ = &reflect.Value{}
 	_ = fmt.Sprintf("")
 	_ = &ackrequeue.NoRequeue{}
+	_ = &aws.Config{}
 )
 
 // sdkFind returns SDK-specific information about a supplied resource
@@ -72,18 +75,16 @@ func (rm *resourceManager) sdkFind(
 	if err != nil {
 		return nil, err
 	}
-	input.Include = []*string{
-		aws.String("TAGS"),
+	input.Include = []svcsdktypes.TaskDefinitionField{
+		svcsdktypes.TaskDefinitionFieldTags,
 	}
 
 	var resp *svcsdk.DescribeTaskDefinitionOutput
-	resp, err = rm.sdkapi.DescribeTaskDefinitionWithContext(ctx, input)
+	resp, err = rm.sdkapi.DescribeTaskDefinition(ctx, input)
 	rm.metrics.RecordAPICall("READ_ONE", "DescribeTaskDefinition", err)
 	if err != nil {
-		if reqErr, ok := ackerr.AWSRequestFailure(err); ok && reqErr.StatusCode() == 404 {
-			return nil, ackerr.NotFound
-		}
-		if awsErr, ok := ackerr.AWSError(err); ok && awsErr.Code() == "ClientException" {
+		var awsErr smithy.APIError
+		if errors.As(err, &awsErr) && awsErr.ErrorCode() == "ClientException" {
 			return nil, ackerr.NotFound
 		}
 		return nil, err
@@ -96,9 +97,9 @@ func (rm *resourceManager) sdkFind(
 	if resp.TaskDefinition.Compatibilities != nil {
 		f0 := []*string{}
 		for _, f0iter := range resp.TaskDefinition.Compatibilities {
-			var f0elem string
-			f0elem = *f0iter
-			f0 = append(f0, &f0elem)
+			var f0elem *string
+			f0elem = aws.String(string(f0iter))
+			f0 = append(f0, f0elem)
 		}
 		ko.Status.Compatibilities = f0
 	} else {
@@ -109,32 +110,19 @@ func (rm *resourceManager) sdkFind(
 		for _, f1iter := range resp.TaskDefinition.ContainerDefinitions {
 			f1elem := &svcapitypes.ContainerDefinition{}
 			if f1iter.Command != nil {
-				f1elemf0 := []*string{}
-				for _, f1elemf0iter := range f1iter.Command {
-					var f1elemf0elem string
-					f1elemf0elem = *f1elemf0iter
-					f1elemf0 = append(f1elemf0, &f1elemf0elem)
-				}
-				f1elem.Command = f1elemf0
+				f1elem.Command = aws.StringSlice(f1iter.Command)
 			}
-			if f1iter.Cpu != nil {
-				f1elem.CPU = f1iter.Cpu
-			}
+			cpuCopy := int64(f1iter.Cpu)
+			f1elem.CPU = &cpuCopy
 			if f1iter.CredentialSpecs != nil {
-				f1elemf2 := []*string{}
-				for _, f1elemf2iter := range f1iter.CredentialSpecs {
-					var f1elemf2elem string
-					f1elemf2elem = *f1elemf2iter
-					f1elemf2 = append(f1elemf2, &f1elemf2elem)
-				}
-				f1elem.CredentialSpecs = f1elemf2
+				f1elem.CredentialSpecs = aws.StringSlice(f1iter.CredentialSpecs)
 			}
 			if f1iter.DependsOn != nil {
 				f1elemf3 := []*svcapitypes.ContainerDependency{}
 				for _, f1elemf3iter := range f1iter.DependsOn {
 					f1elemf3elem := &svcapitypes.ContainerDependency{}
-					if f1elemf3iter.Condition != nil {
-						f1elemf3elem.Condition = f1elemf3iter.Condition
+					if f1elemf3iter.Condition != "" {
+						f1elemf3elem.Condition = aws.String(string(f1elemf3iter.Condition))
 					}
 					if f1elemf3iter.ContainerName != nil {
 						f1elemf3elem.ContainerName = f1elemf3iter.ContainerName
@@ -147,49 +135,19 @@ func (rm *resourceManager) sdkFind(
 				f1elem.DisableNetworking = f1iter.DisableNetworking
 			}
 			if f1iter.DnsSearchDomains != nil {
-				f1elemf5 := []*string{}
-				for _, f1elemf5iter := range f1iter.DnsSearchDomains {
-					var f1elemf5elem string
-					f1elemf5elem = *f1elemf5iter
-					f1elemf5 = append(f1elemf5, &f1elemf5elem)
-				}
-				f1elem.DNSSearchDomains = f1elemf5
+				f1elem.DNSSearchDomains = aws.StringSlice(f1iter.DnsSearchDomains)
 			}
 			if f1iter.DnsServers != nil {
-				f1elemf6 := []*string{}
-				for _, f1elemf6iter := range f1iter.DnsServers {
-					var f1elemf6elem string
-					f1elemf6elem = *f1elemf6iter
-					f1elemf6 = append(f1elemf6, &f1elemf6elem)
-				}
-				f1elem.DNSServers = f1elemf6
+				f1elem.DNSServers = aws.StringSlice(f1iter.DnsServers)
 			}
 			if f1iter.DockerLabels != nil {
-				f1elemf7 := map[string]*string{}
-				for f1elemf7key, f1elemf7valiter := range f1iter.DockerLabels {
-					var f1elemf7val string
-					f1elemf7val = *f1elemf7valiter
-					f1elemf7[f1elemf7key] = &f1elemf7val
-				}
-				f1elem.DockerLabels = f1elemf7
+				f1elem.DockerLabels = aws.StringMap(f1iter.DockerLabels)
 			}
 			if f1iter.DockerSecurityOptions != nil {
-				f1elemf8 := []*string{}
-				for _, f1elemf8iter := range f1iter.DockerSecurityOptions {
-					var f1elemf8elem string
-					f1elemf8elem = *f1elemf8iter
-					f1elemf8 = append(f1elemf8, &f1elemf8elem)
-				}
-				f1elem.DockerSecurityOptions = f1elemf8
+				f1elem.DockerSecurityOptions = aws.StringSlice(f1iter.DockerSecurityOptions)
 			}
 			if f1iter.EntryPoint != nil {
-				f1elemf9 := []*string{}
-				for _, f1elemf9iter := range f1iter.EntryPoint {
-					var f1elemf9elem string
-					f1elemf9elem = *f1elemf9iter
-					f1elemf9 = append(f1elemf9, &f1elemf9elem)
-				}
-				f1elem.EntryPoint = f1elemf9
+				f1elem.EntryPoint = aws.StringSlice(f1iter.EntryPoint)
 			}
 			if f1iter.Environment != nil {
 				f1elemf10 := []*svcapitypes.KeyValuePair{}
@@ -209,8 +167,8 @@ func (rm *resourceManager) sdkFind(
 				f1elemf11 := []*svcapitypes.EnvironmentFile{}
 				for _, f1elemf11iter := range f1iter.EnvironmentFiles {
 					f1elemf11elem := &svcapitypes.EnvironmentFile{}
-					if f1elemf11iter.Type != nil {
-						f1elemf11elem.Type = f1elemf11iter.Type
+					if f1elemf11iter.Type != "" {
+						f1elemf11elem.Type = aws.String(string(f1elemf11iter.Type))
 					}
 					if f1elemf11iter.Value != nil {
 						f1elemf11elem.Value = f1elemf11iter.Value
@@ -239,41 +197,33 @@ func (rm *resourceManager) sdkFind(
 			if f1iter.FirelensConfiguration != nil {
 				f1elemf14 := &svcapitypes.FirelensConfiguration{}
 				if f1iter.FirelensConfiguration.Options != nil {
-					f1elemf14f0 := map[string]*string{}
-					for f1elemf14f0key, f1elemf14f0valiter := range f1iter.FirelensConfiguration.Options {
-						var f1elemf14f0val string
-						f1elemf14f0val = *f1elemf14f0valiter
-						f1elemf14f0[f1elemf14f0key] = &f1elemf14f0val
-					}
-					f1elemf14.Options = f1elemf14f0
+					f1elemf14.Options = aws.StringMap(f1iter.FirelensConfiguration.Options)
 				}
-				if f1iter.FirelensConfiguration.Type != nil {
-					f1elemf14.Type = f1iter.FirelensConfiguration.Type
+				if f1iter.FirelensConfiguration.Type != "" {
+					f1elemf14.Type = aws.String(string(f1iter.FirelensConfiguration.Type))
 				}
 				f1elem.FirelensConfiguration = f1elemf14
 			}
 			if f1iter.HealthCheck != nil {
 				f1elemf15 := &svcapitypes.HealthCheck{}
 				if f1iter.HealthCheck.Command != nil {
-					f1elemf15f0 := []*string{}
-					for _, f1elemf15f0iter := range f1iter.HealthCheck.Command {
-						var f1elemf15f0elem string
-						f1elemf15f0elem = *f1elemf15f0iter
-						f1elemf15f0 = append(f1elemf15f0, &f1elemf15f0elem)
-					}
-					f1elemf15.Command = f1elemf15f0
+					f1elemf15.Command = aws.StringSlice(f1iter.HealthCheck.Command)
 				}
 				if f1iter.HealthCheck.Interval != nil {
-					f1elemf15.Interval = f1iter.HealthCheck.Interval
+					intervalCopy := int64(*f1iter.HealthCheck.Interval)
+					f1elemf15.Interval = &intervalCopy
 				}
 				if f1iter.HealthCheck.Retries != nil {
-					f1elemf15.Retries = f1iter.HealthCheck.Retries
+					retriesCopy := int64(*f1iter.HealthCheck.Retries)
+					f1elemf15.Retries = &retriesCopy
 				}
 				if f1iter.HealthCheck.StartPeriod != nil {
-					f1elemf15.StartPeriod = f1iter.HealthCheck.StartPeriod
+					startPeriodCopy := int64(*f1iter.HealthCheck.StartPeriod)
+					f1elemf15.StartPeriod = &startPeriodCopy
 				}
 				if f1iter.HealthCheck.Timeout != nil {
-					f1elemf15.Timeout = f1iter.HealthCheck.Timeout
+					timeoutCopy := int64(*f1iter.HealthCheck.Timeout)
+					f1elemf15.Timeout = &timeoutCopy
 				}
 				f1elem.HealthCheck = f1elemf15
 			}
@@ -287,35 +237,17 @@ func (rm *resourceManager) sdkFind(
 				f1elem.Interactive = f1iter.Interactive
 			}
 			if f1iter.Links != nil {
-				f1elemf19 := []*string{}
-				for _, f1elemf19iter := range f1iter.Links {
-					var f1elemf19elem string
-					f1elemf19elem = *f1elemf19iter
-					f1elemf19 = append(f1elemf19, &f1elemf19elem)
-				}
-				f1elem.Links = f1elemf19
+				f1elem.Links = aws.StringSlice(f1iter.Links)
 			}
 			if f1iter.LinuxParameters != nil {
 				f1elemf20 := &svcapitypes.LinuxParameters{}
 				if f1iter.LinuxParameters.Capabilities != nil {
 					f1elemf20f0 := &svcapitypes.KernelCapabilities{}
 					if f1iter.LinuxParameters.Capabilities.Add != nil {
-						f1elemf20f0f0 := []*string{}
-						for _, f1elemf20f0f0iter := range f1iter.LinuxParameters.Capabilities.Add {
-							var f1elemf20f0f0elem string
-							f1elemf20f0f0elem = *f1elemf20f0f0iter
-							f1elemf20f0f0 = append(f1elemf20f0f0, &f1elemf20f0f0elem)
-						}
-						f1elemf20f0.Add = f1elemf20f0f0
+						f1elemf20f0.Add = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Add)
 					}
 					if f1iter.LinuxParameters.Capabilities.Drop != nil {
-						f1elemf20f0f1 := []*string{}
-						for _, f1elemf20f0f1iter := range f1iter.LinuxParameters.Capabilities.Drop {
-							var f1elemf20f0f1elem string
-							f1elemf20f0f1elem = *f1elemf20f0f1iter
-							f1elemf20f0f1 = append(f1elemf20f0f1, &f1elemf20f0f1elem)
-						}
-						f1elemf20f0.Drop = f1elemf20f0f1
+						f1elemf20f0.Drop = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Drop)
 					}
 					f1elemf20.Capabilities = f1elemf20f0
 				}
@@ -332,9 +264,9 @@ func (rm *resourceManager) sdkFind(
 						if f1elemf20f1iter.Permissions != nil {
 							f1elemf20f1elemf2 := []*string{}
 							for _, f1elemf20f1elemf2iter := range f1elemf20f1iter.Permissions {
-								var f1elemf20f1elemf2elem string
-								f1elemf20f1elemf2elem = *f1elemf20f1elemf2iter
-								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, &f1elemf20f1elemf2elem)
+								var f1elemf20f1elemf2elem *string
+								f1elemf20f1elemf2elem = aws.String(string(f1elemf20f1elemf2iter))
+								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, f1elemf20f1elemf2elem)
 							}
 							f1elemf20f1elem.Permissions = f1elemf20f1elemf2
 						}
@@ -346,13 +278,16 @@ func (rm *resourceManager) sdkFind(
 					f1elemf20.InitProcessEnabled = f1iter.LinuxParameters.InitProcessEnabled
 				}
 				if f1iter.LinuxParameters.MaxSwap != nil {
-					f1elemf20.MaxSwap = f1iter.LinuxParameters.MaxSwap
+					maxSwapCopy := int64(*f1iter.LinuxParameters.MaxSwap)
+					f1elemf20.MaxSwap = &maxSwapCopy
 				}
 				if f1iter.LinuxParameters.SharedMemorySize != nil {
-					f1elemf20.SharedMemorySize = f1iter.LinuxParameters.SharedMemorySize
+					sharedMemorySizeCopy := int64(*f1iter.LinuxParameters.SharedMemorySize)
+					f1elemf20.SharedMemorySize = &sharedMemorySizeCopy
 				}
 				if f1iter.LinuxParameters.Swappiness != nil {
-					f1elemf20.Swappiness = f1iter.LinuxParameters.Swappiness
+					swappinessCopy := int64(*f1iter.LinuxParameters.Swappiness)
+					f1elemf20.Swappiness = &swappinessCopy
 				}
 				if f1iter.LinuxParameters.Tmpfs != nil {
 					f1elemf20f6 := []*svcapitypes.Tmpfs{}
@@ -362,17 +297,10 @@ func (rm *resourceManager) sdkFind(
 							f1elemf20f6elem.ContainerPath = f1elemf20f6iter.ContainerPath
 						}
 						if f1elemf20f6iter.MountOptions != nil {
-							f1elemf20f6elemf1 := []*string{}
-							for _, f1elemf20f6elemf1iter := range f1elemf20f6iter.MountOptions {
-								var f1elemf20f6elemf1elem string
-								f1elemf20f6elemf1elem = *f1elemf20f6elemf1iter
-								f1elemf20f6elemf1 = append(f1elemf20f6elemf1, &f1elemf20f6elemf1elem)
-							}
-							f1elemf20f6elem.MountOptions = f1elemf20f6elemf1
+							f1elemf20f6elem.MountOptions = aws.StringSlice(f1elemf20f6iter.MountOptions)
 						}
-						if f1elemf20f6iter.Size != nil {
-							f1elemf20f6elem.Size = f1elemf20f6iter.Size
-						}
+						sizeCopy := int64(f1elemf20f6iter.Size)
+						f1elemf20f6elem.Size = &sizeCopy
 						f1elemf20f6 = append(f1elemf20f6, f1elemf20f6elem)
 					}
 					f1elemf20.Tmpfs = f1elemf20f6
@@ -381,17 +309,11 @@ func (rm *resourceManager) sdkFind(
 			}
 			if f1iter.LogConfiguration != nil {
 				f1elemf21 := &svcapitypes.LogConfiguration{}
-				if f1iter.LogConfiguration.LogDriver != nil {
-					f1elemf21.LogDriver = f1iter.LogConfiguration.LogDriver
+				if f1iter.LogConfiguration.LogDriver != "" {
+					f1elemf21.LogDriver = aws.String(string(f1iter.LogConfiguration.LogDriver))
 				}
 				if f1iter.LogConfiguration.Options != nil {
-					f1elemf21f1 := map[string]*string{}
-					for f1elemf21f1key, f1elemf21f1valiter := range f1iter.LogConfiguration.Options {
-						var f1elemf21f1val string
-						f1elemf21f1val = *f1elemf21f1valiter
-						f1elemf21f1[f1elemf21f1key] = &f1elemf21f1val
-					}
-					f1elemf21.Options = f1elemf21f1
+					f1elemf21.Options = aws.StringMap(f1iter.LogConfiguration.Options)
 				}
 				if f1iter.LogConfiguration.SecretOptions != nil {
 					f1elemf21f2 := []*svcapitypes.Secret{}
@@ -410,10 +332,12 @@ func (rm *resourceManager) sdkFind(
 				f1elem.LogConfiguration = f1elemf21
 			}
 			if f1iter.Memory != nil {
-				f1elem.Memory = f1iter.Memory
+				memoryCopy := int64(*f1iter.Memory)
+				f1elem.Memory = &memoryCopy
 			}
 			if f1iter.MemoryReservation != nil {
-				f1elem.MemoryReservation = f1iter.MemoryReservation
+				memoryReservationCopy := int64(*f1iter.MemoryReservation)
+				f1elem.MemoryReservation = &memoryReservationCopy
 			}
 			if f1iter.MountPoints != nil {
 				f1elemf24 := []*svcapitypes.MountPoint{}
@@ -439,23 +363,25 @@ func (rm *resourceManager) sdkFind(
 				f1elemf26 := []*svcapitypes.PortMapping{}
 				for _, f1elemf26iter := range f1iter.PortMappings {
 					f1elemf26elem := &svcapitypes.PortMapping{}
-					if f1elemf26iter.AppProtocol != nil {
-						f1elemf26elem.AppProtocol = f1elemf26iter.AppProtocol
+					if f1elemf26iter.AppProtocol != "" {
+						f1elemf26elem.AppProtocol = aws.String(string(f1elemf26iter.AppProtocol))
 					}
 					if f1elemf26iter.ContainerPort != nil {
-						f1elemf26elem.ContainerPort = f1elemf26iter.ContainerPort
+						containerPortCopy := int64(*f1elemf26iter.ContainerPort)
+						f1elemf26elem.ContainerPort = &containerPortCopy
 					}
 					if f1elemf26iter.ContainerPortRange != nil {
 						f1elemf26elem.ContainerPortRange = f1elemf26iter.ContainerPortRange
 					}
 					if f1elemf26iter.HostPort != nil {
-						f1elemf26elem.HostPort = f1elemf26iter.HostPort
+						hostPortCopy := int64(*f1elemf26iter.HostPort)
+						f1elemf26elem.HostPort = &hostPortCopy
 					}
 					if f1elemf26iter.Name != nil {
 						f1elemf26elem.Name = f1elemf26iter.Name
 					}
-					if f1elemf26iter.Protocol != nil {
-						f1elemf26elem.Protocol = f1elemf26iter.Protocol
+					if f1elemf26iter.Protocol != "" {
+						f1elemf26elem.Protocol = aws.String(string(f1elemf26iter.Protocol))
 					}
 					f1elemf26 = append(f1elemf26, f1elemf26elem)
 				}
@@ -481,8 +407,8 @@ func (rm *resourceManager) sdkFind(
 				f1elemf31 := []*svcapitypes.ResourceRequirement{}
 				for _, f1elemf31iter := range f1iter.ResourceRequirements {
 					f1elemf31elem := &svcapitypes.ResourceRequirement{}
-					if f1elemf31iter.Type != nil {
-						f1elemf31elem.Type = f1elemf31iter.Type
+					if f1elemf31iter.Type != "" {
+						f1elemf31elem.Type = aws.String(string(f1elemf31iter.Type))
 					}
 					if f1elemf31iter.Value != nil {
 						f1elemf31elem.Value = f1elemf31iter.Value
@@ -506,10 +432,12 @@ func (rm *resourceManager) sdkFind(
 				f1elem.Secrets = f1elemf32
 			}
 			if f1iter.StartTimeout != nil {
-				f1elem.StartTimeout = f1iter.StartTimeout
+				startTimeoutCopy := int64(*f1iter.StartTimeout)
+				f1elem.StartTimeout = &startTimeoutCopy
 			}
 			if f1iter.StopTimeout != nil {
-				f1elem.StopTimeout = f1iter.StopTimeout
+				stopTimeoutCopy := int64(*f1iter.StopTimeout)
+				f1elem.StopTimeout = &stopTimeoutCopy
 			}
 			if f1iter.SystemControls != nil {
 				f1elemf35 := []*svcapitypes.SystemControl{}
@@ -529,15 +457,13 @@ func (rm *resourceManager) sdkFind(
 				f1elemf36 := []*svcapitypes.Ulimit{}
 				for _, f1elemf36iter := range f1iter.Ulimits {
 					f1elemf36elem := &svcapitypes.Ulimit{}
-					if f1elemf36iter.HardLimit != nil {
-						f1elemf36elem.HardLimit = f1elemf36iter.HardLimit
+					hardLimitCopy := int64(f1elemf36iter.HardLimit)
+					f1elemf36elem.HardLimit = &hardLimitCopy
+					if f1elemf36iter.Name != "" {
+						f1elemf36elem.Name = aws.String(string(f1elemf36iter.Name))
 					}
-					if f1elemf36iter.Name != nil {
-						f1elemf36elem.Name = f1elemf36iter.Name
-					}
-					if f1elemf36iter.SoftLimit != nil {
-						f1elemf36elem.SoftLimit = f1elemf36iter.SoftLimit
-					}
+					softLimitCopy := int64(f1elemf36iter.SoftLimit)
+					f1elemf36elem.SoftLimit = &softLimitCopy
 					f1elemf36 = append(f1elemf36, f1elemf36elem)
 				}
 				f1elem.Ulimits = f1elemf36
@@ -580,9 +506,8 @@ func (rm *resourceManager) sdkFind(
 	}
 	if resp.TaskDefinition.EphemeralStorage != nil {
 		f4 := &svcapitypes.EphemeralStorage{}
-		if resp.TaskDefinition.EphemeralStorage.SizeInGiB != nil {
-			f4.SizeInGiB = resp.TaskDefinition.EphemeralStorage.SizeInGiB
-		}
+		sizeInGiBCopy := int64(resp.TaskDefinition.EphemeralStorage.SizeInGiB)
+		f4.SizeInGiB = &sizeInGiBCopy
 		ko.Spec.EphemeralStorage = f4
 	} else {
 		ko.Spec.EphemeralStorage = nil
@@ -613,8 +538,8 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.InferenceAccelerators = nil
 	}
-	if resp.TaskDefinition.IpcMode != nil {
-		ko.Spec.IPCMode = resp.TaskDefinition.IpcMode
+	if resp.TaskDefinition.IpcMode != "" {
+		ko.Spec.IPCMode = aws.String(string(resp.TaskDefinition.IpcMode))
 	} else {
 		ko.Spec.IPCMode = nil
 	}
@@ -623,13 +548,13 @@ func (rm *resourceManager) sdkFind(
 	} else {
 		ko.Spec.Memory = nil
 	}
-	if resp.TaskDefinition.NetworkMode != nil {
-		ko.Spec.NetworkMode = resp.TaskDefinition.NetworkMode
+	if resp.TaskDefinition.NetworkMode != "" {
+		ko.Spec.NetworkMode = aws.String(string(resp.TaskDefinition.NetworkMode))
 	} else {
 		ko.Spec.NetworkMode = nil
 	}
-	if resp.TaskDefinition.PidMode != nil {
-		ko.Spec.PIDMode = resp.TaskDefinition.PidMode
+	if resp.TaskDefinition.PidMode != "" {
+		ko.Spec.PIDMode = aws.String(string(resp.TaskDefinition.PidMode))
 	} else {
 		ko.Spec.PIDMode = nil
 	}
@@ -640,8 +565,8 @@ func (rm *resourceManager) sdkFind(
 			if f12iter.Expression != nil {
 				f12elem.Expression = f12iter.Expression
 			}
-			if f12iter.Type != nil {
-				f12elem.Type = f12iter.Type
+			if f12iter.Type != "" {
+				f12elem.Type = aws.String(string(f12iter.Type))
 			}
 			f12 = append(f12, f12elem)
 		}
@@ -668,8 +593,8 @@ func (rm *resourceManager) sdkFind(
 			}
 			f13.Properties = f13f1
 		}
-		if resp.TaskDefinition.ProxyConfiguration.Type != nil {
-			f13.Type = resp.TaskDefinition.ProxyConfiguration.Type
+		if resp.TaskDefinition.ProxyConfiguration.Type != "" {
+			f13.Type = aws.String(string(resp.TaskDefinition.ProxyConfiguration.Type))
 		}
 		ko.Spec.ProxyConfiguration = f13
 	} else {
@@ -695,8 +620,8 @@ func (rm *resourceManager) sdkFind(
 			if f16iter.TargetId != nil {
 				f16elem.TargetID = f16iter.TargetId
 			}
-			if f16iter.TargetType != nil {
-				f16elem.TargetType = f16iter.TargetType
+			if f16iter.TargetType != "" {
+				f16elem.TargetType = aws.String(string(f16iter.TargetType))
 			}
 			if f16iter.Value != nil {
 				f16elem.Value = f16iter.Value
@@ -710,33 +635,30 @@ func (rm *resourceManager) sdkFind(
 	if resp.TaskDefinition.RequiresCompatibilities != nil {
 		f17 := []*string{}
 		for _, f17iter := range resp.TaskDefinition.RequiresCompatibilities {
-			var f17elem string
-			f17elem = *f17iter
-			f17 = append(f17, &f17elem)
+			var f17elem *string
+			f17elem = aws.String(string(f17iter))
+			f17 = append(f17, f17elem)
 		}
 		ko.Spec.RequiresCompatibilities = f17
 	} else {
 		ko.Spec.RequiresCompatibilities = nil
 	}
-	if resp.TaskDefinition.Revision != nil {
-		ko.Status.Revision = resp.TaskDefinition.Revision
-	} else {
-		ko.Status.Revision = nil
-	}
+	revisionCopy := int64(resp.TaskDefinition.Revision)
+	ko.Status.Revision = &revisionCopy
 	if resp.TaskDefinition.RuntimePlatform != nil {
 		f19 := &svcapitypes.RuntimePlatform{}
-		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != nil {
-			f19.CPUArchitecture = resp.TaskDefinition.RuntimePlatform.CpuArchitecture
+		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != "" {
+			f19.CPUArchitecture = aws.String(string(resp.TaskDefinition.RuntimePlatform.CpuArchitecture))
 		}
-		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != nil {
-			f19.OperatingSystemFamily = resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily
+		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != "" {
+			f19.OperatingSystemFamily = aws.String(string(resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily))
 		}
 		ko.Spec.RuntimePlatform = f19
 	} else {
 		ko.Spec.RuntimePlatform = nil
 	}
-	if resp.TaskDefinition.Status != nil {
-		ko.Status.Status = resp.TaskDefinition.Status
+	if resp.TaskDefinition.Status != "" {
+		ko.Status.Status = aws.String(string(resp.TaskDefinition.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -768,25 +690,13 @@ func (rm *resourceManager) sdkFind(
 					f23elemf1.Driver = f23iter.DockerVolumeConfiguration.Driver
 				}
 				if f23iter.DockerVolumeConfiguration.DriverOpts != nil {
-					f23elemf1f2 := map[string]*string{}
-					for f23elemf1f2key, f23elemf1f2valiter := range f23iter.DockerVolumeConfiguration.DriverOpts {
-						var f23elemf1f2val string
-						f23elemf1f2val = *f23elemf1f2valiter
-						f23elemf1f2[f23elemf1f2key] = &f23elemf1f2val
-					}
-					f23elemf1.DriverOpts = f23elemf1f2
+					f23elemf1.DriverOpts = aws.StringMap(f23iter.DockerVolumeConfiguration.DriverOpts)
 				}
 				if f23iter.DockerVolumeConfiguration.Labels != nil {
-					f23elemf1f3 := map[string]*string{}
-					for f23elemf1f3key, f23elemf1f3valiter := range f23iter.DockerVolumeConfiguration.Labels {
-						var f23elemf1f3val string
-						f23elemf1f3val = *f23elemf1f3valiter
-						f23elemf1f3[f23elemf1f3key] = &f23elemf1f3val
-					}
-					f23elemf1.Labels = f23elemf1f3
+					f23elemf1.Labels = aws.StringMap(f23iter.DockerVolumeConfiguration.Labels)
 				}
-				if f23iter.DockerVolumeConfiguration.Scope != nil {
-					f23elemf1.Scope = f23iter.DockerVolumeConfiguration.Scope
+				if f23iter.DockerVolumeConfiguration.Scope != "" {
+					f23elemf1.Scope = aws.String(string(f23iter.DockerVolumeConfiguration.Scope))
 				}
 				f23elem.DockerVolumeConfiguration = f23elemf1
 			}
@@ -797,8 +707,8 @@ func (rm *resourceManager) sdkFind(
 					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId != nil {
 						f23elemf2f0.AccessPointID = f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId
 					}
-					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != nil {
-						f23elemf2f0.IAM = f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam
+					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != "" {
+						f23elemf2f0.IAM = aws.String(string(f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam))
 					}
 					f23elemf2.AuthorizationConfig = f23elemf2f0
 				}
@@ -808,11 +718,12 @@ func (rm *resourceManager) sdkFind(
 				if f23iter.EfsVolumeConfiguration.RootDirectory != nil {
 					f23elemf2.RootDirectory = f23iter.EfsVolumeConfiguration.RootDirectory
 				}
-				if f23iter.EfsVolumeConfiguration.TransitEncryption != nil {
-					f23elemf2.TransitEncryption = f23iter.EfsVolumeConfiguration.TransitEncryption
+				if f23iter.EfsVolumeConfiguration.TransitEncryption != "" {
+					f23elemf2.TransitEncryption = aws.String(string(f23iter.EfsVolumeConfiguration.TransitEncryption))
 				}
 				if f23iter.EfsVolumeConfiguration.TransitEncryptionPort != nil {
-					f23elemf2.TransitEncryptionPort = f23iter.EfsVolumeConfiguration.TransitEncryptionPort
+					transitEncryptionPortCopy := int64(*f23iter.EfsVolumeConfiguration.TransitEncryptionPort)
+					f23elemf2.TransitEncryptionPort = &transitEncryptionPortCopy
 				}
 				f23elem.EFSVolumeConfiguration = f23elemf2
 			}
@@ -875,7 +786,7 @@ func (rm *resourceManager) newDescribeRequestPayload(
 	res := &svcsdk.DescribeTaskDefinitionInput{}
 
 	if r.ko.Spec.Family != nil {
-		res.SetTaskDefinition(*r.ko.Spec.Family)
+		res.TaskDefinition = r.ko.Spec.Family
 	}
 
 	return res, nil
@@ -900,7 +811,7 @@ func (rm *resourceManager) sdkCreate(
 
 	var resp *svcsdk.RegisterTaskDefinitionOutput
 	_ = resp
-	resp, err = rm.sdkapi.RegisterTaskDefinitionWithContext(ctx, input)
+	resp, err = rm.sdkapi.RegisterTaskDefinition(ctx, input)
 	rm.metrics.RecordAPICall("CREATE", "RegisterTaskDefinition", err)
 	if err != nil {
 		return nil, err
@@ -912,9 +823,9 @@ func (rm *resourceManager) sdkCreate(
 	if resp.TaskDefinition.Compatibilities != nil {
 		f0 := []*string{}
 		for _, f0iter := range resp.TaskDefinition.Compatibilities {
-			var f0elem string
-			f0elem = *f0iter
-			f0 = append(f0, &f0elem)
+			var f0elem *string
+			f0elem = aws.String(string(f0iter))
+			f0 = append(f0, f0elem)
 		}
 		ko.Status.Compatibilities = f0
 	} else {
@@ -925,32 +836,19 @@ func (rm *resourceManager) sdkCreate(
 		for _, f1iter := range resp.TaskDefinition.ContainerDefinitions {
 			f1elem := &svcapitypes.ContainerDefinition{}
 			if f1iter.Command != nil {
-				f1elemf0 := []*string{}
-				for _, f1elemf0iter := range f1iter.Command {
-					var f1elemf0elem string
-					f1elemf0elem = *f1elemf0iter
-					f1elemf0 = append(f1elemf0, &f1elemf0elem)
-				}
-				f1elem.Command = f1elemf0
+				f1elem.Command = aws.StringSlice(f1iter.Command)
 			}
-			if f1iter.Cpu != nil {
-				f1elem.CPU = f1iter.Cpu
-			}
+			cpuCopy := int64(f1iter.Cpu)
+			f1elem.CPU = &cpuCopy
 			if f1iter.CredentialSpecs != nil {
-				f1elemf2 := []*string{}
-				for _, f1elemf2iter := range f1iter.CredentialSpecs {
-					var f1elemf2elem string
-					f1elemf2elem = *f1elemf2iter
-					f1elemf2 = append(f1elemf2, &f1elemf2elem)
-				}
-				f1elem.CredentialSpecs = f1elemf2
+				f1elem.CredentialSpecs = aws.StringSlice(f1iter.CredentialSpecs)
 			}
 			if f1iter.DependsOn != nil {
 				f1elemf3 := []*svcapitypes.ContainerDependency{}
 				for _, f1elemf3iter := range f1iter.DependsOn {
 					f1elemf3elem := &svcapitypes.ContainerDependency{}
-					if f1elemf3iter.Condition != nil {
-						f1elemf3elem.Condition = f1elemf3iter.Condition
+					if f1elemf3iter.Condition != "" {
+						f1elemf3elem.Condition = aws.String(string(f1elemf3iter.Condition))
 					}
 					if f1elemf3iter.ContainerName != nil {
 						f1elemf3elem.ContainerName = f1elemf3iter.ContainerName
@@ -963,49 +861,19 @@ func (rm *resourceManager) sdkCreate(
 				f1elem.DisableNetworking = f1iter.DisableNetworking
 			}
 			if f1iter.DnsSearchDomains != nil {
-				f1elemf5 := []*string{}
-				for _, f1elemf5iter := range f1iter.DnsSearchDomains {
-					var f1elemf5elem string
-					f1elemf5elem = *f1elemf5iter
-					f1elemf5 = append(f1elemf5, &f1elemf5elem)
-				}
-				f1elem.DNSSearchDomains = f1elemf5
+				f1elem.DNSSearchDomains = aws.StringSlice(f1iter.DnsSearchDomains)
 			}
 			if f1iter.DnsServers != nil {
-				f1elemf6 := []*string{}
-				for _, f1elemf6iter := range f1iter.DnsServers {
-					var f1elemf6elem string
-					f1elemf6elem = *f1elemf6iter
-					f1elemf6 = append(f1elemf6, &f1elemf6elem)
-				}
-				f1elem.DNSServers = f1elemf6
+				f1elem.DNSServers = aws.StringSlice(f1iter.DnsServers)
 			}
 			if f1iter.DockerLabels != nil {
-				f1elemf7 := map[string]*string{}
-				for f1elemf7key, f1elemf7valiter := range f1iter.DockerLabels {
-					var f1elemf7val string
-					f1elemf7val = *f1elemf7valiter
-					f1elemf7[f1elemf7key] = &f1elemf7val
-				}
-				f1elem.DockerLabels = f1elemf7
+				f1elem.DockerLabels = aws.StringMap(f1iter.DockerLabels)
 			}
 			if f1iter.DockerSecurityOptions != nil {
-				f1elemf8 := []*string{}
-				for _, f1elemf8iter := range f1iter.DockerSecurityOptions {
-					var f1elemf8elem string
-					f1elemf8elem = *f1elemf8iter
-					f1elemf8 = append(f1elemf8, &f1elemf8elem)
-				}
-				f1elem.DockerSecurityOptions = f1elemf8
+				f1elem.DockerSecurityOptions = aws.StringSlice(f1iter.DockerSecurityOptions)
 			}
 			if f1iter.EntryPoint != nil {
-				f1elemf9 := []*string{}
-				for _, f1elemf9iter := range f1iter.EntryPoint {
-					var f1elemf9elem string
-					f1elemf9elem = *f1elemf9iter
-					f1elemf9 = append(f1elemf9, &f1elemf9elem)
-				}
-				f1elem.EntryPoint = f1elemf9
+				f1elem.EntryPoint = aws.StringSlice(f1iter.EntryPoint)
 			}
 			if f1iter.Environment != nil {
 				f1elemf10 := []*svcapitypes.KeyValuePair{}
@@ -1025,8 +893,8 @@ func (rm *resourceManager) sdkCreate(
 				f1elemf11 := []*svcapitypes.EnvironmentFile{}
 				for _, f1elemf11iter := range f1iter.EnvironmentFiles {
 					f1elemf11elem := &svcapitypes.EnvironmentFile{}
-					if f1elemf11iter.Type != nil {
-						f1elemf11elem.Type = f1elemf11iter.Type
+					if f1elemf11iter.Type != "" {
+						f1elemf11elem.Type = aws.String(string(f1elemf11iter.Type))
 					}
 					if f1elemf11iter.Value != nil {
 						f1elemf11elem.Value = f1elemf11iter.Value
@@ -1055,41 +923,33 @@ func (rm *resourceManager) sdkCreate(
 			if f1iter.FirelensConfiguration != nil {
 				f1elemf14 := &svcapitypes.FirelensConfiguration{}
 				if f1iter.FirelensConfiguration.Options != nil {
-					f1elemf14f0 := map[string]*string{}
-					for f1elemf14f0key, f1elemf14f0valiter := range f1iter.FirelensConfiguration.Options {
-						var f1elemf14f0val string
-						f1elemf14f0val = *f1elemf14f0valiter
-						f1elemf14f0[f1elemf14f0key] = &f1elemf14f0val
-					}
-					f1elemf14.Options = f1elemf14f0
+					f1elemf14.Options = aws.StringMap(f1iter.FirelensConfiguration.Options)
 				}
-				if f1iter.FirelensConfiguration.Type != nil {
-					f1elemf14.Type = f1iter.FirelensConfiguration.Type
+				if f1iter.FirelensConfiguration.Type != "" {
+					f1elemf14.Type = aws.String(string(f1iter.FirelensConfiguration.Type))
 				}
 				f1elem.FirelensConfiguration = f1elemf14
 			}
 			if f1iter.HealthCheck != nil {
 				f1elemf15 := &svcapitypes.HealthCheck{}
 				if f1iter.HealthCheck.Command != nil {
-					f1elemf15f0 := []*string{}
-					for _, f1elemf15f0iter := range f1iter.HealthCheck.Command {
-						var f1elemf15f0elem string
-						f1elemf15f0elem = *f1elemf15f0iter
-						f1elemf15f0 = append(f1elemf15f0, &f1elemf15f0elem)
-					}
-					f1elemf15.Command = f1elemf15f0
+					f1elemf15.Command = aws.StringSlice(f1iter.HealthCheck.Command)
 				}
 				if f1iter.HealthCheck.Interval != nil {
-					f1elemf15.Interval = f1iter.HealthCheck.Interval
+					intervalCopy := int64(*f1iter.HealthCheck.Interval)
+					f1elemf15.Interval = &intervalCopy
 				}
 				if f1iter.HealthCheck.Retries != nil {
-					f1elemf15.Retries = f1iter.HealthCheck.Retries
+					retriesCopy := int64(*f1iter.HealthCheck.Retries)
+					f1elemf15.Retries = &retriesCopy
 				}
 				if f1iter.HealthCheck.StartPeriod != nil {
-					f1elemf15.StartPeriod = f1iter.HealthCheck.StartPeriod
+					startPeriodCopy := int64(*f1iter.HealthCheck.StartPeriod)
+					f1elemf15.StartPeriod = &startPeriodCopy
 				}
 				if f1iter.HealthCheck.Timeout != nil {
-					f1elemf15.Timeout = f1iter.HealthCheck.Timeout
+					timeoutCopy := int64(*f1iter.HealthCheck.Timeout)
+					f1elemf15.Timeout = &timeoutCopy
 				}
 				f1elem.HealthCheck = f1elemf15
 			}
@@ -1103,35 +963,17 @@ func (rm *resourceManager) sdkCreate(
 				f1elem.Interactive = f1iter.Interactive
 			}
 			if f1iter.Links != nil {
-				f1elemf19 := []*string{}
-				for _, f1elemf19iter := range f1iter.Links {
-					var f1elemf19elem string
-					f1elemf19elem = *f1elemf19iter
-					f1elemf19 = append(f1elemf19, &f1elemf19elem)
-				}
-				f1elem.Links = f1elemf19
+				f1elem.Links = aws.StringSlice(f1iter.Links)
 			}
 			if f1iter.LinuxParameters != nil {
 				f1elemf20 := &svcapitypes.LinuxParameters{}
 				if f1iter.LinuxParameters.Capabilities != nil {
 					f1elemf20f0 := &svcapitypes.KernelCapabilities{}
 					if f1iter.LinuxParameters.Capabilities.Add != nil {
-						f1elemf20f0f0 := []*string{}
-						for _, f1elemf20f0f0iter := range f1iter.LinuxParameters.Capabilities.Add {
-							var f1elemf20f0f0elem string
-							f1elemf20f0f0elem = *f1elemf20f0f0iter
-							f1elemf20f0f0 = append(f1elemf20f0f0, &f1elemf20f0f0elem)
-						}
-						f1elemf20f0.Add = f1elemf20f0f0
+						f1elemf20f0.Add = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Add)
 					}
 					if f1iter.LinuxParameters.Capabilities.Drop != nil {
-						f1elemf20f0f1 := []*string{}
-						for _, f1elemf20f0f1iter := range f1iter.LinuxParameters.Capabilities.Drop {
-							var f1elemf20f0f1elem string
-							f1elemf20f0f1elem = *f1elemf20f0f1iter
-							f1elemf20f0f1 = append(f1elemf20f0f1, &f1elemf20f0f1elem)
-						}
-						f1elemf20f0.Drop = f1elemf20f0f1
+						f1elemf20f0.Drop = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Drop)
 					}
 					f1elemf20.Capabilities = f1elemf20f0
 				}
@@ -1148,9 +990,9 @@ func (rm *resourceManager) sdkCreate(
 						if f1elemf20f1iter.Permissions != nil {
 							f1elemf20f1elemf2 := []*string{}
 							for _, f1elemf20f1elemf2iter := range f1elemf20f1iter.Permissions {
-								var f1elemf20f1elemf2elem string
-								f1elemf20f1elemf2elem = *f1elemf20f1elemf2iter
-								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, &f1elemf20f1elemf2elem)
+								var f1elemf20f1elemf2elem *string
+								f1elemf20f1elemf2elem = aws.String(string(f1elemf20f1elemf2iter))
+								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, f1elemf20f1elemf2elem)
 							}
 							f1elemf20f1elem.Permissions = f1elemf20f1elemf2
 						}
@@ -1162,13 +1004,16 @@ func (rm *resourceManager) sdkCreate(
 					f1elemf20.InitProcessEnabled = f1iter.LinuxParameters.InitProcessEnabled
 				}
 				if f1iter.LinuxParameters.MaxSwap != nil {
-					f1elemf20.MaxSwap = f1iter.LinuxParameters.MaxSwap
+					maxSwapCopy := int64(*f1iter.LinuxParameters.MaxSwap)
+					f1elemf20.MaxSwap = &maxSwapCopy
 				}
 				if f1iter.LinuxParameters.SharedMemorySize != nil {
-					f1elemf20.SharedMemorySize = f1iter.LinuxParameters.SharedMemorySize
+					sharedMemorySizeCopy := int64(*f1iter.LinuxParameters.SharedMemorySize)
+					f1elemf20.SharedMemorySize = &sharedMemorySizeCopy
 				}
 				if f1iter.LinuxParameters.Swappiness != nil {
-					f1elemf20.Swappiness = f1iter.LinuxParameters.Swappiness
+					swappinessCopy := int64(*f1iter.LinuxParameters.Swappiness)
+					f1elemf20.Swappiness = &swappinessCopy
 				}
 				if f1iter.LinuxParameters.Tmpfs != nil {
 					f1elemf20f6 := []*svcapitypes.Tmpfs{}
@@ -1178,17 +1023,10 @@ func (rm *resourceManager) sdkCreate(
 							f1elemf20f6elem.ContainerPath = f1elemf20f6iter.ContainerPath
 						}
 						if f1elemf20f6iter.MountOptions != nil {
-							f1elemf20f6elemf1 := []*string{}
-							for _, f1elemf20f6elemf1iter := range f1elemf20f6iter.MountOptions {
-								var f1elemf20f6elemf1elem string
-								f1elemf20f6elemf1elem = *f1elemf20f6elemf1iter
-								f1elemf20f6elemf1 = append(f1elemf20f6elemf1, &f1elemf20f6elemf1elem)
-							}
-							f1elemf20f6elem.MountOptions = f1elemf20f6elemf1
+							f1elemf20f6elem.MountOptions = aws.StringSlice(f1elemf20f6iter.MountOptions)
 						}
-						if f1elemf20f6iter.Size != nil {
-							f1elemf20f6elem.Size = f1elemf20f6iter.Size
-						}
+						sizeCopy := int64(f1elemf20f6iter.Size)
+						f1elemf20f6elem.Size = &sizeCopy
 						f1elemf20f6 = append(f1elemf20f6, f1elemf20f6elem)
 					}
 					f1elemf20.Tmpfs = f1elemf20f6
@@ -1197,17 +1035,11 @@ func (rm *resourceManager) sdkCreate(
 			}
 			if f1iter.LogConfiguration != nil {
 				f1elemf21 := &svcapitypes.LogConfiguration{}
-				if f1iter.LogConfiguration.LogDriver != nil {
-					f1elemf21.LogDriver = f1iter.LogConfiguration.LogDriver
+				if f1iter.LogConfiguration.LogDriver != "" {
+					f1elemf21.LogDriver = aws.String(string(f1iter.LogConfiguration.LogDriver))
 				}
 				if f1iter.LogConfiguration.Options != nil {
-					f1elemf21f1 := map[string]*string{}
-					for f1elemf21f1key, f1elemf21f1valiter := range f1iter.LogConfiguration.Options {
-						var f1elemf21f1val string
-						f1elemf21f1val = *f1elemf21f1valiter
-						f1elemf21f1[f1elemf21f1key] = &f1elemf21f1val
-					}
-					f1elemf21.Options = f1elemf21f1
+					f1elemf21.Options = aws.StringMap(f1iter.LogConfiguration.Options)
 				}
 				if f1iter.LogConfiguration.SecretOptions != nil {
 					f1elemf21f2 := []*svcapitypes.Secret{}
@@ -1226,10 +1058,12 @@ func (rm *resourceManager) sdkCreate(
 				f1elem.LogConfiguration = f1elemf21
 			}
 			if f1iter.Memory != nil {
-				f1elem.Memory = f1iter.Memory
+				memoryCopy := int64(*f1iter.Memory)
+				f1elem.Memory = &memoryCopy
 			}
 			if f1iter.MemoryReservation != nil {
-				f1elem.MemoryReservation = f1iter.MemoryReservation
+				memoryReservationCopy := int64(*f1iter.MemoryReservation)
+				f1elem.MemoryReservation = &memoryReservationCopy
 			}
 			if f1iter.MountPoints != nil {
 				f1elemf24 := []*svcapitypes.MountPoint{}
@@ -1255,23 +1089,25 @@ func (rm *resourceManager) sdkCreate(
 				f1elemf26 := []*svcapitypes.PortMapping{}
 				for _, f1elemf26iter := range f1iter.PortMappings {
 					f1elemf26elem := &svcapitypes.PortMapping{}
-					if f1elemf26iter.AppProtocol != nil {
-						f1elemf26elem.AppProtocol = f1elemf26iter.AppProtocol
+					if f1elemf26iter.AppProtocol != "" {
+						f1elemf26elem.AppProtocol = aws.String(string(f1elemf26iter.AppProtocol))
 					}
 					if f1elemf26iter.ContainerPort != nil {
-						f1elemf26elem.ContainerPort = f1elemf26iter.ContainerPort
+						containerPortCopy := int64(*f1elemf26iter.ContainerPort)
+						f1elemf26elem.ContainerPort = &containerPortCopy
 					}
 					if f1elemf26iter.ContainerPortRange != nil {
 						f1elemf26elem.ContainerPortRange = f1elemf26iter.ContainerPortRange
 					}
 					if f1elemf26iter.HostPort != nil {
-						f1elemf26elem.HostPort = f1elemf26iter.HostPort
+						hostPortCopy := int64(*f1elemf26iter.HostPort)
+						f1elemf26elem.HostPort = &hostPortCopy
 					}
 					if f1elemf26iter.Name != nil {
 						f1elemf26elem.Name = f1elemf26iter.Name
 					}
-					if f1elemf26iter.Protocol != nil {
-						f1elemf26elem.Protocol = f1elemf26iter.Protocol
+					if f1elemf26iter.Protocol != "" {
+						f1elemf26elem.Protocol = aws.String(string(f1elemf26iter.Protocol))
 					}
 					f1elemf26 = append(f1elemf26, f1elemf26elem)
 				}
@@ -1297,8 +1133,8 @@ func (rm *resourceManager) sdkCreate(
 				f1elemf31 := []*svcapitypes.ResourceRequirement{}
 				for _, f1elemf31iter := range f1iter.ResourceRequirements {
 					f1elemf31elem := &svcapitypes.ResourceRequirement{}
-					if f1elemf31iter.Type != nil {
-						f1elemf31elem.Type = f1elemf31iter.Type
+					if f1elemf31iter.Type != "" {
+						f1elemf31elem.Type = aws.String(string(f1elemf31iter.Type))
 					}
 					if f1elemf31iter.Value != nil {
 						f1elemf31elem.Value = f1elemf31iter.Value
@@ -1322,10 +1158,12 @@ func (rm *resourceManager) sdkCreate(
 				f1elem.Secrets = f1elemf32
 			}
 			if f1iter.StartTimeout != nil {
-				f1elem.StartTimeout = f1iter.StartTimeout
+				startTimeoutCopy := int64(*f1iter.StartTimeout)
+				f1elem.StartTimeout = &startTimeoutCopy
 			}
 			if f1iter.StopTimeout != nil {
-				f1elem.StopTimeout = f1iter.StopTimeout
+				stopTimeoutCopy := int64(*f1iter.StopTimeout)
+				f1elem.StopTimeout = &stopTimeoutCopy
 			}
 			if f1iter.SystemControls != nil {
 				f1elemf35 := []*svcapitypes.SystemControl{}
@@ -1345,15 +1183,13 @@ func (rm *resourceManager) sdkCreate(
 				f1elemf36 := []*svcapitypes.Ulimit{}
 				for _, f1elemf36iter := range f1iter.Ulimits {
 					f1elemf36elem := &svcapitypes.Ulimit{}
-					if f1elemf36iter.HardLimit != nil {
-						f1elemf36elem.HardLimit = f1elemf36iter.HardLimit
+					hardLimitCopy := int64(f1elemf36iter.HardLimit)
+					f1elemf36elem.HardLimit = &hardLimitCopy
+					if f1elemf36iter.Name != "" {
+						f1elemf36elem.Name = aws.String(string(f1elemf36iter.Name))
 					}
-					if f1elemf36iter.Name != nil {
-						f1elemf36elem.Name = f1elemf36iter.Name
-					}
-					if f1elemf36iter.SoftLimit != nil {
-						f1elemf36elem.SoftLimit = f1elemf36iter.SoftLimit
-					}
+					softLimitCopy := int64(f1elemf36iter.SoftLimit)
+					f1elemf36elem.SoftLimit = &softLimitCopy
 					f1elemf36 = append(f1elemf36, f1elemf36elem)
 				}
 				f1elem.Ulimits = f1elemf36
@@ -1396,9 +1232,8 @@ func (rm *resourceManager) sdkCreate(
 	}
 	if resp.TaskDefinition.EphemeralStorage != nil {
 		f4 := &svcapitypes.EphemeralStorage{}
-		if resp.TaskDefinition.EphemeralStorage.SizeInGiB != nil {
-			f4.SizeInGiB = resp.TaskDefinition.EphemeralStorage.SizeInGiB
-		}
+		sizeInGiBCopy := int64(resp.TaskDefinition.EphemeralStorage.SizeInGiB)
+		f4.SizeInGiB = &sizeInGiBCopy
 		ko.Spec.EphemeralStorage = f4
 	} else {
 		ko.Spec.EphemeralStorage = nil
@@ -1429,8 +1264,8 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Spec.InferenceAccelerators = nil
 	}
-	if resp.TaskDefinition.IpcMode != nil {
-		ko.Spec.IPCMode = resp.TaskDefinition.IpcMode
+	if resp.TaskDefinition.IpcMode != "" {
+		ko.Spec.IPCMode = aws.String(string(resp.TaskDefinition.IpcMode))
 	} else {
 		ko.Spec.IPCMode = nil
 	}
@@ -1439,13 +1274,13 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Spec.Memory = nil
 	}
-	if resp.TaskDefinition.NetworkMode != nil {
-		ko.Spec.NetworkMode = resp.TaskDefinition.NetworkMode
+	if resp.TaskDefinition.NetworkMode != "" {
+		ko.Spec.NetworkMode = aws.String(string(resp.TaskDefinition.NetworkMode))
 	} else {
 		ko.Spec.NetworkMode = nil
 	}
-	if resp.TaskDefinition.PidMode != nil {
-		ko.Spec.PIDMode = resp.TaskDefinition.PidMode
+	if resp.TaskDefinition.PidMode != "" {
+		ko.Spec.PIDMode = aws.String(string(resp.TaskDefinition.PidMode))
 	} else {
 		ko.Spec.PIDMode = nil
 	}
@@ -1456,8 +1291,8 @@ func (rm *resourceManager) sdkCreate(
 			if f12iter.Expression != nil {
 				f12elem.Expression = f12iter.Expression
 			}
-			if f12iter.Type != nil {
-				f12elem.Type = f12iter.Type
+			if f12iter.Type != "" {
+				f12elem.Type = aws.String(string(f12iter.Type))
 			}
 			f12 = append(f12, f12elem)
 		}
@@ -1484,8 +1319,8 @@ func (rm *resourceManager) sdkCreate(
 			}
 			f13.Properties = f13f1
 		}
-		if resp.TaskDefinition.ProxyConfiguration.Type != nil {
-			f13.Type = resp.TaskDefinition.ProxyConfiguration.Type
+		if resp.TaskDefinition.ProxyConfiguration.Type != "" {
+			f13.Type = aws.String(string(resp.TaskDefinition.ProxyConfiguration.Type))
 		}
 		ko.Spec.ProxyConfiguration = f13
 	} else {
@@ -1511,8 +1346,8 @@ func (rm *resourceManager) sdkCreate(
 			if f16iter.TargetId != nil {
 				f16elem.TargetID = f16iter.TargetId
 			}
-			if f16iter.TargetType != nil {
-				f16elem.TargetType = f16iter.TargetType
+			if f16iter.TargetType != "" {
+				f16elem.TargetType = aws.String(string(f16iter.TargetType))
 			}
 			if f16iter.Value != nil {
 				f16elem.Value = f16iter.Value
@@ -1526,33 +1361,30 @@ func (rm *resourceManager) sdkCreate(
 	if resp.TaskDefinition.RequiresCompatibilities != nil {
 		f17 := []*string{}
 		for _, f17iter := range resp.TaskDefinition.RequiresCompatibilities {
-			var f17elem string
-			f17elem = *f17iter
-			f17 = append(f17, &f17elem)
+			var f17elem *string
+			f17elem = aws.String(string(f17iter))
+			f17 = append(f17, f17elem)
 		}
 		ko.Spec.RequiresCompatibilities = f17
 	} else {
 		ko.Spec.RequiresCompatibilities = nil
 	}
-	if resp.TaskDefinition.Revision != nil {
-		ko.Status.Revision = resp.TaskDefinition.Revision
-	} else {
-		ko.Status.Revision = nil
-	}
+	revisionCopy := int64(resp.TaskDefinition.Revision)
+	ko.Status.Revision = &revisionCopy
 	if resp.TaskDefinition.RuntimePlatform != nil {
 		f19 := &svcapitypes.RuntimePlatform{}
-		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != nil {
-			f19.CPUArchitecture = resp.TaskDefinition.RuntimePlatform.CpuArchitecture
+		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != "" {
+			f19.CPUArchitecture = aws.String(string(resp.TaskDefinition.RuntimePlatform.CpuArchitecture))
 		}
-		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != nil {
-			f19.OperatingSystemFamily = resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily
+		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != "" {
+			f19.OperatingSystemFamily = aws.String(string(resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily))
 		}
 		ko.Spec.RuntimePlatform = f19
 	} else {
 		ko.Spec.RuntimePlatform = nil
 	}
-	if resp.TaskDefinition.Status != nil {
-		ko.Status.Status = resp.TaskDefinition.Status
+	if resp.TaskDefinition.Status != "" {
+		ko.Status.Status = aws.String(string(resp.TaskDefinition.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -1584,25 +1416,13 @@ func (rm *resourceManager) sdkCreate(
 					f23elemf1.Driver = f23iter.DockerVolumeConfiguration.Driver
 				}
 				if f23iter.DockerVolumeConfiguration.DriverOpts != nil {
-					f23elemf1f2 := map[string]*string{}
-					for f23elemf1f2key, f23elemf1f2valiter := range f23iter.DockerVolumeConfiguration.DriverOpts {
-						var f23elemf1f2val string
-						f23elemf1f2val = *f23elemf1f2valiter
-						f23elemf1f2[f23elemf1f2key] = &f23elemf1f2val
-					}
-					f23elemf1.DriverOpts = f23elemf1f2
+					f23elemf1.DriverOpts = aws.StringMap(f23iter.DockerVolumeConfiguration.DriverOpts)
 				}
 				if f23iter.DockerVolumeConfiguration.Labels != nil {
-					f23elemf1f3 := map[string]*string{}
-					for f23elemf1f3key, f23elemf1f3valiter := range f23iter.DockerVolumeConfiguration.Labels {
-						var f23elemf1f3val string
-						f23elemf1f3val = *f23elemf1f3valiter
-						f23elemf1f3[f23elemf1f3key] = &f23elemf1f3val
-					}
-					f23elemf1.Labels = f23elemf1f3
+					f23elemf1.Labels = aws.StringMap(f23iter.DockerVolumeConfiguration.Labels)
 				}
-				if f23iter.DockerVolumeConfiguration.Scope != nil {
-					f23elemf1.Scope = f23iter.DockerVolumeConfiguration.Scope
+				if f23iter.DockerVolumeConfiguration.Scope != "" {
+					f23elemf1.Scope = aws.String(string(f23iter.DockerVolumeConfiguration.Scope))
 				}
 				f23elem.DockerVolumeConfiguration = f23elemf1
 			}
@@ -1613,8 +1433,8 @@ func (rm *resourceManager) sdkCreate(
 					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId != nil {
 						f23elemf2f0.AccessPointID = f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId
 					}
-					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != nil {
-						f23elemf2f0.IAM = f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam
+					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != "" {
+						f23elemf2f0.IAM = aws.String(string(f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam))
 					}
 					f23elemf2.AuthorizationConfig = f23elemf2f0
 				}
@@ -1624,11 +1444,12 @@ func (rm *resourceManager) sdkCreate(
 				if f23iter.EfsVolumeConfiguration.RootDirectory != nil {
 					f23elemf2.RootDirectory = f23iter.EfsVolumeConfiguration.RootDirectory
 				}
-				if f23iter.EfsVolumeConfiguration.TransitEncryption != nil {
-					f23elemf2.TransitEncryption = f23iter.EfsVolumeConfiguration.TransitEncryption
+				if f23iter.EfsVolumeConfiguration.TransitEncryption != "" {
+					f23elemf2.TransitEncryption = aws.String(string(f23iter.EfsVolumeConfiguration.TransitEncryption))
 				}
 				if f23iter.EfsVolumeConfiguration.TransitEncryptionPort != nil {
-					f23elemf2.TransitEncryptionPort = f23iter.EfsVolumeConfiguration.TransitEncryptionPort
+					transitEncryptionPortCopy := int64(*f23iter.EfsVolumeConfiguration.TransitEncryptionPort)
+					f23elemf2.TransitEncryptionPort = &transitEncryptionPortCopy
 				}
 				f23elem.EFSVolumeConfiguration = f23elemf2
 			}
@@ -1682,680 +1503,679 @@ func (rm *resourceManager) newCreateRequestPayload(
 	res := &svcsdk.RegisterTaskDefinitionInput{}
 
 	if r.ko.Spec.ContainerDefinitions != nil {
-		f0 := []*svcsdk.ContainerDefinition{}
+		f0 := []svcsdktypes.ContainerDefinition{}
 		for _, f0iter := range r.ko.Spec.ContainerDefinitions {
-			f0elem := &svcsdk.ContainerDefinition{}
+			f0elem := &svcsdktypes.ContainerDefinition{}
 			if f0iter.Command != nil {
-				f0elemf0 := []*string{}
-				for _, f0elemf0iter := range f0iter.Command {
-					var f0elemf0elem string
-					f0elemf0elem = *f0elemf0iter
-					f0elemf0 = append(f0elemf0, &f0elemf0elem)
-				}
-				f0elem.SetCommand(f0elemf0)
+				f0elem.Command = aws.ToStringSlice(f0iter.Command)
 			}
 			if f0iter.CPU != nil {
-				f0elem.SetCpu(*f0iter.CPU)
+				cpuCopy0 := *f0iter.CPU
+				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field cpu is of type int32")
+				}
+				cpuCopy := int32(cpuCopy0)
+				f0elem.Cpu = cpuCopy
 			}
 			if f0iter.CredentialSpecs != nil {
-				f0elemf2 := []*string{}
-				for _, f0elemf2iter := range f0iter.CredentialSpecs {
-					var f0elemf2elem string
-					f0elemf2elem = *f0elemf2iter
-					f0elemf2 = append(f0elemf2, &f0elemf2elem)
-				}
-				f0elem.SetCredentialSpecs(f0elemf2)
+				f0elem.CredentialSpecs = aws.ToStringSlice(f0iter.CredentialSpecs)
 			}
 			if f0iter.DependsOn != nil {
-				f0elemf3 := []*svcsdk.ContainerDependency{}
+				f0elemf3 := []svcsdktypes.ContainerDependency{}
 				for _, f0elemf3iter := range f0iter.DependsOn {
-					f0elemf3elem := &svcsdk.ContainerDependency{}
+					f0elemf3elem := &svcsdktypes.ContainerDependency{}
 					if f0elemf3iter.Condition != nil {
-						f0elemf3elem.SetCondition(*f0elemf3iter.Condition)
+						f0elemf3elem.Condition = svcsdktypes.ContainerCondition(*f0elemf3iter.Condition)
 					}
 					if f0elemf3iter.ContainerName != nil {
-						f0elemf3elem.SetContainerName(*f0elemf3iter.ContainerName)
+						f0elemf3elem.ContainerName = f0elemf3iter.ContainerName
 					}
-					f0elemf3 = append(f0elemf3, f0elemf3elem)
+					f0elemf3 = append(f0elemf3, *f0elemf3elem)
 				}
-				f0elem.SetDependsOn(f0elemf3)
+				f0elem.DependsOn = f0elemf3
 			}
 			if f0iter.DisableNetworking != nil {
-				f0elem.SetDisableNetworking(*f0iter.DisableNetworking)
+				f0elem.DisableNetworking = f0iter.DisableNetworking
 			}
 			if f0iter.DNSSearchDomains != nil {
-				f0elemf5 := []*string{}
-				for _, f0elemf5iter := range f0iter.DNSSearchDomains {
-					var f0elemf5elem string
-					f0elemf5elem = *f0elemf5iter
-					f0elemf5 = append(f0elemf5, &f0elemf5elem)
-				}
-				f0elem.SetDnsSearchDomains(f0elemf5)
+				f0elem.DnsSearchDomains = aws.ToStringSlice(f0iter.DNSSearchDomains)
 			}
 			if f0iter.DNSServers != nil {
-				f0elemf6 := []*string{}
-				for _, f0elemf6iter := range f0iter.DNSServers {
-					var f0elemf6elem string
-					f0elemf6elem = *f0elemf6iter
-					f0elemf6 = append(f0elemf6, &f0elemf6elem)
-				}
-				f0elem.SetDnsServers(f0elemf6)
+				f0elem.DnsServers = aws.ToStringSlice(f0iter.DNSServers)
 			}
 			if f0iter.DockerLabels != nil {
-				f0elemf7 := map[string]*string{}
-				for f0elemf7key, f0elemf7valiter := range f0iter.DockerLabels {
-					var f0elemf7val string
-					f0elemf7val = *f0elemf7valiter
-					f0elemf7[f0elemf7key] = &f0elemf7val
-				}
-				f0elem.SetDockerLabels(f0elemf7)
+				f0elem.DockerLabels = aws.ToStringMap(f0iter.DockerLabels)
 			}
 			if f0iter.DockerSecurityOptions != nil {
-				f0elemf8 := []*string{}
-				for _, f0elemf8iter := range f0iter.DockerSecurityOptions {
-					var f0elemf8elem string
-					f0elemf8elem = *f0elemf8iter
-					f0elemf8 = append(f0elemf8, &f0elemf8elem)
-				}
-				f0elem.SetDockerSecurityOptions(f0elemf8)
+				f0elem.DockerSecurityOptions = aws.ToStringSlice(f0iter.DockerSecurityOptions)
 			}
 			if f0iter.EntryPoint != nil {
-				f0elemf9 := []*string{}
-				for _, f0elemf9iter := range f0iter.EntryPoint {
-					var f0elemf9elem string
-					f0elemf9elem = *f0elemf9iter
-					f0elemf9 = append(f0elemf9, &f0elemf9elem)
-				}
-				f0elem.SetEntryPoint(f0elemf9)
+				f0elem.EntryPoint = aws.ToStringSlice(f0iter.EntryPoint)
 			}
 			if f0iter.Environment != nil {
-				f0elemf10 := []*svcsdk.KeyValuePair{}
+				f0elemf10 := []svcsdktypes.KeyValuePair{}
 				for _, f0elemf10iter := range f0iter.Environment {
-					f0elemf10elem := &svcsdk.KeyValuePair{}
+					f0elemf10elem := &svcsdktypes.KeyValuePair{}
 					if f0elemf10iter.Name != nil {
-						f0elemf10elem.SetName(*f0elemf10iter.Name)
+						f0elemf10elem.Name = f0elemf10iter.Name
 					}
 					if f0elemf10iter.Value != nil {
-						f0elemf10elem.SetValue(*f0elemf10iter.Value)
+						f0elemf10elem.Value = f0elemf10iter.Value
 					}
-					f0elemf10 = append(f0elemf10, f0elemf10elem)
+					f0elemf10 = append(f0elemf10, *f0elemf10elem)
 				}
-				f0elem.SetEnvironment(f0elemf10)
+				f0elem.Environment = f0elemf10
 			}
 			if f0iter.EnvironmentFiles != nil {
-				f0elemf11 := []*svcsdk.EnvironmentFile{}
+				f0elemf11 := []svcsdktypes.EnvironmentFile{}
 				for _, f0elemf11iter := range f0iter.EnvironmentFiles {
-					f0elemf11elem := &svcsdk.EnvironmentFile{}
+					f0elemf11elem := &svcsdktypes.EnvironmentFile{}
 					if f0elemf11iter.Type != nil {
-						f0elemf11elem.SetType(*f0elemf11iter.Type)
+						f0elemf11elem.Type = svcsdktypes.EnvironmentFileType(*f0elemf11iter.Type)
 					}
 					if f0elemf11iter.Value != nil {
-						f0elemf11elem.SetValue(*f0elemf11iter.Value)
+						f0elemf11elem.Value = f0elemf11iter.Value
 					}
-					f0elemf11 = append(f0elemf11, f0elemf11elem)
+					f0elemf11 = append(f0elemf11, *f0elemf11elem)
 				}
-				f0elem.SetEnvironmentFiles(f0elemf11)
+				f0elem.EnvironmentFiles = f0elemf11
 			}
 			if f0iter.Essential != nil {
-				f0elem.SetEssential(*f0iter.Essential)
+				f0elem.Essential = f0iter.Essential
 			}
 			if f0iter.ExtraHosts != nil {
-				f0elemf13 := []*svcsdk.HostEntry{}
+				f0elemf13 := []svcsdktypes.HostEntry{}
 				for _, f0elemf13iter := range f0iter.ExtraHosts {
-					f0elemf13elem := &svcsdk.HostEntry{}
+					f0elemf13elem := &svcsdktypes.HostEntry{}
 					if f0elemf13iter.Hostname != nil {
-						f0elemf13elem.SetHostname(*f0elemf13iter.Hostname)
+						f0elemf13elem.Hostname = f0elemf13iter.Hostname
 					}
 					if f0elemf13iter.IPAddress != nil {
-						f0elemf13elem.SetIpAddress(*f0elemf13iter.IPAddress)
+						f0elemf13elem.IpAddress = f0elemf13iter.IPAddress
 					}
-					f0elemf13 = append(f0elemf13, f0elemf13elem)
+					f0elemf13 = append(f0elemf13, *f0elemf13elem)
 				}
-				f0elem.SetExtraHosts(f0elemf13)
+				f0elem.ExtraHosts = f0elemf13
 			}
 			if f0iter.FirelensConfiguration != nil {
-				f0elemf14 := &svcsdk.FirelensConfiguration{}
+				f0elemf14 := &svcsdktypes.FirelensConfiguration{}
 				if f0iter.FirelensConfiguration.Options != nil {
-					f0elemf14f0 := map[string]*string{}
-					for f0elemf14f0key, f0elemf14f0valiter := range f0iter.FirelensConfiguration.Options {
-						var f0elemf14f0val string
-						f0elemf14f0val = *f0elemf14f0valiter
-						f0elemf14f0[f0elemf14f0key] = &f0elemf14f0val
-					}
-					f0elemf14.SetOptions(f0elemf14f0)
+					f0elemf14.Options = aws.ToStringMap(f0iter.FirelensConfiguration.Options)
 				}
 				if f0iter.FirelensConfiguration.Type != nil {
-					f0elemf14.SetType(*f0iter.FirelensConfiguration.Type)
+					f0elemf14.Type = svcsdktypes.FirelensConfigurationType(*f0iter.FirelensConfiguration.Type)
 				}
-				f0elem.SetFirelensConfiguration(f0elemf14)
+				f0elem.FirelensConfiguration = f0elemf14
 			}
 			if f0iter.HealthCheck != nil {
-				f0elemf15 := &svcsdk.HealthCheck{}
+				f0elemf15 := &svcsdktypes.HealthCheck{}
 				if f0iter.HealthCheck.Command != nil {
-					f0elemf15f0 := []*string{}
-					for _, f0elemf15f0iter := range f0iter.HealthCheck.Command {
-						var f0elemf15f0elem string
-						f0elemf15f0elem = *f0elemf15f0iter
-						f0elemf15f0 = append(f0elemf15f0, &f0elemf15f0elem)
-					}
-					f0elemf15.SetCommand(f0elemf15f0)
+					f0elemf15.Command = aws.ToStringSlice(f0iter.HealthCheck.Command)
 				}
 				if f0iter.HealthCheck.Interval != nil {
-					f0elemf15.SetInterval(*f0iter.HealthCheck.Interval)
+					intervalCopy0 := *f0iter.HealthCheck.Interval
+					if intervalCopy0 > math.MaxInt32 || intervalCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field interval is of type int32")
+					}
+					intervalCopy := int32(intervalCopy0)
+					f0elemf15.Interval = &intervalCopy
 				}
 				if f0iter.HealthCheck.Retries != nil {
-					f0elemf15.SetRetries(*f0iter.HealthCheck.Retries)
+					retriesCopy0 := *f0iter.HealthCheck.Retries
+					if retriesCopy0 > math.MaxInt32 || retriesCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field retries is of type int32")
+					}
+					retriesCopy := int32(retriesCopy0)
+					f0elemf15.Retries = &retriesCopy
 				}
 				if f0iter.HealthCheck.StartPeriod != nil {
-					f0elemf15.SetStartPeriod(*f0iter.HealthCheck.StartPeriod)
+					startPeriodCopy0 := *f0iter.HealthCheck.StartPeriod
+					if startPeriodCopy0 > math.MaxInt32 || startPeriodCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field startPeriod is of type int32")
+					}
+					startPeriodCopy := int32(startPeriodCopy0)
+					f0elemf15.StartPeriod = &startPeriodCopy
 				}
 				if f0iter.HealthCheck.Timeout != nil {
-					f0elemf15.SetTimeout(*f0iter.HealthCheck.Timeout)
+					timeoutCopy0 := *f0iter.HealthCheck.Timeout
+					if timeoutCopy0 > math.MaxInt32 || timeoutCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field timeout is of type int32")
+					}
+					timeoutCopy := int32(timeoutCopy0)
+					f0elemf15.Timeout = &timeoutCopy
 				}
-				f0elem.SetHealthCheck(f0elemf15)
+				f0elem.HealthCheck = f0elemf15
 			}
 			if f0iter.Hostname != nil {
-				f0elem.SetHostname(*f0iter.Hostname)
+				f0elem.Hostname = f0iter.Hostname
 			}
 			if f0iter.Image != nil {
-				f0elem.SetImage(*f0iter.Image)
+				f0elem.Image = f0iter.Image
 			}
 			if f0iter.Interactive != nil {
-				f0elem.SetInteractive(*f0iter.Interactive)
+				f0elem.Interactive = f0iter.Interactive
 			}
 			if f0iter.Links != nil {
-				f0elemf19 := []*string{}
-				for _, f0elemf19iter := range f0iter.Links {
-					var f0elemf19elem string
-					f0elemf19elem = *f0elemf19iter
-					f0elemf19 = append(f0elemf19, &f0elemf19elem)
-				}
-				f0elem.SetLinks(f0elemf19)
+				f0elem.Links = aws.ToStringSlice(f0iter.Links)
 			}
 			if f0iter.LinuxParameters != nil {
-				f0elemf20 := &svcsdk.LinuxParameters{}
+				f0elemf20 := &svcsdktypes.LinuxParameters{}
 				if f0iter.LinuxParameters.Capabilities != nil {
-					f0elemf20f0 := &svcsdk.KernelCapabilities{}
+					f0elemf20f0 := &svcsdktypes.KernelCapabilities{}
 					if f0iter.LinuxParameters.Capabilities.Add != nil {
-						f0elemf20f0f0 := []*string{}
-						for _, f0elemf20f0f0iter := range f0iter.LinuxParameters.Capabilities.Add {
-							var f0elemf20f0f0elem string
-							f0elemf20f0f0elem = *f0elemf20f0f0iter
-							f0elemf20f0f0 = append(f0elemf20f0f0, &f0elemf20f0f0elem)
-						}
-						f0elemf20f0.SetAdd(f0elemf20f0f0)
+						f0elemf20f0.Add = aws.ToStringSlice(f0iter.LinuxParameters.Capabilities.Add)
 					}
 					if f0iter.LinuxParameters.Capabilities.Drop != nil {
-						f0elemf20f0f1 := []*string{}
-						for _, f0elemf20f0f1iter := range f0iter.LinuxParameters.Capabilities.Drop {
-							var f0elemf20f0f1elem string
-							f0elemf20f0f1elem = *f0elemf20f0f1iter
-							f0elemf20f0f1 = append(f0elemf20f0f1, &f0elemf20f0f1elem)
-						}
-						f0elemf20f0.SetDrop(f0elemf20f0f1)
+						f0elemf20f0.Drop = aws.ToStringSlice(f0iter.LinuxParameters.Capabilities.Drop)
 					}
-					f0elemf20.SetCapabilities(f0elemf20f0)
+					f0elemf20.Capabilities = f0elemf20f0
 				}
 				if f0iter.LinuxParameters.Devices != nil {
-					f0elemf20f1 := []*svcsdk.Device{}
+					f0elemf20f1 := []svcsdktypes.Device{}
 					for _, f0elemf20f1iter := range f0iter.LinuxParameters.Devices {
-						f0elemf20f1elem := &svcsdk.Device{}
+						f0elemf20f1elem := &svcsdktypes.Device{}
 						if f0elemf20f1iter.ContainerPath != nil {
-							f0elemf20f1elem.SetContainerPath(*f0elemf20f1iter.ContainerPath)
+							f0elemf20f1elem.ContainerPath = f0elemf20f1iter.ContainerPath
 						}
 						if f0elemf20f1iter.HostPath != nil {
-							f0elemf20f1elem.SetHostPath(*f0elemf20f1iter.HostPath)
+							f0elemf20f1elem.HostPath = f0elemf20f1iter.HostPath
 						}
 						if f0elemf20f1iter.Permissions != nil {
-							f0elemf20f1elemf2 := []*string{}
+							f0elemf20f1elemf2 := []svcsdktypes.DeviceCgroupPermission{}
 							for _, f0elemf20f1elemf2iter := range f0elemf20f1iter.Permissions {
 								var f0elemf20f1elemf2elem string
-								f0elemf20f1elemf2elem = *f0elemf20f1elemf2iter
-								f0elemf20f1elemf2 = append(f0elemf20f1elemf2, &f0elemf20f1elemf2elem)
+								f0elemf20f1elemf2elem = string(*f0elemf20f1elemf2iter)
+								f0elemf20f1elemf2 = append(f0elemf20f1elemf2, svcsdktypes.DeviceCgroupPermission(f0elemf20f1elemf2elem))
 							}
-							f0elemf20f1elem.SetPermissions(f0elemf20f1elemf2)
+							f0elemf20f1elem.Permissions = f0elemf20f1elemf2
 						}
-						f0elemf20f1 = append(f0elemf20f1, f0elemf20f1elem)
+						f0elemf20f1 = append(f0elemf20f1, *f0elemf20f1elem)
 					}
-					f0elemf20.SetDevices(f0elemf20f1)
+					f0elemf20.Devices = f0elemf20f1
 				}
 				if f0iter.LinuxParameters.InitProcessEnabled != nil {
-					f0elemf20.SetInitProcessEnabled(*f0iter.LinuxParameters.InitProcessEnabled)
+					f0elemf20.InitProcessEnabled = f0iter.LinuxParameters.InitProcessEnabled
 				}
 				if f0iter.LinuxParameters.MaxSwap != nil {
-					f0elemf20.SetMaxSwap(*f0iter.LinuxParameters.MaxSwap)
+					maxSwapCopy0 := *f0iter.LinuxParameters.MaxSwap
+					if maxSwapCopy0 > math.MaxInt32 || maxSwapCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field maxSwap is of type int32")
+					}
+					maxSwapCopy := int32(maxSwapCopy0)
+					f0elemf20.MaxSwap = &maxSwapCopy
 				}
 				if f0iter.LinuxParameters.SharedMemorySize != nil {
-					f0elemf20.SetSharedMemorySize(*f0iter.LinuxParameters.SharedMemorySize)
+					sharedMemorySizeCopy0 := *f0iter.LinuxParameters.SharedMemorySize
+					if sharedMemorySizeCopy0 > math.MaxInt32 || sharedMemorySizeCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field sharedMemorySize is of type int32")
+					}
+					sharedMemorySizeCopy := int32(sharedMemorySizeCopy0)
+					f0elemf20.SharedMemorySize = &sharedMemorySizeCopy
 				}
 				if f0iter.LinuxParameters.Swappiness != nil {
-					f0elemf20.SetSwappiness(*f0iter.LinuxParameters.Swappiness)
+					swappinessCopy0 := *f0iter.LinuxParameters.Swappiness
+					if swappinessCopy0 > math.MaxInt32 || swappinessCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field swappiness is of type int32")
+					}
+					swappinessCopy := int32(swappinessCopy0)
+					f0elemf20.Swappiness = &swappinessCopy
 				}
 				if f0iter.LinuxParameters.Tmpfs != nil {
-					f0elemf20f6 := []*svcsdk.Tmpfs{}
+					f0elemf20f6 := []svcsdktypes.Tmpfs{}
 					for _, f0elemf20f6iter := range f0iter.LinuxParameters.Tmpfs {
-						f0elemf20f6elem := &svcsdk.Tmpfs{}
+						f0elemf20f6elem := &svcsdktypes.Tmpfs{}
 						if f0elemf20f6iter.ContainerPath != nil {
-							f0elemf20f6elem.SetContainerPath(*f0elemf20f6iter.ContainerPath)
+							f0elemf20f6elem.ContainerPath = f0elemf20f6iter.ContainerPath
 						}
 						if f0elemf20f6iter.MountOptions != nil {
-							f0elemf20f6elemf1 := []*string{}
-							for _, f0elemf20f6elemf1iter := range f0elemf20f6iter.MountOptions {
-								var f0elemf20f6elemf1elem string
-								f0elemf20f6elemf1elem = *f0elemf20f6elemf1iter
-								f0elemf20f6elemf1 = append(f0elemf20f6elemf1, &f0elemf20f6elemf1elem)
-							}
-							f0elemf20f6elem.SetMountOptions(f0elemf20f6elemf1)
+							f0elemf20f6elem.MountOptions = aws.ToStringSlice(f0elemf20f6iter.MountOptions)
 						}
 						if f0elemf20f6iter.Size != nil {
-							f0elemf20f6elem.SetSize(*f0elemf20f6iter.Size)
+							sizeCopy0 := *f0elemf20f6iter.Size
+							if sizeCopy0 > math.MaxInt32 || sizeCopy0 < math.MinInt32 {
+								return nil, fmt.Errorf("error: field size is of type int32")
+							}
+							sizeCopy := int32(sizeCopy0)
+							f0elemf20f6elem.Size = sizeCopy
 						}
-						f0elemf20f6 = append(f0elemf20f6, f0elemf20f6elem)
+						f0elemf20f6 = append(f0elemf20f6, *f0elemf20f6elem)
 					}
-					f0elemf20.SetTmpfs(f0elemf20f6)
+					f0elemf20.Tmpfs = f0elemf20f6
 				}
-				f0elem.SetLinuxParameters(f0elemf20)
+				f0elem.LinuxParameters = f0elemf20
 			}
 			if f0iter.LogConfiguration != nil {
-				f0elemf21 := &svcsdk.LogConfiguration{}
+				f0elemf21 := &svcsdktypes.LogConfiguration{}
 				if f0iter.LogConfiguration.LogDriver != nil {
-					f0elemf21.SetLogDriver(*f0iter.LogConfiguration.LogDriver)
+					f0elemf21.LogDriver = svcsdktypes.LogDriver(*f0iter.LogConfiguration.LogDriver)
 				}
 				if f0iter.LogConfiguration.Options != nil {
-					f0elemf21f1 := map[string]*string{}
-					for f0elemf21f1key, f0elemf21f1valiter := range f0iter.LogConfiguration.Options {
-						var f0elemf21f1val string
-						f0elemf21f1val = *f0elemf21f1valiter
-						f0elemf21f1[f0elemf21f1key] = &f0elemf21f1val
-					}
-					f0elemf21.SetOptions(f0elemf21f1)
+					f0elemf21.Options = aws.ToStringMap(f0iter.LogConfiguration.Options)
 				}
 				if f0iter.LogConfiguration.SecretOptions != nil {
-					f0elemf21f2 := []*svcsdk.Secret{}
+					f0elemf21f2 := []svcsdktypes.Secret{}
 					for _, f0elemf21f2iter := range f0iter.LogConfiguration.SecretOptions {
-						f0elemf21f2elem := &svcsdk.Secret{}
+						f0elemf21f2elem := &svcsdktypes.Secret{}
 						if f0elemf21f2iter.Name != nil {
-							f0elemf21f2elem.SetName(*f0elemf21f2iter.Name)
+							f0elemf21f2elem.Name = f0elemf21f2iter.Name
 						}
 						if f0elemf21f2iter.ValueFrom != nil {
-							f0elemf21f2elem.SetValueFrom(*f0elemf21f2iter.ValueFrom)
+							f0elemf21f2elem.ValueFrom = f0elemf21f2iter.ValueFrom
 						}
-						f0elemf21f2 = append(f0elemf21f2, f0elemf21f2elem)
+						f0elemf21f2 = append(f0elemf21f2, *f0elemf21f2elem)
 					}
-					f0elemf21.SetSecretOptions(f0elemf21f2)
+					f0elemf21.SecretOptions = f0elemf21f2
 				}
-				f0elem.SetLogConfiguration(f0elemf21)
+				f0elem.LogConfiguration = f0elemf21
 			}
 			if f0iter.Memory != nil {
-				f0elem.SetMemory(*f0iter.Memory)
+				memoryCopy0 := *f0iter.Memory
+				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field memory is of type int32")
+				}
+				memoryCopy := int32(memoryCopy0)
+				f0elem.Memory = &memoryCopy
 			}
 			if f0iter.MemoryReservation != nil {
-				f0elem.SetMemoryReservation(*f0iter.MemoryReservation)
+				memoryReservationCopy0 := *f0iter.MemoryReservation
+				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
+				}
+				memoryReservationCopy := int32(memoryReservationCopy0)
+				f0elem.MemoryReservation = &memoryReservationCopy
 			}
 			if f0iter.MountPoints != nil {
-				f0elemf24 := []*svcsdk.MountPoint{}
+				f0elemf24 := []svcsdktypes.MountPoint{}
 				for _, f0elemf24iter := range f0iter.MountPoints {
-					f0elemf24elem := &svcsdk.MountPoint{}
+					f0elemf24elem := &svcsdktypes.MountPoint{}
 					if f0elemf24iter.ContainerPath != nil {
-						f0elemf24elem.SetContainerPath(*f0elemf24iter.ContainerPath)
+						f0elemf24elem.ContainerPath = f0elemf24iter.ContainerPath
 					}
 					if f0elemf24iter.ReadOnly != nil {
-						f0elemf24elem.SetReadOnly(*f0elemf24iter.ReadOnly)
+						f0elemf24elem.ReadOnly = f0elemf24iter.ReadOnly
 					}
 					if f0elemf24iter.SourceVolume != nil {
-						f0elemf24elem.SetSourceVolume(*f0elemf24iter.SourceVolume)
+						f0elemf24elem.SourceVolume = f0elemf24iter.SourceVolume
 					}
-					f0elemf24 = append(f0elemf24, f0elemf24elem)
+					f0elemf24 = append(f0elemf24, *f0elemf24elem)
 				}
-				f0elem.SetMountPoints(f0elemf24)
+				f0elem.MountPoints = f0elemf24
 			}
 			if f0iter.Name != nil {
-				f0elem.SetName(*f0iter.Name)
+				f0elem.Name = f0iter.Name
 			}
 			if f0iter.PortMappings != nil {
-				f0elemf26 := []*svcsdk.PortMapping{}
+				f0elemf26 := []svcsdktypes.PortMapping{}
 				for _, f0elemf26iter := range f0iter.PortMappings {
-					f0elemf26elem := &svcsdk.PortMapping{}
+					f0elemf26elem := &svcsdktypes.PortMapping{}
 					if f0elemf26iter.AppProtocol != nil {
-						f0elemf26elem.SetAppProtocol(*f0elemf26iter.AppProtocol)
+						f0elemf26elem.AppProtocol = svcsdktypes.ApplicationProtocol(*f0elemf26iter.AppProtocol)
 					}
 					if f0elemf26iter.ContainerPort != nil {
-						f0elemf26elem.SetContainerPort(*f0elemf26iter.ContainerPort)
+						containerPortCopy0 := *f0elemf26iter.ContainerPort
+						if containerPortCopy0 > math.MaxInt32 || containerPortCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field containerPort is of type int32")
+						}
+						containerPortCopy := int32(containerPortCopy0)
+						f0elemf26elem.ContainerPort = &containerPortCopy
 					}
 					if f0elemf26iter.ContainerPortRange != nil {
-						f0elemf26elem.SetContainerPortRange(*f0elemf26iter.ContainerPortRange)
+						f0elemf26elem.ContainerPortRange = f0elemf26iter.ContainerPortRange
 					}
 					if f0elemf26iter.HostPort != nil {
-						f0elemf26elem.SetHostPort(*f0elemf26iter.HostPort)
+						hostPortCopy0 := *f0elemf26iter.HostPort
+						if hostPortCopy0 > math.MaxInt32 || hostPortCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field hostPort is of type int32")
+						}
+						hostPortCopy := int32(hostPortCopy0)
+						f0elemf26elem.HostPort = &hostPortCopy
 					}
 					if f0elemf26iter.Name != nil {
-						f0elemf26elem.SetName(*f0elemf26iter.Name)
+						f0elemf26elem.Name = f0elemf26iter.Name
 					}
 					if f0elemf26iter.Protocol != nil {
-						f0elemf26elem.SetProtocol(*f0elemf26iter.Protocol)
+						f0elemf26elem.Protocol = svcsdktypes.TransportProtocol(*f0elemf26iter.Protocol)
 					}
-					f0elemf26 = append(f0elemf26, f0elemf26elem)
+					f0elemf26 = append(f0elemf26, *f0elemf26elem)
 				}
-				f0elem.SetPortMappings(f0elemf26)
+				f0elem.PortMappings = f0elemf26
 			}
 			if f0iter.Privileged != nil {
-				f0elem.SetPrivileged(*f0iter.Privileged)
+				f0elem.Privileged = f0iter.Privileged
 			}
 			if f0iter.PseudoTerminal != nil {
-				f0elem.SetPseudoTerminal(*f0iter.PseudoTerminal)
+				f0elem.PseudoTerminal = f0iter.PseudoTerminal
 			}
 			if f0iter.ReadonlyRootFilesystem != nil {
-				f0elem.SetReadonlyRootFilesystem(*f0iter.ReadonlyRootFilesystem)
+				f0elem.ReadonlyRootFilesystem = f0iter.ReadonlyRootFilesystem
 			}
 			if f0iter.RepositoryCredentials != nil {
-				f0elemf30 := &svcsdk.RepositoryCredentials{}
+				f0elemf30 := &svcsdktypes.RepositoryCredentials{}
 				if f0iter.RepositoryCredentials.CredentialsParameter != nil {
-					f0elemf30.SetCredentialsParameter(*f0iter.RepositoryCredentials.CredentialsParameter)
+					f0elemf30.CredentialsParameter = f0iter.RepositoryCredentials.CredentialsParameter
 				}
-				f0elem.SetRepositoryCredentials(f0elemf30)
+				f0elem.RepositoryCredentials = f0elemf30
 			}
 			if f0iter.ResourceRequirements != nil {
-				f0elemf31 := []*svcsdk.ResourceRequirement{}
+				f0elemf31 := []svcsdktypes.ResourceRequirement{}
 				for _, f0elemf31iter := range f0iter.ResourceRequirements {
-					f0elemf31elem := &svcsdk.ResourceRequirement{}
+					f0elemf31elem := &svcsdktypes.ResourceRequirement{}
 					if f0elemf31iter.Type != nil {
-						f0elemf31elem.SetType(*f0elemf31iter.Type)
+						f0elemf31elem.Type = svcsdktypes.ResourceType(*f0elemf31iter.Type)
 					}
 					if f0elemf31iter.Value != nil {
-						f0elemf31elem.SetValue(*f0elemf31iter.Value)
+						f0elemf31elem.Value = f0elemf31iter.Value
 					}
-					f0elemf31 = append(f0elemf31, f0elemf31elem)
+					f0elemf31 = append(f0elemf31, *f0elemf31elem)
 				}
-				f0elem.SetResourceRequirements(f0elemf31)
+				f0elem.ResourceRequirements = f0elemf31
 			}
 			if f0iter.Secrets != nil {
-				f0elemf32 := []*svcsdk.Secret{}
+				f0elemf32 := []svcsdktypes.Secret{}
 				for _, f0elemf32iter := range f0iter.Secrets {
-					f0elemf32elem := &svcsdk.Secret{}
+					f0elemf32elem := &svcsdktypes.Secret{}
 					if f0elemf32iter.Name != nil {
-						f0elemf32elem.SetName(*f0elemf32iter.Name)
+						f0elemf32elem.Name = f0elemf32iter.Name
 					}
 					if f0elemf32iter.ValueFrom != nil {
-						f0elemf32elem.SetValueFrom(*f0elemf32iter.ValueFrom)
+						f0elemf32elem.ValueFrom = f0elemf32iter.ValueFrom
 					}
-					f0elemf32 = append(f0elemf32, f0elemf32elem)
+					f0elemf32 = append(f0elemf32, *f0elemf32elem)
 				}
-				f0elem.SetSecrets(f0elemf32)
+				f0elem.Secrets = f0elemf32
 			}
 			if f0iter.StartTimeout != nil {
-				f0elem.SetStartTimeout(*f0iter.StartTimeout)
+				startTimeoutCopy0 := *f0iter.StartTimeout
+				if startTimeoutCopy0 > math.MaxInt32 || startTimeoutCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field startTimeout is of type int32")
+				}
+				startTimeoutCopy := int32(startTimeoutCopy0)
+				f0elem.StartTimeout = &startTimeoutCopy
 			}
 			if f0iter.StopTimeout != nil {
-				f0elem.SetStopTimeout(*f0iter.StopTimeout)
+				stopTimeoutCopy0 := *f0iter.StopTimeout
+				if stopTimeoutCopy0 > math.MaxInt32 || stopTimeoutCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field StopTimeout is of type int32")
+				}
+				stopTimeoutCopy := int32(stopTimeoutCopy0)
+				f0elem.StopTimeout = &stopTimeoutCopy
 			}
 			if f0iter.SystemControls != nil {
-				f0elemf35 := []*svcsdk.SystemControl{}
+				f0elemf35 := []svcsdktypes.SystemControl{}
 				for _, f0elemf35iter := range f0iter.SystemControls {
-					f0elemf35elem := &svcsdk.SystemControl{}
+					f0elemf35elem := &svcsdktypes.SystemControl{}
 					if f0elemf35iter.Namespace != nil {
-						f0elemf35elem.SetNamespace(*f0elemf35iter.Namespace)
+						f0elemf35elem.Namespace = f0elemf35iter.Namespace
 					}
 					if f0elemf35iter.Value != nil {
-						f0elemf35elem.SetValue(*f0elemf35iter.Value)
+						f0elemf35elem.Value = f0elemf35iter.Value
 					}
-					f0elemf35 = append(f0elemf35, f0elemf35elem)
+					f0elemf35 = append(f0elemf35, *f0elemf35elem)
 				}
-				f0elem.SetSystemControls(f0elemf35)
+				f0elem.SystemControls = f0elemf35
 			}
 			if f0iter.Ulimits != nil {
-				f0elemf36 := []*svcsdk.Ulimit{}
+				f0elemf36 := []svcsdktypes.Ulimit{}
 				for _, f0elemf36iter := range f0iter.Ulimits {
-					f0elemf36elem := &svcsdk.Ulimit{}
+					f0elemf36elem := &svcsdktypes.Ulimit{}
 					if f0elemf36iter.HardLimit != nil {
-						f0elemf36elem.SetHardLimit(*f0elemf36iter.HardLimit)
+						hardLimitCopy0 := *f0elemf36iter.HardLimit
+						if hardLimitCopy0 > math.MaxInt32 || hardLimitCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field hardLimit is of type int32")
+						}
+						hardLimitCopy := int32(hardLimitCopy0)
+						f0elemf36elem.HardLimit = hardLimitCopy
 					}
 					if f0elemf36iter.Name != nil {
-						f0elemf36elem.SetName(*f0elemf36iter.Name)
+						f0elemf36elem.Name = svcsdktypes.UlimitName(*f0elemf36iter.Name)
 					}
 					if f0elemf36iter.SoftLimit != nil {
-						f0elemf36elem.SetSoftLimit(*f0elemf36iter.SoftLimit)
+						softLimitCopy0 := *f0elemf36iter.SoftLimit
+						if softLimitCopy0 > math.MaxInt32 || softLimitCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field softLimit is of type int32")
+						}
+						softLimitCopy := int32(softLimitCopy0)
+						f0elemf36elem.SoftLimit = softLimitCopy
 					}
-					f0elemf36 = append(f0elemf36, f0elemf36elem)
+					f0elemf36 = append(f0elemf36, *f0elemf36elem)
 				}
-				f0elem.SetUlimits(f0elemf36)
+				f0elem.Ulimits = f0elemf36
 			}
 			if f0iter.User != nil {
-				f0elem.SetUser(*f0iter.User)
+				f0elem.User = f0iter.User
 			}
 			if f0iter.VolumesFrom != nil {
-				f0elemf38 := []*svcsdk.VolumeFrom{}
+				f0elemf38 := []svcsdktypes.VolumeFrom{}
 				for _, f0elemf38iter := range f0iter.VolumesFrom {
-					f0elemf38elem := &svcsdk.VolumeFrom{}
+					f0elemf38elem := &svcsdktypes.VolumeFrom{}
 					if f0elemf38iter.ReadOnly != nil {
-						f0elemf38elem.SetReadOnly(*f0elemf38iter.ReadOnly)
+						f0elemf38elem.ReadOnly = f0elemf38iter.ReadOnly
 					}
 					if f0elemf38iter.SourceContainer != nil {
-						f0elemf38elem.SetSourceContainer(*f0elemf38iter.SourceContainer)
+						f0elemf38elem.SourceContainer = f0elemf38iter.SourceContainer
 					}
-					f0elemf38 = append(f0elemf38, f0elemf38elem)
+					f0elemf38 = append(f0elemf38, *f0elemf38elem)
 				}
-				f0elem.SetVolumesFrom(f0elemf38)
+				f0elem.VolumesFrom = f0elemf38
 			}
 			if f0iter.WorkingDirectory != nil {
-				f0elem.SetWorkingDirectory(*f0iter.WorkingDirectory)
+				f0elem.WorkingDirectory = f0iter.WorkingDirectory
 			}
-			f0 = append(f0, f0elem)
+			f0 = append(f0, *f0elem)
 		}
-		res.SetContainerDefinitions(f0)
+		res.ContainerDefinitions = f0
 	}
 	if r.ko.Spec.CPU != nil {
-		res.SetCpu(*r.ko.Spec.CPU)
+		res.Cpu = r.ko.Spec.CPU
 	}
 	if r.ko.Spec.EphemeralStorage != nil {
-		f2 := &svcsdk.EphemeralStorage{}
+		f2 := &svcsdktypes.EphemeralStorage{}
 		if r.ko.Spec.EphemeralStorage.SizeInGiB != nil {
-			f2.SetSizeInGiB(*r.ko.Spec.EphemeralStorage.SizeInGiB)
+			sizeInGiBCopy0 := *r.ko.Spec.EphemeralStorage.SizeInGiB
+			if sizeInGiBCopy0 > math.MaxInt32 || sizeInGiBCopy0 < math.MinInt32 {
+				return nil, fmt.Errorf("error: field sizeInGiB is of type int32")
+			}
+			sizeInGiBCopy := int32(sizeInGiBCopy0)
+			f2.SizeInGiB = sizeInGiBCopy
 		}
-		res.SetEphemeralStorage(f2)
+		res.EphemeralStorage = f2
 	}
 	if r.ko.Spec.ExecutionRoleARN != nil {
-		res.SetExecutionRoleArn(*r.ko.Spec.ExecutionRoleARN)
+		res.ExecutionRoleArn = r.ko.Spec.ExecutionRoleARN
 	}
 	if r.ko.Spec.Family != nil {
-		res.SetFamily(*r.ko.Spec.Family)
+		res.Family = r.ko.Spec.Family
 	}
 	if r.ko.Spec.InferenceAccelerators != nil {
-		f5 := []*svcsdk.InferenceAccelerator{}
+		f5 := []svcsdktypes.InferenceAccelerator{}
 		for _, f5iter := range r.ko.Spec.InferenceAccelerators {
-			f5elem := &svcsdk.InferenceAccelerator{}
+			f5elem := &svcsdktypes.InferenceAccelerator{}
 			if f5iter.DeviceName != nil {
-				f5elem.SetDeviceName(*f5iter.DeviceName)
+				f5elem.DeviceName = f5iter.DeviceName
 			}
 			if f5iter.DeviceType != nil {
-				f5elem.SetDeviceType(*f5iter.DeviceType)
+				f5elem.DeviceType = f5iter.DeviceType
 			}
-			f5 = append(f5, f5elem)
+			f5 = append(f5, *f5elem)
 		}
-		res.SetInferenceAccelerators(f5)
+		res.InferenceAccelerators = f5
 	}
 	if r.ko.Spec.IPCMode != nil {
-		res.SetIpcMode(*r.ko.Spec.IPCMode)
+		res.IpcMode = svcsdktypes.IpcMode(*r.ko.Spec.IPCMode)
 	}
 	if r.ko.Spec.Memory != nil {
-		res.SetMemory(*r.ko.Spec.Memory)
+		res.Memory = r.ko.Spec.Memory
 	}
 	if r.ko.Spec.NetworkMode != nil {
-		res.SetNetworkMode(*r.ko.Spec.NetworkMode)
+		res.NetworkMode = svcsdktypes.NetworkMode(*r.ko.Spec.NetworkMode)
 	}
 	if r.ko.Spec.PIDMode != nil {
-		res.SetPidMode(*r.ko.Spec.PIDMode)
+		res.PidMode = svcsdktypes.PidMode(*r.ko.Spec.PIDMode)
 	}
 	if r.ko.Spec.PlacementConstraints != nil {
-		f10 := []*svcsdk.TaskDefinitionPlacementConstraint{}
+		f10 := []svcsdktypes.TaskDefinitionPlacementConstraint{}
 		for _, f10iter := range r.ko.Spec.PlacementConstraints {
-			f10elem := &svcsdk.TaskDefinitionPlacementConstraint{}
+			f10elem := &svcsdktypes.TaskDefinitionPlacementConstraint{}
 			if f10iter.Expression != nil {
-				f10elem.SetExpression(*f10iter.Expression)
+				f10elem.Expression = f10iter.Expression
 			}
 			if f10iter.Type != nil {
-				f10elem.SetType(*f10iter.Type)
+				f10elem.Type = svcsdktypes.TaskDefinitionPlacementConstraintType(*f10iter.Type)
 			}
-			f10 = append(f10, f10elem)
+			f10 = append(f10, *f10elem)
 		}
-		res.SetPlacementConstraints(f10)
+		res.PlacementConstraints = f10
 	}
 	if r.ko.Spec.ProxyConfiguration != nil {
-		f11 := &svcsdk.ProxyConfiguration{}
+		f11 := &svcsdktypes.ProxyConfiguration{}
 		if r.ko.Spec.ProxyConfiguration.ContainerName != nil {
-			f11.SetContainerName(*r.ko.Spec.ProxyConfiguration.ContainerName)
+			f11.ContainerName = r.ko.Spec.ProxyConfiguration.ContainerName
 		}
 		if r.ko.Spec.ProxyConfiguration.Properties != nil {
-			f11f1 := []*svcsdk.KeyValuePair{}
+			f11f1 := []svcsdktypes.KeyValuePair{}
 			for _, f11f1iter := range r.ko.Spec.ProxyConfiguration.Properties {
-				f11f1elem := &svcsdk.KeyValuePair{}
+				f11f1elem := &svcsdktypes.KeyValuePair{}
 				if f11f1iter.Name != nil {
-					f11f1elem.SetName(*f11f1iter.Name)
+					f11f1elem.Name = f11f1iter.Name
 				}
 				if f11f1iter.Value != nil {
-					f11f1elem.SetValue(*f11f1iter.Value)
+					f11f1elem.Value = f11f1iter.Value
 				}
-				f11f1 = append(f11f1, f11f1elem)
+				f11f1 = append(f11f1, *f11f1elem)
 			}
-			f11.SetProperties(f11f1)
+			f11.Properties = f11f1
 		}
 		if r.ko.Spec.ProxyConfiguration.Type != nil {
-			f11.SetType(*r.ko.Spec.ProxyConfiguration.Type)
+			f11.Type = svcsdktypes.ProxyConfigurationType(*r.ko.Spec.ProxyConfiguration.Type)
 		}
-		res.SetProxyConfiguration(f11)
+		res.ProxyConfiguration = f11
 	}
 	if r.ko.Spec.RequiresCompatibilities != nil {
-		f12 := []*string{}
+		f12 := []svcsdktypes.Compatibility{}
 		for _, f12iter := range r.ko.Spec.RequiresCompatibilities {
 			var f12elem string
-			f12elem = *f12iter
-			f12 = append(f12, &f12elem)
+			f12elem = string(*f12iter)
+			f12 = append(f12, svcsdktypes.Compatibility(f12elem))
 		}
-		res.SetRequiresCompatibilities(f12)
+		res.RequiresCompatibilities = f12
 	}
 	if r.ko.Spec.RuntimePlatform != nil {
-		f13 := &svcsdk.RuntimePlatform{}
+		f13 := &svcsdktypes.RuntimePlatform{}
 		if r.ko.Spec.RuntimePlatform.CPUArchitecture != nil {
-			f13.SetCpuArchitecture(*r.ko.Spec.RuntimePlatform.CPUArchitecture)
+			f13.CpuArchitecture = svcsdktypes.CPUArchitecture(*r.ko.Spec.RuntimePlatform.CPUArchitecture)
 		}
 		if r.ko.Spec.RuntimePlatform.OperatingSystemFamily != nil {
-			f13.SetOperatingSystemFamily(*r.ko.Spec.RuntimePlatform.OperatingSystemFamily)
+			f13.OperatingSystemFamily = svcsdktypes.OSFamily(*r.ko.Spec.RuntimePlatform.OperatingSystemFamily)
 		}
-		res.SetRuntimePlatform(f13)
+		res.RuntimePlatform = f13
 	}
 	if r.ko.Spec.Tags != nil {
-		f14 := []*svcsdk.Tag{}
+		f14 := []svcsdktypes.Tag{}
 		for _, f14iter := range r.ko.Spec.Tags {
-			f14elem := &svcsdk.Tag{}
+			f14elem := &svcsdktypes.Tag{}
 			if f14iter.Key != nil {
-				f14elem.SetKey(*f14iter.Key)
+				f14elem.Key = f14iter.Key
 			}
 			if f14iter.Value != nil {
-				f14elem.SetValue(*f14iter.Value)
+				f14elem.Value = f14iter.Value
 			}
-			f14 = append(f14, f14elem)
+			f14 = append(f14, *f14elem)
 		}
-		res.SetTags(f14)
+		res.Tags = f14
 	}
 	if r.ko.Spec.TaskRoleARN != nil {
-		res.SetTaskRoleArn(*r.ko.Spec.TaskRoleARN)
+		res.TaskRoleArn = r.ko.Spec.TaskRoleARN
 	}
 	if r.ko.Spec.Volumes != nil {
-		f16 := []*svcsdk.Volume{}
+		f16 := []svcsdktypes.Volume{}
 		for _, f16iter := range r.ko.Spec.Volumes {
-			f16elem := &svcsdk.Volume{}
+			f16elem := &svcsdktypes.Volume{}
 			if f16iter.ConfiguredAtLaunch != nil {
-				f16elem.SetConfiguredAtLaunch(*f16iter.ConfiguredAtLaunch)
+				f16elem.ConfiguredAtLaunch = f16iter.ConfiguredAtLaunch
 			}
 			if f16iter.DockerVolumeConfiguration != nil {
-				f16elemf1 := &svcsdk.DockerVolumeConfiguration{}
+				f16elemf1 := &svcsdktypes.DockerVolumeConfiguration{}
 				if f16iter.DockerVolumeConfiguration.Autoprovision != nil {
-					f16elemf1.SetAutoprovision(*f16iter.DockerVolumeConfiguration.Autoprovision)
+					f16elemf1.Autoprovision = f16iter.DockerVolumeConfiguration.Autoprovision
 				}
 				if f16iter.DockerVolumeConfiguration.Driver != nil {
-					f16elemf1.SetDriver(*f16iter.DockerVolumeConfiguration.Driver)
+					f16elemf1.Driver = f16iter.DockerVolumeConfiguration.Driver
 				}
 				if f16iter.DockerVolumeConfiguration.DriverOpts != nil {
-					f16elemf1f2 := map[string]*string{}
-					for f16elemf1f2key, f16elemf1f2valiter := range f16iter.DockerVolumeConfiguration.DriverOpts {
-						var f16elemf1f2val string
-						f16elemf1f2val = *f16elemf1f2valiter
-						f16elemf1f2[f16elemf1f2key] = &f16elemf1f2val
-					}
-					f16elemf1.SetDriverOpts(f16elemf1f2)
+					f16elemf1.DriverOpts = aws.ToStringMap(f16iter.DockerVolumeConfiguration.DriverOpts)
 				}
 				if f16iter.DockerVolumeConfiguration.Labels != nil {
-					f16elemf1f3 := map[string]*string{}
-					for f16elemf1f3key, f16elemf1f3valiter := range f16iter.DockerVolumeConfiguration.Labels {
-						var f16elemf1f3val string
-						f16elemf1f3val = *f16elemf1f3valiter
-						f16elemf1f3[f16elemf1f3key] = &f16elemf1f3val
-					}
-					f16elemf1.SetLabels(f16elemf1f3)
+					f16elemf1.Labels = aws.ToStringMap(f16iter.DockerVolumeConfiguration.Labels)
 				}
 				if f16iter.DockerVolumeConfiguration.Scope != nil {
-					f16elemf1.SetScope(*f16iter.DockerVolumeConfiguration.Scope)
+					f16elemf1.Scope = svcsdktypes.Scope(*f16iter.DockerVolumeConfiguration.Scope)
 				}
-				f16elem.SetDockerVolumeConfiguration(f16elemf1)
+				f16elem.DockerVolumeConfiguration = f16elemf1
 			}
 			if f16iter.EFSVolumeConfiguration != nil {
-				f16elemf2 := &svcsdk.EFSVolumeConfiguration{}
+				f16elemf2 := &svcsdktypes.EFSVolumeConfiguration{}
 				if f16iter.EFSVolumeConfiguration.AuthorizationConfig != nil {
-					f16elemf2f0 := &svcsdk.EFSAuthorizationConfig{}
+					f16elemf2f0 := &svcsdktypes.EFSAuthorizationConfig{}
 					if f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID != nil {
-						f16elemf2f0.SetAccessPointId(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID)
+						f16elemf2f0.AccessPointId = f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID
 					}
 					if f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM != nil {
-						f16elemf2f0.SetIam(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM)
+						f16elemf2f0.Iam = svcsdktypes.EFSAuthorizationConfigIAM(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM)
 					}
-					f16elemf2.SetAuthorizationConfig(f16elemf2f0)
+					f16elemf2.AuthorizationConfig = f16elemf2f0
 				}
 				if f16iter.EFSVolumeConfiguration.FileSystemID != nil {
-					f16elemf2.SetFileSystemId(*f16iter.EFSVolumeConfiguration.FileSystemID)
+					f16elemf2.FileSystemId = f16iter.EFSVolumeConfiguration.FileSystemID
 				}
 				if f16iter.EFSVolumeConfiguration.RootDirectory != nil {
-					f16elemf2.SetRootDirectory(*f16iter.EFSVolumeConfiguration.RootDirectory)
+					f16elemf2.RootDirectory = f16iter.EFSVolumeConfiguration.RootDirectory
 				}
 				if f16iter.EFSVolumeConfiguration.TransitEncryption != nil {
-					f16elemf2.SetTransitEncryption(*f16iter.EFSVolumeConfiguration.TransitEncryption)
+					f16elemf2.TransitEncryption = svcsdktypes.EFSTransitEncryption(*f16iter.EFSVolumeConfiguration.TransitEncryption)
 				}
 				if f16iter.EFSVolumeConfiguration.TransitEncryptionPort != nil {
-					f16elemf2.SetTransitEncryptionPort(*f16iter.EFSVolumeConfiguration.TransitEncryptionPort)
+					transitEncryptionPortCopy0 := *f16iter.EFSVolumeConfiguration.TransitEncryptionPort
+					if transitEncryptionPortCopy0 > math.MaxInt32 || transitEncryptionPortCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field transitEncryptionPort is of type int32")
+					}
+					transitEncryptionPortCopy := int32(transitEncryptionPortCopy0)
+					f16elemf2.TransitEncryptionPort = &transitEncryptionPortCopy
 				}
-				f16elem.SetEfsVolumeConfiguration(f16elemf2)
+				f16elem.EfsVolumeConfiguration = f16elemf2
 			}
 			if f16iter.FsxWindowsFileServerVolumeConfiguration != nil {
-				f16elemf3 := &svcsdk.FSxWindowsFileServerVolumeConfiguration{}
+				f16elemf3 := &svcsdktypes.FSxWindowsFileServerVolumeConfiguration{}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig != nil {
-					f16elemf3f0 := &svcsdk.FSxWindowsFileServerAuthorizationConfig{}
+					f16elemf3f0 := &svcsdktypes.FSxWindowsFileServerAuthorizationConfig{}
 					if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter != nil {
-						f16elemf3f0.SetCredentialsParameter(*f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter)
+						f16elemf3f0.CredentialsParameter = f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter
 					}
 					if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain != nil {
-						f16elemf3f0.SetDomain(*f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain)
+						f16elemf3f0.Domain = f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain
 					}
-					f16elemf3.SetAuthorizationConfig(f16elemf3f0)
+					f16elemf3.AuthorizationConfig = f16elemf3f0
 				}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID != nil {
-					f16elemf3.SetFileSystemId(*f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID)
+					f16elemf3.FileSystemId = f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID
 				}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory != nil {
-					f16elemf3.SetRootDirectory(*f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory)
+					f16elemf3.RootDirectory = f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory
 				}
-				f16elem.SetFsxWindowsFileServerVolumeConfiguration(f16elemf3)
+				f16elem.FsxWindowsFileServerVolumeConfiguration = f16elemf3
 			}
 			if f16iter.Host != nil {
-				f16elemf4 := &svcsdk.HostVolumeProperties{}
+				f16elemf4 := &svcsdktypes.HostVolumeProperties{}
 				if f16iter.Host.SourcePath != nil {
-					f16elemf4.SetSourcePath(*f16iter.Host.SourcePath)
+					f16elemf4.SourcePath = f16iter.Host.SourcePath
 				}
-				f16elem.SetHost(f16elemf4)
+				f16elem.Host = f16elemf4
 			}
 			if f16iter.Name != nil {
-				f16elem.SetName(*f16iter.Name)
+				f16elem.Name = f16iter.Name
 			}
-			f16 = append(f16, f16elem)
+			f16 = append(f16, *f16elem)
 		}
-		res.SetVolumes(f16)
+		res.Volumes = f16
 	}
 
 	return res, nil
@@ -2381,7 +2201,7 @@ func (rm *resourceManager) sdkUpdate(
 
 	var resp *svcsdk.RegisterTaskDefinitionOutput
 	_ = resp
-	resp, err = rm.sdkapi.RegisterTaskDefinitionWithContext(ctx, input)
+	resp, err = rm.sdkapi.RegisterTaskDefinition(ctx, input)
 	rm.metrics.RecordAPICall("UPDATE", "RegisterTaskDefinition", err)
 	if err != nil {
 		return nil, err
@@ -2393,9 +2213,9 @@ func (rm *resourceManager) sdkUpdate(
 	if resp.TaskDefinition.Compatibilities != nil {
 		f0 := []*string{}
 		for _, f0iter := range resp.TaskDefinition.Compatibilities {
-			var f0elem string
-			f0elem = *f0iter
-			f0 = append(f0, &f0elem)
+			var f0elem *string
+			f0elem = aws.String(string(f0iter))
+			f0 = append(f0, f0elem)
 		}
 		ko.Status.Compatibilities = f0
 	} else {
@@ -2406,32 +2226,19 @@ func (rm *resourceManager) sdkUpdate(
 		for _, f1iter := range resp.TaskDefinition.ContainerDefinitions {
 			f1elem := &svcapitypes.ContainerDefinition{}
 			if f1iter.Command != nil {
-				f1elemf0 := []*string{}
-				for _, f1elemf0iter := range f1iter.Command {
-					var f1elemf0elem string
-					f1elemf0elem = *f1elemf0iter
-					f1elemf0 = append(f1elemf0, &f1elemf0elem)
-				}
-				f1elem.Command = f1elemf0
+				f1elem.Command = aws.StringSlice(f1iter.Command)
 			}
-			if f1iter.Cpu != nil {
-				f1elem.CPU = f1iter.Cpu
-			}
+			cpuCopy := int64(f1iter.Cpu)
+			f1elem.CPU = &cpuCopy
 			if f1iter.CredentialSpecs != nil {
-				f1elemf2 := []*string{}
-				for _, f1elemf2iter := range f1iter.CredentialSpecs {
-					var f1elemf2elem string
-					f1elemf2elem = *f1elemf2iter
-					f1elemf2 = append(f1elemf2, &f1elemf2elem)
-				}
-				f1elem.CredentialSpecs = f1elemf2
+				f1elem.CredentialSpecs = aws.StringSlice(f1iter.CredentialSpecs)
 			}
 			if f1iter.DependsOn != nil {
 				f1elemf3 := []*svcapitypes.ContainerDependency{}
 				for _, f1elemf3iter := range f1iter.DependsOn {
 					f1elemf3elem := &svcapitypes.ContainerDependency{}
-					if f1elemf3iter.Condition != nil {
-						f1elemf3elem.Condition = f1elemf3iter.Condition
+					if f1elemf3iter.Condition != "" {
+						f1elemf3elem.Condition = aws.String(string(f1elemf3iter.Condition))
 					}
 					if f1elemf3iter.ContainerName != nil {
 						f1elemf3elem.ContainerName = f1elemf3iter.ContainerName
@@ -2444,49 +2251,19 @@ func (rm *resourceManager) sdkUpdate(
 				f1elem.DisableNetworking = f1iter.DisableNetworking
 			}
 			if f1iter.DnsSearchDomains != nil {
-				f1elemf5 := []*string{}
-				for _, f1elemf5iter := range f1iter.DnsSearchDomains {
-					var f1elemf5elem string
-					f1elemf5elem = *f1elemf5iter
-					f1elemf5 = append(f1elemf5, &f1elemf5elem)
-				}
-				f1elem.DNSSearchDomains = f1elemf5
+				f1elem.DNSSearchDomains = aws.StringSlice(f1iter.DnsSearchDomains)
 			}
 			if f1iter.DnsServers != nil {
-				f1elemf6 := []*string{}
-				for _, f1elemf6iter := range f1iter.DnsServers {
-					var f1elemf6elem string
-					f1elemf6elem = *f1elemf6iter
-					f1elemf6 = append(f1elemf6, &f1elemf6elem)
-				}
-				f1elem.DNSServers = f1elemf6
+				f1elem.DNSServers = aws.StringSlice(f1iter.DnsServers)
 			}
 			if f1iter.DockerLabels != nil {
-				f1elemf7 := map[string]*string{}
-				for f1elemf7key, f1elemf7valiter := range f1iter.DockerLabels {
-					var f1elemf7val string
-					f1elemf7val = *f1elemf7valiter
-					f1elemf7[f1elemf7key] = &f1elemf7val
-				}
-				f1elem.DockerLabels = f1elemf7
+				f1elem.DockerLabels = aws.StringMap(f1iter.DockerLabels)
 			}
 			if f1iter.DockerSecurityOptions != nil {
-				f1elemf8 := []*string{}
-				for _, f1elemf8iter := range f1iter.DockerSecurityOptions {
-					var f1elemf8elem string
-					f1elemf8elem = *f1elemf8iter
-					f1elemf8 = append(f1elemf8, &f1elemf8elem)
-				}
-				f1elem.DockerSecurityOptions = f1elemf8
+				f1elem.DockerSecurityOptions = aws.StringSlice(f1iter.DockerSecurityOptions)
 			}
 			if f1iter.EntryPoint != nil {
-				f1elemf9 := []*string{}
-				for _, f1elemf9iter := range f1iter.EntryPoint {
-					var f1elemf9elem string
-					f1elemf9elem = *f1elemf9iter
-					f1elemf9 = append(f1elemf9, &f1elemf9elem)
-				}
-				f1elem.EntryPoint = f1elemf9
+				f1elem.EntryPoint = aws.StringSlice(f1iter.EntryPoint)
 			}
 			if f1iter.Environment != nil {
 				f1elemf10 := []*svcapitypes.KeyValuePair{}
@@ -2506,8 +2283,8 @@ func (rm *resourceManager) sdkUpdate(
 				f1elemf11 := []*svcapitypes.EnvironmentFile{}
 				for _, f1elemf11iter := range f1iter.EnvironmentFiles {
 					f1elemf11elem := &svcapitypes.EnvironmentFile{}
-					if f1elemf11iter.Type != nil {
-						f1elemf11elem.Type = f1elemf11iter.Type
+					if f1elemf11iter.Type != "" {
+						f1elemf11elem.Type = aws.String(string(f1elemf11iter.Type))
 					}
 					if f1elemf11iter.Value != nil {
 						f1elemf11elem.Value = f1elemf11iter.Value
@@ -2536,41 +2313,33 @@ func (rm *resourceManager) sdkUpdate(
 			if f1iter.FirelensConfiguration != nil {
 				f1elemf14 := &svcapitypes.FirelensConfiguration{}
 				if f1iter.FirelensConfiguration.Options != nil {
-					f1elemf14f0 := map[string]*string{}
-					for f1elemf14f0key, f1elemf14f0valiter := range f1iter.FirelensConfiguration.Options {
-						var f1elemf14f0val string
-						f1elemf14f0val = *f1elemf14f0valiter
-						f1elemf14f0[f1elemf14f0key] = &f1elemf14f0val
-					}
-					f1elemf14.Options = f1elemf14f0
+					f1elemf14.Options = aws.StringMap(f1iter.FirelensConfiguration.Options)
 				}
-				if f1iter.FirelensConfiguration.Type != nil {
-					f1elemf14.Type = f1iter.FirelensConfiguration.Type
+				if f1iter.FirelensConfiguration.Type != "" {
+					f1elemf14.Type = aws.String(string(f1iter.FirelensConfiguration.Type))
 				}
 				f1elem.FirelensConfiguration = f1elemf14
 			}
 			if f1iter.HealthCheck != nil {
 				f1elemf15 := &svcapitypes.HealthCheck{}
 				if f1iter.HealthCheck.Command != nil {
-					f1elemf15f0 := []*string{}
-					for _, f1elemf15f0iter := range f1iter.HealthCheck.Command {
-						var f1elemf15f0elem string
-						f1elemf15f0elem = *f1elemf15f0iter
-						f1elemf15f0 = append(f1elemf15f0, &f1elemf15f0elem)
-					}
-					f1elemf15.Command = f1elemf15f0
+					f1elemf15.Command = aws.StringSlice(f1iter.HealthCheck.Command)
 				}
 				if f1iter.HealthCheck.Interval != nil {
-					f1elemf15.Interval = f1iter.HealthCheck.Interval
+					intervalCopy := int64(*f1iter.HealthCheck.Interval)
+					f1elemf15.Interval = &intervalCopy
 				}
 				if f1iter.HealthCheck.Retries != nil {
-					f1elemf15.Retries = f1iter.HealthCheck.Retries
+					retriesCopy := int64(*f1iter.HealthCheck.Retries)
+					f1elemf15.Retries = &retriesCopy
 				}
 				if f1iter.HealthCheck.StartPeriod != nil {
-					f1elemf15.StartPeriod = f1iter.HealthCheck.StartPeriod
+					startPeriodCopy := int64(*f1iter.HealthCheck.StartPeriod)
+					f1elemf15.StartPeriod = &startPeriodCopy
 				}
 				if f1iter.HealthCheck.Timeout != nil {
-					f1elemf15.Timeout = f1iter.HealthCheck.Timeout
+					timeoutCopy := int64(*f1iter.HealthCheck.Timeout)
+					f1elemf15.Timeout = &timeoutCopy
 				}
 				f1elem.HealthCheck = f1elemf15
 			}
@@ -2584,35 +2353,17 @@ func (rm *resourceManager) sdkUpdate(
 				f1elem.Interactive = f1iter.Interactive
 			}
 			if f1iter.Links != nil {
-				f1elemf19 := []*string{}
-				for _, f1elemf19iter := range f1iter.Links {
-					var f1elemf19elem string
-					f1elemf19elem = *f1elemf19iter
-					f1elemf19 = append(f1elemf19, &f1elemf19elem)
-				}
-				f1elem.Links = f1elemf19
+				f1elem.Links = aws.StringSlice(f1iter.Links)
 			}
 			if f1iter.LinuxParameters != nil {
 				f1elemf20 := &svcapitypes.LinuxParameters{}
 				if f1iter.LinuxParameters.Capabilities != nil {
 					f1elemf20f0 := &svcapitypes.KernelCapabilities{}
 					if f1iter.LinuxParameters.Capabilities.Add != nil {
-						f1elemf20f0f0 := []*string{}
-						for _, f1elemf20f0f0iter := range f1iter.LinuxParameters.Capabilities.Add {
-							var f1elemf20f0f0elem string
-							f1elemf20f0f0elem = *f1elemf20f0f0iter
-							f1elemf20f0f0 = append(f1elemf20f0f0, &f1elemf20f0f0elem)
-						}
-						f1elemf20f0.Add = f1elemf20f0f0
+						f1elemf20f0.Add = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Add)
 					}
 					if f1iter.LinuxParameters.Capabilities.Drop != nil {
-						f1elemf20f0f1 := []*string{}
-						for _, f1elemf20f0f1iter := range f1iter.LinuxParameters.Capabilities.Drop {
-							var f1elemf20f0f1elem string
-							f1elemf20f0f1elem = *f1elemf20f0f1iter
-							f1elemf20f0f1 = append(f1elemf20f0f1, &f1elemf20f0f1elem)
-						}
-						f1elemf20f0.Drop = f1elemf20f0f1
+						f1elemf20f0.Drop = aws.StringSlice(f1iter.LinuxParameters.Capabilities.Drop)
 					}
 					f1elemf20.Capabilities = f1elemf20f0
 				}
@@ -2629,9 +2380,9 @@ func (rm *resourceManager) sdkUpdate(
 						if f1elemf20f1iter.Permissions != nil {
 							f1elemf20f1elemf2 := []*string{}
 							for _, f1elemf20f1elemf2iter := range f1elemf20f1iter.Permissions {
-								var f1elemf20f1elemf2elem string
-								f1elemf20f1elemf2elem = *f1elemf20f1elemf2iter
-								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, &f1elemf20f1elemf2elem)
+								var f1elemf20f1elemf2elem *string
+								f1elemf20f1elemf2elem = aws.String(string(f1elemf20f1elemf2iter))
+								f1elemf20f1elemf2 = append(f1elemf20f1elemf2, f1elemf20f1elemf2elem)
 							}
 							f1elemf20f1elem.Permissions = f1elemf20f1elemf2
 						}
@@ -2643,13 +2394,16 @@ func (rm *resourceManager) sdkUpdate(
 					f1elemf20.InitProcessEnabled = f1iter.LinuxParameters.InitProcessEnabled
 				}
 				if f1iter.LinuxParameters.MaxSwap != nil {
-					f1elemf20.MaxSwap = f1iter.LinuxParameters.MaxSwap
+					maxSwapCopy := int64(*f1iter.LinuxParameters.MaxSwap)
+					f1elemf20.MaxSwap = &maxSwapCopy
 				}
 				if f1iter.LinuxParameters.SharedMemorySize != nil {
-					f1elemf20.SharedMemorySize = f1iter.LinuxParameters.SharedMemorySize
+					sharedMemorySizeCopy := int64(*f1iter.LinuxParameters.SharedMemorySize)
+					f1elemf20.SharedMemorySize = &sharedMemorySizeCopy
 				}
 				if f1iter.LinuxParameters.Swappiness != nil {
-					f1elemf20.Swappiness = f1iter.LinuxParameters.Swappiness
+					swappinessCopy := int64(*f1iter.LinuxParameters.Swappiness)
+					f1elemf20.Swappiness = &swappinessCopy
 				}
 				if f1iter.LinuxParameters.Tmpfs != nil {
 					f1elemf20f6 := []*svcapitypes.Tmpfs{}
@@ -2659,17 +2413,10 @@ func (rm *resourceManager) sdkUpdate(
 							f1elemf20f6elem.ContainerPath = f1elemf20f6iter.ContainerPath
 						}
 						if f1elemf20f6iter.MountOptions != nil {
-							f1elemf20f6elemf1 := []*string{}
-							for _, f1elemf20f6elemf1iter := range f1elemf20f6iter.MountOptions {
-								var f1elemf20f6elemf1elem string
-								f1elemf20f6elemf1elem = *f1elemf20f6elemf1iter
-								f1elemf20f6elemf1 = append(f1elemf20f6elemf1, &f1elemf20f6elemf1elem)
-							}
-							f1elemf20f6elem.MountOptions = f1elemf20f6elemf1
+							f1elemf20f6elem.MountOptions = aws.StringSlice(f1elemf20f6iter.MountOptions)
 						}
-						if f1elemf20f6iter.Size != nil {
-							f1elemf20f6elem.Size = f1elemf20f6iter.Size
-						}
+						sizeCopy := int64(f1elemf20f6iter.Size)
+						f1elemf20f6elem.Size = &sizeCopy
 						f1elemf20f6 = append(f1elemf20f6, f1elemf20f6elem)
 					}
 					f1elemf20.Tmpfs = f1elemf20f6
@@ -2678,17 +2425,11 @@ func (rm *resourceManager) sdkUpdate(
 			}
 			if f1iter.LogConfiguration != nil {
 				f1elemf21 := &svcapitypes.LogConfiguration{}
-				if f1iter.LogConfiguration.LogDriver != nil {
-					f1elemf21.LogDriver = f1iter.LogConfiguration.LogDriver
+				if f1iter.LogConfiguration.LogDriver != "" {
+					f1elemf21.LogDriver = aws.String(string(f1iter.LogConfiguration.LogDriver))
 				}
 				if f1iter.LogConfiguration.Options != nil {
-					f1elemf21f1 := map[string]*string{}
-					for f1elemf21f1key, f1elemf21f1valiter := range f1iter.LogConfiguration.Options {
-						var f1elemf21f1val string
-						f1elemf21f1val = *f1elemf21f1valiter
-						f1elemf21f1[f1elemf21f1key] = &f1elemf21f1val
-					}
-					f1elemf21.Options = f1elemf21f1
+					f1elemf21.Options = aws.StringMap(f1iter.LogConfiguration.Options)
 				}
 				if f1iter.LogConfiguration.SecretOptions != nil {
 					f1elemf21f2 := []*svcapitypes.Secret{}
@@ -2707,10 +2448,12 @@ func (rm *resourceManager) sdkUpdate(
 				f1elem.LogConfiguration = f1elemf21
 			}
 			if f1iter.Memory != nil {
-				f1elem.Memory = f1iter.Memory
+				memoryCopy := int64(*f1iter.Memory)
+				f1elem.Memory = &memoryCopy
 			}
 			if f1iter.MemoryReservation != nil {
-				f1elem.MemoryReservation = f1iter.MemoryReservation
+				memoryReservationCopy := int64(*f1iter.MemoryReservation)
+				f1elem.MemoryReservation = &memoryReservationCopy
 			}
 			if f1iter.MountPoints != nil {
 				f1elemf24 := []*svcapitypes.MountPoint{}
@@ -2736,23 +2479,25 @@ func (rm *resourceManager) sdkUpdate(
 				f1elemf26 := []*svcapitypes.PortMapping{}
 				for _, f1elemf26iter := range f1iter.PortMappings {
 					f1elemf26elem := &svcapitypes.PortMapping{}
-					if f1elemf26iter.AppProtocol != nil {
-						f1elemf26elem.AppProtocol = f1elemf26iter.AppProtocol
+					if f1elemf26iter.AppProtocol != "" {
+						f1elemf26elem.AppProtocol = aws.String(string(f1elemf26iter.AppProtocol))
 					}
 					if f1elemf26iter.ContainerPort != nil {
-						f1elemf26elem.ContainerPort = f1elemf26iter.ContainerPort
+						containerPortCopy := int64(*f1elemf26iter.ContainerPort)
+						f1elemf26elem.ContainerPort = &containerPortCopy
 					}
 					if f1elemf26iter.ContainerPortRange != nil {
 						f1elemf26elem.ContainerPortRange = f1elemf26iter.ContainerPortRange
 					}
 					if f1elemf26iter.HostPort != nil {
-						f1elemf26elem.HostPort = f1elemf26iter.HostPort
+						hostPortCopy := int64(*f1elemf26iter.HostPort)
+						f1elemf26elem.HostPort = &hostPortCopy
 					}
 					if f1elemf26iter.Name != nil {
 						f1elemf26elem.Name = f1elemf26iter.Name
 					}
-					if f1elemf26iter.Protocol != nil {
-						f1elemf26elem.Protocol = f1elemf26iter.Protocol
+					if f1elemf26iter.Protocol != "" {
+						f1elemf26elem.Protocol = aws.String(string(f1elemf26iter.Protocol))
 					}
 					f1elemf26 = append(f1elemf26, f1elemf26elem)
 				}
@@ -2778,8 +2523,8 @@ func (rm *resourceManager) sdkUpdate(
 				f1elemf31 := []*svcapitypes.ResourceRequirement{}
 				for _, f1elemf31iter := range f1iter.ResourceRequirements {
 					f1elemf31elem := &svcapitypes.ResourceRequirement{}
-					if f1elemf31iter.Type != nil {
-						f1elemf31elem.Type = f1elemf31iter.Type
+					if f1elemf31iter.Type != "" {
+						f1elemf31elem.Type = aws.String(string(f1elemf31iter.Type))
 					}
 					if f1elemf31iter.Value != nil {
 						f1elemf31elem.Value = f1elemf31iter.Value
@@ -2803,10 +2548,12 @@ func (rm *resourceManager) sdkUpdate(
 				f1elem.Secrets = f1elemf32
 			}
 			if f1iter.StartTimeout != nil {
-				f1elem.StartTimeout = f1iter.StartTimeout
+				startTimeoutCopy := int64(*f1iter.StartTimeout)
+				f1elem.StartTimeout = &startTimeoutCopy
 			}
 			if f1iter.StopTimeout != nil {
-				f1elem.StopTimeout = f1iter.StopTimeout
+				stopTimeoutCopy := int64(*f1iter.StopTimeout)
+				f1elem.StopTimeout = &stopTimeoutCopy
 			}
 			if f1iter.SystemControls != nil {
 				f1elemf35 := []*svcapitypes.SystemControl{}
@@ -2826,15 +2573,13 @@ func (rm *resourceManager) sdkUpdate(
 				f1elemf36 := []*svcapitypes.Ulimit{}
 				for _, f1elemf36iter := range f1iter.Ulimits {
 					f1elemf36elem := &svcapitypes.Ulimit{}
-					if f1elemf36iter.HardLimit != nil {
-						f1elemf36elem.HardLimit = f1elemf36iter.HardLimit
+					hardLimitCopy := int64(f1elemf36iter.HardLimit)
+					f1elemf36elem.HardLimit = &hardLimitCopy
+					if f1elemf36iter.Name != "" {
+						f1elemf36elem.Name = aws.String(string(f1elemf36iter.Name))
 					}
-					if f1elemf36iter.Name != nil {
-						f1elemf36elem.Name = f1elemf36iter.Name
-					}
-					if f1elemf36iter.SoftLimit != nil {
-						f1elemf36elem.SoftLimit = f1elemf36iter.SoftLimit
-					}
+					softLimitCopy := int64(f1elemf36iter.SoftLimit)
+					f1elemf36elem.SoftLimit = &softLimitCopy
 					f1elemf36 = append(f1elemf36, f1elemf36elem)
 				}
 				f1elem.Ulimits = f1elemf36
@@ -2877,9 +2622,8 @@ func (rm *resourceManager) sdkUpdate(
 	}
 	if resp.TaskDefinition.EphemeralStorage != nil {
 		f4 := &svcapitypes.EphemeralStorage{}
-		if resp.TaskDefinition.EphemeralStorage.SizeInGiB != nil {
-			f4.SizeInGiB = resp.TaskDefinition.EphemeralStorage.SizeInGiB
-		}
+		sizeInGiBCopy := int64(resp.TaskDefinition.EphemeralStorage.SizeInGiB)
+		f4.SizeInGiB = &sizeInGiBCopy
 		ko.Spec.EphemeralStorage = f4
 	} else {
 		ko.Spec.EphemeralStorage = nil
@@ -2910,8 +2654,8 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Spec.InferenceAccelerators = nil
 	}
-	if resp.TaskDefinition.IpcMode != nil {
-		ko.Spec.IPCMode = resp.TaskDefinition.IpcMode
+	if resp.TaskDefinition.IpcMode != "" {
+		ko.Spec.IPCMode = aws.String(string(resp.TaskDefinition.IpcMode))
 	} else {
 		ko.Spec.IPCMode = nil
 	}
@@ -2920,13 +2664,13 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Spec.Memory = nil
 	}
-	if resp.TaskDefinition.NetworkMode != nil {
-		ko.Spec.NetworkMode = resp.TaskDefinition.NetworkMode
+	if resp.TaskDefinition.NetworkMode != "" {
+		ko.Spec.NetworkMode = aws.String(string(resp.TaskDefinition.NetworkMode))
 	} else {
 		ko.Spec.NetworkMode = nil
 	}
-	if resp.TaskDefinition.PidMode != nil {
-		ko.Spec.PIDMode = resp.TaskDefinition.PidMode
+	if resp.TaskDefinition.PidMode != "" {
+		ko.Spec.PIDMode = aws.String(string(resp.TaskDefinition.PidMode))
 	} else {
 		ko.Spec.PIDMode = nil
 	}
@@ -2937,8 +2681,8 @@ func (rm *resourceManager) sdkUpdate(
 			if f12iter.Expression != nil {
 				f12elem.Expression = f12iter.Expression
 			}
-			if f12iter.Type != nil {
-				f12elem.Type = f12iter.Type
+			if f12iter.Type != "" {
+				f12elem.Type = aws.String(string(f12iter.Type))
 			}
 			f12 = append(f12, f12elem)
 		}
@@ -2965,8 +2709,8 @@ func (rm *resourceManager) sdkUpdate(
 			}
 			f13.Properties = f13f1
 		}
-		if resp.TaskDefinition.ProxyConfiguration.Type != nil {
-			f13.Type = resp.TaskDefinition.ProxyConfiguration.Type
+		if resp.TaskDefinition.ProxyConfiguration.Type != "" {
+			f13.Type = aws.String(string(resp.TaskDefinition.ProxyConfiguration.Type))
 		}
 		ko.Spec.ProxyConfiguration = f13
 	} else {
@@ -2992,8 +2736,8 @@ func (rm *resourceManager) sdkUpdate(
 			if f16iter.TargetId != nil {
 				f16elem.TargetID = f16iter.TargetId
 			}
-			if f16iter.TargetType != nil {
-				f16elem.TargetType = f16iter.TargetType
+			if f16iter.TargetType != "" {
+				f16elem.TargetType = aws.String(string(f16iter.TargetType))
 			}
 			if f16iter.Value != nil {
 				f16elem.Value = f16iter.Value
@@ -3007,33 +2751,30 @@ func (rm *resourceManager) sdkUpdate(
 	if resp.TaskDefinition.RequiresCompatibilities != nil {
 		f17 := []*string{}
 		for _, f17iter := range resp.TaskDefinition.RequiresCompatibilities {
-			var f17elem string
-			f17elem = *f17iter
-			f17 = append(f17, &f17elem)
+			var f17elem *string
+			f17elem = aws.String(string(f17iter))
+			f17 = append(f17, f17elem)
 		}
 		ko.Spec.RequiresCompatibilities = f17
 	} else {
 		ko.Spec.RequiresCompatibilities = nil
 	}
-	if resp.TaskDefinition.Revision != nil {
-		ko.Status.Revision = resp.TaskDefinition.Revision
-	} else {
-		ko.Status.Revision = nil
-	}
+	revisionCopy := int64(resp.TaskDefinition.Revision)
+	ko.Status.Revision = &revisionCopy
 	if resp.TaskDefinition.RuntimePlatform != nil {
 		f19 := &svcapitypes.RuntimePlatform{}
-		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != nil {
-			f19.CPUArchitecture = resp.TaskDefinition.RuntimePlatform.CpuArchitecture
+		if resp.TaskDefinition.RuntimePlatform.CpuArchitecture != "" {
+			f19.CPUArchitecture = aws.String(string(resp.TaskDefinition.RuntimePlatform.CpuArchitecture))
 		}
-		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != nil {
-			f19.OperatingSystemFamily = resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily
+		if resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily != "" {
+			f19.OperatingSystemFamily = aws.String(string(resp.TaskDefinition.RuntimePlatform.OperatingSystemFamily))
 		}
 		ko.Spec.RuntimePlatform = f19
 	} else {
 		ko.Spec.RuntimePlatform = nil
 	}
-	if resp.TaskDefinition.Status != nil {
-		ko.Status.Status = resp.TaskDefinition.Status
+	if resp.TaskDefinition.Status != "" {
+		ko.Status.Status = aws.String(string(resp.TaskDefinition.Status))
 	} else {
 		ko.Status.Status = nil
 	}
@@ -3065,25 +2806,13 @@ func (rm *resourceManager) sdkUpdate(
 					f23elemf1.Driver = f23iter.DockerVolumeConfiguration.Driver
 				}
 				if f23iter.DockerVolumeConfiguration.DriverOpts != nil {
-					f23elemf1f2 := map[string]*string{}
-					for f23elemf1f2key, f23elemf1f2valiter := range f23iter.DockerVolumeConfiguration.DriverOpts {
-						var f23elemf1f2val string
-						f23elemf1f2val = *f23elemf1f2valiter
-						f23elemf1f2[f23elemf1f2key] = &f23elemf1f2val
-					}
-					f23elemf1.DriverOpts = f23elemf1f2
+					f23elemf1.DriverOpts = aws.StringMap(f23iter.DockerVolumeConfiguration.DriverOpts)
 				}
 				if f23iter.DockerVolumeConfiguration.Labels != nil {
-					f23elemf1f3 := map[string]*string{}
-					for f23elemf1f3key, f23elemf1f3valiter := range f23iter.DockerVolumeConfiguration.Labels {
-						var f23elemf1f3val string
-						f23elemf1f3val = *f23elemf1f3valiter
-						f23elemf1f3[f23elemf1f3key] = &f23elemf1f3val
-					}
-					f23elemf1.Labels = f23elemf1f3
+					f23elemf1.Labels = aws.StringMap(f23iter.DockerVolumeConfiguration.Labels)
 				}
-				if f23iter.DockerVolumeConfiguration.Scope != nil {
-					f23elemf1.Scope = f23iter.DockerVolumeConfiguration.Scope
+				if f23iter.DockerVolumeConfiguration.Scope != "" {
+					f23elemf1.Scope = aws.String(string(f23iter.DockerVolumeConfiguration.Scope))
 				}
 				f23elem.DockerVolumeConfiguration = f23elemf1
 			}
@@ -3094,8 +2823,8 @@ func (rm *resourceManager) sdkUpdate(
 					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId != nil {
 						f23elemf2f0.AccessPointID = f23iter.EfsVolumeConfiguration.AuthorizationConfig.AccessPointId
 					}
-					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != nil {
-						f23elemf2f0.IAM = f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam
+					if f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam != "" {
+						f23elemf2f0.IAM = aws.String(string(f23iter.EfsVolumeConfiguration.AuthorizationConfig.Iam))
 					}
 					f23elemf2.AuthorizationConfig = f23elemf2f0
 				}
@@ -3105,11 +2834,12 @@ func (rm *resourceManager) sdkUpdate(
 				if f23iter.EfsVolumeConfiguration.RootDirectory != nil {
 					f23elemf2.RootDirectory = f23iter.EfsVolumeConfiguration.RootDirectory
 				}
-				if f23iter.EfsVolumeConfiguration.TransitEncryption != nil {
-					f23elemf2.TransitEncryption = f23iter.EfsVolumeConfiguration.TransitEncryption
+				if f23iter.EfsVolumeConfiguration.TransitEncryption != "" {
+					f23elemf2.TransitEncryption = aws.String(string(f23iter.EfsVolumeConfiguration.TransitEncryption))
 				}
 				if f23iter.EfsVolumeConfiguration.TransitEncryptionPort != nil {
-					f23elemf2.TransitEncryptionPort = f23iter.EfsVolumeConfiguration.TransitEncryptionPort
+					transitEncryptionPortCopy := int64(*f23iter.EfsVolumeConfiguration.TransitEncryptionPort)
+					f23elemf2.TransitEncryptionPort = &transitEncryptionPortCopy
 				}
 				f23elem.EFSVolumeConfiguration = f23elemf2
 			}
@@ -3164,680 +2894,679 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	res := &svcsdk.RegisterTaskDefinitionInput{}
 
 	if r.ko.Spec.ContainerDefinitions != nil {
-		f0 := []*svcsdk.ContainerDefinition{}
+		f0 := []svcsdktypes.ContainerDefinition{}
 		for _, f0iter := range r.ko.Spec.ContainerDefinitions {
-			f0elem := &svcsdk.ContainerDefinition{}
+			f0elem := &svcsdktypes.ContainerDefinition{}
 			if f0iter.Command != nil {
-				f0elemf0 := []*string{}
-				for _, f0elemf0iter := range f0iter.Command {
-					var f0elemf0elem string
-					f0elemf0elem = *f0elemf0iter
-					f0elemf0 = append(f0elemf0, &f0elemf0elem)
-				}
-				f0elem.SetCommand(f0elemf0)
+				f0elem.Command = aws.ToStringSlice(f0iter.Command)
 			}
 			if f0iter.CPU != nil {
-				f0elem.SetCpu(*f0iter.CPU)
+				cpuCopy0 := *f0iter.CPU
+				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field cpu is of type int32")
+				}
+				cpuCopy := int32(cpuCopy0)
+				f0elem.Cpu = cpuCopy
 			}
 			if f0iter.CredentialSpecs != nil {
-				f0elemf2 := []*string{}
-				for _, f0elemf2iter := range f0iter.CredentialSpecs {
-					var f0elemf2elem string
-					f0elemf2elem = *f0elemf2iter
-					f0elemf2 = append(f0elemf2, &f0elemf2elem)
-				}
-				f0elem.SetCredentialSpecs(f0elemf2)
+				f0elem.CredentialSpecs = aws.ToStringSlice(f0iter.CredentialSpecs)
 			}
 			if f0iter.DependsOn != nil {
-				f0elemf3 := []*svcsdk.ContainerDependency{}
+				f0elemf3 := []svcsdktypes.ContainerDependency{}
 				for _, f0elemf3iter := range f0iter.DependsOn {
-					f0elemf3elem := &svcsdk.ContainerDependency{}
+					f0elemf3elem := &svcsdktypes.ContainerDependency{}
 					if f0elemf3iter.Condition != nil {
-						f0elemf3elem.SetCondition(*f0elemf3iter.Condition)
+						f0elemf3elem.Condition = svcsdktypes.ContainerCondition(*f0elemf3iter.Condition)
 					}
 					if f0elemf3iter.ContainerName != nil {
-						f0elemf3elem.SetContainerName(*f0elemf3iter.ContainerName)
+						f0elemf3elem.ContainerName = f0elemf3iter.ContainerName
 					}
-					f0elemf3 = append(f0elemf3, f0elemf3elem)
+					f0elemf3 = append(f0elemf3, *f0elemf3elem)
 				}
-				f0elem.SetDependsOn(f0elemf3)
+				f0elem.DependsOn = f0elemf3
 			}
 			if f0iter.DisableNetworking != nil {
-				f0elem.SetDisableNetworking(*f0iter.DisableNetworking)
+				f0elem.DisableNetworking = f0iter.DisableNetworking
 			}
 			if f0iter.DNSSearchDomains != nil {
-				f0elemf5 := []*string{}
-				for _, f0elemf5iter := range f0iter.DNSSearchDomains {
-					var f0elemf5elem string
-					f0elemf5elem = *f0elemf5iter
-					f0elemf5 = append(f0elemf5, &f0elemf5elem)
-				}
-				f0elem.SetDnsSearchDomains(f0elemf5)
+				f0elem.DnsSearchDomains = aws.ToStringSlice(f0iter.DNSSearchDomains)
 			}
 			if f0iter.DNSServers != nil {
-				f0elemf6 := []*string{}
-				for _, f0elemf6iter := range f0iter.DNSServers {
-					var f0elemf6elem string
-					f0elemf6elem = *f0elemf6iter
-					f0elemf6 = append(f0elemf6, &f0elemf6elem)
-				}
-				f0elem.SetDnsServers(f0elemf6)
+				f0elem.DnsServers = aws.ToStringSlice(f0iter.DNSServers)
 			}
 			if f0iter.DockerLabels != nil {
-				f0elemf7 := map[string]*string{}
-				for f0elemf7key, f0elemf7valiter := range f0iter.DockerLabels {
-					var f0elemf7val string
-					f0elemf7val = *f0elemf7valiter
-					f0elemf7[f0elemf7key] = &f0elemf7val
-				}
-				f0elem.SetDockerLabels(f0elemf7)
+				f0elem.DockerLabels = aws.ToStringMap(f0iter.DockerLabels)
 			}
 			if f0iter.DockerSecurityOptions != nil {
-				f0elemf8 := []*string{}
-				for _, f0elemf8iter := range f0iter.DockerSecurityOptions {
-					var f0elemf8elem string
-					f0elemf8elem = *f0elemf8iter
-					f0elemf8 = append(f0elemf8, &f0elemf8elem)
-				}
-				f0elem.SetDockerSecurityOptions(f0elemf8)
+				f0elem.DockerSecurityOptions = aws.ToStringSlice(f0iter.DockerSecurityOptions)
 			}
 			if f0iter.EntryPoint != nil {
-				f0elemf9 := []*string{}
-				for _, f0elemf9iter := range f0iter.EntryPoint {
-					var f0elemf9elem string
-					f0elemf9elem = *f0elemf9iter
-					f0elemf9 = append(f0elemf9, &f0elemf9elem)
-				}
-				f0elem.SetEntryPoint(f0elemf9)
+				f0elem.EntryPoint = aws.ToStringSlice(f0iter.EntryPoint)
 			}
 			if f0iter.Environment != nil {
-				f0elemf10 := []*svcsdk.KeyValuePair{}
+				f0elemf10 := []svcsdktypes.KeyValuePair{}
 				for _, f0elemf10iter := range f0iter.Environment {
-					f0elemf10elem := &svcsdk.KeyValuePair{}
+					f0elemf10elem := &svcsdktypes.KeyValuePair{}
 					if f0elemf10iter.Name != nil {
-						f0elemf10elem.SetName(*f0elemf10iter.Name)
+						f0elemf10elem.Name = f0elemf10iter.Name
 					}
 					if f0elemf10iter.Value != nil {
-						f0elemf10elem.SetValue(*f0elemf10iter.Value)
+						f0elemf10elem.Value = f0elemf10iter.Value
 					}
-					f0elemf10 = append(f0elemf10, f0elemf10elem)
+					f0elemf10 = append(f0elemf10, *f0elemf10elem)
 				}
-				f0elem.SetEnvironment(f0elemf10)
+				f0elem.Environment = f0elemf10
 			}
 			if f0iter.EnvironmentFiles != nil {
-				f0elemf11 := []*svcsdk.EnvironmentFile{}
+				f0elemf11 := []svcsdktypes.EnvironmentFile{}
 				for _, f0elemf11iter := range f0iter.EnvironmentFiles {
-					f0elemf11elem := &svcsdk.EnvironmentFile{}
+					f0elemf11elem := &svcsdktypes.EnvironmentFile{}
 					if f0elemf11iter.Type != nil {
-						f0elemf11elem.SetType(*f0elemf11iter.Type)
+						f0elemf11elem.Type = svcsdktypes.EnvironmentFileType(*f0elemf11iter.Type)
 					}
 					if f0elemf11iter.Value != nil {
-						f0elemf11elem.SetValue(*f0elemf11iter.Value)
+						f0elemf11elem.Value = f0elemf11iter.Value
 					}
-					f0elemf11 = append(f0elemf11, f0elemf11elem)
+					f0elemf11 = append(f0elemf11, *f0elemf11elem)
 				}
-				f0elem.SetEnvironmentFiles(f0elemf11)
+				f0elem.EnvironmentFiles = f0elemf11
 			}
 			if f0iter.Essential != nil {
-				f0elem.SetEssential(*f0iter.Essential)
+				f0elem.Essential = f0iter.Essential
 			}
 			if f0iter.ExtraHosts != nil {
-				f0elemf13 := []*svcsdk.HostEntry{}
+				f0elemf13 := []svcsdktypes.HostEntry{}
 				for _, f0elemf13iter := range f0iter.ExtraHosts {
-					f0elemf13elem := &svcsdk.HostEntry{}
+					f0elemf13elem := &svcsdktypes.HostEntry{}
 					if f0elemf13iter.Hostname != nil {
-						f0elemf13elem.SetHostname(*f0elemf13iter.Hostname)
+						f0elemf13elem.Hostname = f0elemf13iter.Hostname
 					}
 					if f0elemf13iter.IPAddress != nil {
-						f0elemf13elem.SetIpAddress(*f0elemf13iter.IPAddress)
+						f0elemf13elem.IpAddress = f0elemf13iter.IPAddress
 					}
-					f0elemf13 = append(f0elemf13, f0elemf13elem)
+					f0elemf13 = append(f0elemf13, *f0elemf13elem)
 				}
-				f0elem.SetExtraHosts(f0elemf13)
+				f0elem.ExtraHosts = f0elemf13
 			}
 			if f0iter.FirelensConfiguration != nil {
-				f0elemf14 := &svcsdk.FirelensConfiguration{}
+				f0elemf14 := &svcsdktypes.FirelensConfiguration{}
 				if f0iter.FirelensConfiguration.Options != nil {
-					f0elemf14f0 := map[string]*string{}
-					for f0elemf14f0key, f0elemf14f0valiter := range f0iter.FirelensConfiguration.Options {
-						var f0elemf14f0val string
-						f0elemf14f0val = *f0elemf14f0valiter
-						f0elemf14f0[f0elemf14f0key] = &f0elemf14f0val
-					}
-					f0elemf14.SetOptions(f0elemf14f0)
+					f0elemf14.Options = aws.ToStringMap(f0iter.FirelensConfiguration.Options)
 				}
 				if f0iter.FirelensConfiguration.Type != nil {
-					f0elemf14.SetType(*f0iter.FirelensConfiguration.Type)
+					f0elemf14.Type = svcsdktypes.FirelensConfigurationType(*f0iter.FirelensConfiguration.Type)
 				}
-				f0elem.SetFirelensConfiguration(f0elemf14)
+				f0elem.FirelensConfiguration = f0elemf14
 			}
 			if f0iter.HealthCheck != nil {
-				f0elemf15 := &svcsdk.HealthCheck{}
+				f0elemf15 := &svcsdktypes.HealthCheck{}
 				if f0iter.HealthCheck.Command != nil {
-					f0elemf15f0 := []*string{}
-					for _, f0elemf15f0iter := range f0iter.HealthCheck.Command {
-						var f0elemf15f0elem string
-						f0elemf15f0elem = *f0elemf15f0iter
-						f0elemf15f0 = append(f0elemf15f0, &f0elemf15f0elem)
-					}
-					f0elemf15.SetCommand(f0elemf15f0)
+					f0elemf15.Command = aws.ToStringSlice(f0iter.HealthCheck.Command)
 				}
 				if f0iter.HealthCheck.Interval != nil {
-					f0elemf15.SetInterval(*f0iter.HealthCheck.Interval)
+					intervalCopy0 := *f0iter.HealthCheck.Interval
+					if intervalCopy0 > math.MaxInt32 || intervalCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field interval is of type int32")
+					}
+					intervalCopy := int32(intervalCopy0)
+					f0elemf15.Interval = &intervalCopy
 				}
 				if f0iter.HealthCheck.Retries != nil {
-					f0elemf15.SetRetries(*f0iter.HealthCheck.Retries)
+					retriesCopy0 := *f0iter.HealthCheck.Retries
+					if retriesCopy0 > math.MaxInt32 || retriesCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field retries is of type int32")
+					}
+					retriesCopy := int32(retriesCopy0)
+					f0elemf15.Retries = &retriesCopy
 				}
 				if f0iter.HealthCheck.StartPeriod != nil {
-					f0elemf15.SetStartPeriod(*f0iter.HealthCheck.StartPeriod)
+					startPeriodCopy0 := *f0iter.HealthCheck.StartPeriod
+					if startPeriodCopy0 > math.MaxInt32 || startPeriodCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field startPeriod is of type int32")
+					}
+					startPeriodCopy := int32(startPeriodCopy0)
+					f0elemf15.StartPeriod = &startPeriodCopy
 				}
 				if f0iter.HealthCheck.Timeout != nil {
-					f0elemf15.SetTimeout(*f0iter.HealthCheck.Timeout)
+					timeoutCopy0 := *f0iter.HealthCheck.Timeout
+					if timeoutCopy0 > math.MaxInt32 || timeoutCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field timeout is of type int32")
+					}
+					timeoutCopy := int32(timeoutCopy0)
+					f0elemf15.Timeout = &timeoutCopy
 				}
-				f0elem.SetHealthCheck(f0elemf15)
+				f0elem.HealthCheck = f0elemf15
 			}
 			if f0iter.Hostname != nil {
-				f0elem.SetHostname(*f0iter.Hostname)
+				f0elem.Hostname = f0iter.Hostname
 			}
 			if f0iter.Image != nil {
-				f0elem.SetImage(*f0iter.Image)
+				f0elem.Image = f0iter.Image
 			}
 			if f0iter.Interactive != nil {
-				f0elem.SetInteractive(*f0iter.Interactive)
+				f0elem.Interactive = f0iter.Interactive
 			}
 			if f0iter.Links != nil {
-				f0elemf19 := []*string{}
-				for _, f0elemf19iter := range f0iter.Links {
-					var f0elemf19elem string
-					f0elemf19elem = *f0elemf19iter
-					f0elemf19 = append(f0elemf19, &f0elemf19elem)
-				}
-				f0elem.SetLinks(f0elemf19)
+				f0elem.Links = aws.ToStringSlice(f0iter.Links)
 			}
 			if f0iter.LinuxParameters != nil {
-				f0elemf20 := &svcsdk.LinuxParameters{}
+				f0elemf20 := &svcsdktypes.LinuxParameters{}
 				if f0iter.LinuxParameters.Capabilities != nil {
-					f0elemf20f0 := &svcsdk.KernelCapabilities{}
+					f0elemf20f0 := &svcsdktypes.KernelCapabilities{}
 					if f0iter.LinuxParameters.Capabilities.Add != nil {
-						f0elemf20f0f0 := []*string{}
-						for _, f0elemf20f0f0iter := range f0iter.LinuxParameters.Capabilities.Add {
-							var f0elemf20f0f0elem string
-							f0elemf20f0f0elem = *f0elemf20f0f0iter
-							f0elemf20f0f0 = append(f0elemf20f0f0, &f0elemf20f0f0elem)
-						}
-						f0elemf20f0.SetAdd(f0elemf20f0f0)
+						f0elemf20f0.Add = aws.ToStringSlice(f0iter.LinuxParameters.Capabilities.Add)
 					}
 					if f0iter.LinuxParameters.Capabilities.Drop != nil {
-						f0elemf20f0f1 := []*string{}
-						for _, f0elemf20f0f1iter := range f0iter.LinuxParameters.Capabilities.Drop {
-							var f0elemf20f0f1elem string
-							f0elemf20f0f1elem = *f0elemf20f0f1iter
-							f0elemf20f0f1 = append(f0elemf20f0f1, &f0elemf20f0f1elem)
-						}
-						f0elemf20f0.SetDrop(f0elemf20f0f1)
+						f0elemf20f0.Drop = aws.ToStringSlice(f0iter.LinuxParameters.Capabilities.Drop)
 					}
-					f0elemf20.SetCapabilities(f0elemf20f0)
+					f0elemf20.Capabilities = f0elemf20f0
 				}
 				if f0iter.LinuxParameters.Devices != nil {
-					f0elemf20f1 := []*svcsdk.Device{}
+					f0elemf20f1 := []svcsdktypes.Device{}
 					for _, f0elemf20f1iter := range f0iter.LinuxParameters.Devices {
-						f0elemf20f1elem := &svcsdk.Device{}
+						f0elemf20f1elem := &svcsdktypes.Device{}
 						if f0elemf20f1iter.ContainerPath != nil {
-							f0elemf20f1elem.SetContainerPath(*f0elemf20f1iter.ContainerPath)
+							f0elemf20f1elem.ContainerPath = f0elemf20f1iter.ContainerPath
 						}
 						if f0elemf20f1iter.HostPath != nil {
-							f0elemf20f1elem.SetHostPath(*f0elemf20f1iter.HostPath)
+							f0elemf20f1elem.HostPath = f0elemf20f1iter.HostPath
 						}
 						if f0elemf20f1iter.Permissions != nil {
-							f0elemf20f1elemf2 := []*string{}
+							f0elemf20f1elemf2 := []svcsdktypes.DeviceCgroupPermission{}
 							for _, f0elemf20f1elemf2iter := range f0elemf20f1iter.Permissions {
 								var f0elemf20f1elemf2elem string
-								f0elemf20f1elemf2elem = *f0elemf20f1elemf2iter
-								f0elemf20f1elemf2 = append(f0elemf20f1elemf2, &f0elemf20f1elemf2elem)
+								f0elemf20f1elemf2elem = string(*f0elemf20f1elemf2iter)
+								f0elemf20f1elemf2 = append(f0elemf20f1elemf2, svcsdktypes.DeviceCgroupPermission(f0elemf20f1elemf2elem))
 							}
-							f0elemf20f1elem.SetPermissions(f0elemf20f1elemf2)
+							f0elemf20f1elem.Permissions = f0elemf20f1elemf2
 						}
-						f0elemf20f1 = append(f0elemf20f1, f0elemf20f1elem)
+						f0elemf20f1 = append(f0elemf20f1, *f0elemf20f1elem)
 					}
-					f0elemf20.SetDevices(f0elemf20f1)
+					f0elemf20.Devices = f0elemf20f1
 				}
 				if f0iter.LinuxParameters.InitProcessEnabled != nil {
-					f0elemf20.SetInitProcessEnabled(*f0iter.LinuxParameters.InitProcessEnabled)
+					f0elemf20.InitProcessEnabled = f0iter.LinuxParameters.InitProcessEnabled
 				}
 				if f0iter.LinuxParameters.MaxSwap != nil {
-					f0elemf20.SetMaxSwap(*f0iter.LinuxParameters.MaxSwap)
+					maxSwapCopy0 := *f0iter.LinuxParameters.MaxSwap
+					if maxSwapCopy0 > math.MaxInt32 || maxSwapCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field maxSwap is of type int32")
+					}
+					maxSwapCopy := int32(maxSwapCopy0)
+					f0elemf20.MaxSwap = &maxSwapCopy
 				}
 				if f0iter.LinuxParameters.SharedMemorySize != nil {
-					f0elemf20.SetSharedMemorySize(*f0iter.LinuxParameters.SharedMemorySize)
+					sharedMemorySizeCopy0 := *f0iter.LinuxParameters.SharedMemorySize
+					if sharedMemorySizeCopy0 > math.MaxInt32 || sharedMemorySizeCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field sharedMemorySize is of type int32")
+					}
+					sharedMemorySizeCopy := int32(sharedMemorySizeCopy0)
+					f0elemf20.SharedMemorySize = &sharedMemorySizeCopy
 				}
 				if f0iter.LinuxParameters.Swappiness != nil {
-					f0elemf20.SetSwappiness(*f0iter.LinuxParameters.Swappiness)
+					swappinessCopy0 := *f0iter.LinuxParameters.Swappiness
+					if swappinessCopy0 > math.MaxInt32 || swappinessCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field swappiness is of type int32")
+					}
+					swappinessCopy := int32(swappinessCopy0)
+					f0elemf20.Swappiness = &swappinessCopy
 				}
 				if f0iter.LinuxParameters.Tmpfs != nil {
-					f0elemf20f6 := []*svcsdk.Tmpfs{}
+					f0elemf20f6 := []svcsdktypes.Tmpfs{}
 					for _, f0elemf20f6iter := range f0iter.LinuxParameters.Tmpfs {
-						f0elemf20f6elem := &svcsdk.Tmpfs{}
+						f0elemf20f6elem := &svcsdktypes.Tmpfs{}
 						if f0elemf20f6iter.ContainerPath != nil {
-							f0elemf20f6elem.SetContainerPath(*f0elemf20f6iter.ContainerPath)
+							f0elemf20f6elem.ContainerPath = f0elemf20f6iter.ContainerPath
 						}
 						if f0elemf20f6iter.MountOptions != nil {
-							f0elemf20f6elemf1 := []*string{}
-							for _, f0elemf20f6elemf1iter := range f0elemf20f6iter.MountOptions {
-								var f0elemf20f6elemf1elem string
-								f0elemf20f6elemf1elem = *f0elemf20f6elemf1iter
-								f0elemf20f6elemf1 = append(f0elemf20f6elemf1, &f0elemf20f6elemf1elem)
-							}
-							f0elemf20f6elem.SetMountOptions(f0elemf20f6elemf1)
+							f0elemf20f6elem.MountOptions = aws.ToStringSlice(f0elemf20f6iter.MountOptions)
 						}
 						if f0elemf20f6iter.Size != nil {
-							f0elemf20f6elem.SetSize(*f0elemf20f6iter.Size)
+							sizeCopy0 := *f0elemf20f6iter.Size
+							if sizeCopy0 > math.MaxInt32 || sizeCopy0 < math.MinInt32 {
+								return nil, fmt.Errorf("error: field size is of type int32")
+							}
+							sizeCopy := int32(sizeCopy0)
+							f0elemf20f6elem.Size = sizeCopy
 						}
-						f0elemf20f6 = append(f0elemf20f6, f0elemf20f6elem)
+						f0elemf20f6 = append(f0elemf20f6, *f0elemf20f6elem)
 					}
-					f0elemf20.SetTmpfs(f0elemf20f6)
+					f0elemf20.Tmpfs = f0elemf20f6
 				}
-				f0elem.SetLinuxParameters(f0elemf20)
+				f0elem.LinuxParameters = f0elemf20
 			}
 			if f0iter.LogConfiguration != nil {
-				f0elemf21 := &svcsdk.LogConfiguration{}
+				f0elemf21 := &svcsdktypes.LogConfiguration{}
 				if f0iter.LogConfiguration.LogDriver != nil {
-					f0elemf21.SetLogDriver(*f0iter.LogConfiguration.LogDriver)
+					f0elemf21.LogDriver = svcsdktypes.LogDriver(*f0iter.LogConfiguration.LogDriver)
 				}
 				if f0iter.LogConfiguration.Options != nil {
-					f0elemf21f1 := map[string]*string{}
-					for f0elemf21f1key, f0elemf21f1valiter := range f0iter.LogConfiguration.Options {
-						var f0elemf21f1val string
-						f0elemf21f1val = *f0elemf21f1valiter
-						f0elemf21f1[f0elemf21f1key] = &f0elemf21f1val
-					}
-					f0elemf21.SetOptions(f0elemf21f1)
+					f0elemf21.Options = aws.ToStringMap(f0iter.LogConfiguration.Options)
 				}
 				if f0iter.LogConfiguration.SecretOptions != nil {
-					f0elemf21f2 := []*svcsdk.Secret{}
+					f0elemf21f2 := []svcsdktypes.Secret{}
 					for _, f0elemf21f2iter := range f0iter.LogConfiguration.SecretOptions {
-						f0elemf21f2elem := &svcsdk.Secret{}
+						f0elemf21f2elem := &svcsdktypes.Secret{}
 						if f0elemf21f2iter.Name != nil {
-							f0elemf21f2elem.SetName(*f0elemf21f2iter.Name)
+							f0elemf21f2elem.Name = f0elemf21f2iter.Name
 						}
 						if f0elemf21f2iter.ValueFrom != nil {
-							f0elemf21f2elem.SetValueFrom(*f0elemf21f2iter.ValueFrom)
+							f0elemf21f2elem.ValueFrom = f0elemf21f2iter.ValueFrom
 						}
-						f0elemf21f2 = append(f0elemf21f2, f0elemf21f2elem)
+						f0elemf21f2 = append(f0elemf21f2, *f0elemf21f2elem)
 					}
-					f0elemf21.SetSecretOptions(f0elemf21f2)
+					f0elemf21.SecretOptions = f0elemf21f2
 				}
-				f0elem.SetLogConfiguration(f0elemf21)
+				f0elem.LogConfiguration = f0elemf21
 			}
 			if f0iter.Memory != nil {
-				f0elem.SetMemory(*f0iter.Memory)
+				memoryCopy0 := *f0iter.Memory
+				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field memory is of type int32")
+				}
+				memoryCopy := int32(memoryCopy0)
+				f0elem.Memory = &memoryCopy
 			}
 			if f0iter.MemoryReservation != nil {
-				f0elem.SetMemoryReservation(*f0iter.MemoryReservation)
+				memoryReservationCopy0 := *f0iter.MemoryReservation
+				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
+				}
+				memoryReservationCopy := int32(memoryReservationCopy0)
+				f0elem.MemoryReservation = &memoryReservationCopy
 			}
 			if f0iter.MountPoints != nil {
-				f0elemf24 := []*svcsdk.MountPoint{}
+				f0elemf24 := []svcsdktypes.MountPoint{}
 				for _, f0elemf24iter := range f0iter.MountPoints {
-					f0elemf24elem := &svcsdk.MountPoint{}
+					f0elemf24elem := &svcsdktypes.MountPoint{}
 					if f0elemf24iter.ContainerPath != nil {
-						f0elemf24elem.SetContainerPath(*f0elemf24iter.ContainerPath)
+						f0elemf24elem.ContainerPath = f0elemf24iter.ContainerPath
 					}
 					if f0elemf24iter.ReadOnly != nil {
-						f0elemf24elem.SetReadOnly(*f0elemf24iter.ReadOnly)
+						f0elemf24elem.ReadOnly = f0elemf24iter.ReadOnly
 					}
 					if f0elemf24iter.SourceVolume != nil {
-						f0elemf24elem.SetSourceVolume(*f0elemf24iter.SourceVolume)
+						f0elemf24elem.SourceVolume = f0elemf24iter.SourceVolume
 					}
-					f0elemf24 = append(f0elemf24, f0elemf24elem)
+					f0elemf24 = append(f0elemf24, *f0elemf24elem)
 				}
-				f0elem.SetMountPoints(f0elemf24)
+				f0elem.MountPoints = f0elemf24
 			}
 			if f0iter.Name != nil {
-				f0elem.SetName(*f0iter.Name)
+				f0elem.Name = f0iter.Name
 			}
 			if f0iter.PortMappings != nil {
-				f0elemf26 := []*svcsdk.PortMapping{}
+				f0elemf26 := []svcsdktypes.PortMapping{}
 				for _, f0elemf26iter := range f0iter.PortMappings {
-					f0elemf26elem := &svcsdk.PortMapping{}
+					f0elemf26elem := &svcsdktypes.PortMapping{}
 					if f0elemf26iter.AppProtocol != nil {
-						f0elemf26elem.SetAppProtocol(*f0elemf26iter.AppProtocol)
+						f0elemf26elem.AppProtocol = svcsdktypes.ApplicationProtocol(*f0elemf26iter.AppProtocol)
 					}
 					if f0elemf26iter.ContainerPort != nil {
-						f0elemf26elem.SetContainerPort(*f0elemf26iter.ContainerPort)
+						containerPortCopy0 := *f0elemf26iter.ContainerPort
+						if containerPortCopy0 > math.MaxInt32 || containerPortCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field containerPort is of type int32")
+						}
+						containerPortCopy := int32(containerPortCopy0)
+						f0elemf26elem.ContainerPort = &containerPortCopy
 					}
 					if f0elemf26iter.ContainerPortRange != nil {
-						f0elemf26elem.SetContainerPortRange(*f0elemf26iter.ContainerPortRange)
+						f0elemf26elem.ContainerPortRange = f0elemf26iter.ContainerPortRange
 					}
 					if f0elemf26iter.HostPort != nil {
-						f0elemf26elem.SetHostPort(*f0elemf26iter.HostPort)
+						hostPortCopy0 := *f0elemf26iter.HostPort
+						if hostPortCopy0 > math.MaxInt32 || hostPortCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field hostPort is of type int32")
+						}
+						hostPortCopy := int32(hostPortCopy0)
+						f0elemf26elem.HostPort = &hostPortCopy
 					}
 					if f0elemf26iter.Name != nil {
-						f0elemf26elem.SetName(*f0elemf26iter.Name)
+						f0elemf26elem.Name = f0elemf26iter.Name
 					}
 					if f0elemf26iter.Protocol != nil {
-						f0elemf26elem.SetProtocol(*f0elemf26iter.Protocol)
+						f0elemf26elem.Protocol = svcsdktypes.TransportProtocol(*f0elemf26iter.Protocol)
 					}
-					f0elemf26 = append(f0elemf26, f0elemf26elem)
+					f0elemf26 = append(f0elemf26, *f0elemf26elem)
 				}
-				f0elem.SetPortMappings(f0elemf26)
+				f0elem.PortMappings = f0elemf26
 			}
 			if f0iter.Privileged != nil {
-				f0elem.SetPrivileged(*f0iter.Privileged)
+				f0elem.Privileged = f0iter.Privileged
 			}
 			if f0iter.PseudoTerminal != nil {
-				f0elem.SetPseudoTerminal(*f0iter.PseudoTerminal)
+				f0elem.PseudoTerminal = f0iter.PseudoTerminal
 			}
 			if f0iter.ReadonlyRootFilesystem != nil {
-				f0elem.SetReadonlyRootFilesystem(*f0iter.ReadonlyRootFilesystem)
+				f0elem.ReadonlyRootFilesystem = f0iter.ReadonlyRootFilesystem
 			}
 			if f0iter.RepositoryCredentials != nil {
-				f0elemf30 := &svcsdk.RepositoryCredentials{}
+				f0elemf30 := &svcsdktypes.RepositoryCredentials{}
 				if f0iter.RepositoryCredentials.CredentialsParameter != nil {
-					f0elemf30.SetCredentialsParameter(*f0iter.RepositoryCredentials.CredentialsParameter)
+					f0elemf30.CredentialsParameter = f0iter.RepositoryCredentials.CredentialsParameter
 				}
-				f0elem.SetRepositoryCredentials(f0elemf30)
+				f0elem.RepositoryCredentials = f0elemf30
 			}
 			if f0iter.ResourceRequirements != nil {
-				f0elemf31 := []*svcsdk.ResourceRequirement{}
+				f0elemf31 := []svcsdktypes.ResourceRequirement{}
 				for _, f0elemf31iter := range f0iter.ResourceRequirements {
-					f0elemf31elem := &svcsdk.ResourceRequirement{}
+					f0elemf31elem := &svcsdktypes.ResourceRequirement{}
 					if f0elemf31iter.Type != nil {
-						f0elemf31elem.SetType(*f0elemf31iter.Type)
+						f0elemf31elem.Type = svcsdktypes.ResourceType(*f0elemf31iter.Type)
 					}
 					if f0elemf31iter.Value != nil {
-						f0elemf31elem.SetValue(*f0elemf31iter.Value)
+						f0elemf31elem.Value = f0elemf31iter.Value
 					}
-					f0elemf31 = append(f0elemf31, f0elemf31elem)
+					f0elemf31 = append(f0elemf31, *f0elemf31elem)
 				}
-				f0elem.SetResourceRequirements(f0elemf31)
+				f0elem.ResourceRequirements = f0elemf31
 			}
 			if f0iter.Secrets != nil {
-				f0elemf32 := []*svcsdk.Secret{}
+				f0elemf32 := []svcsdktypes.Secret{}
 				for _, f0elemf32iter := range f0iter.Secrets {
-					f0elemf32elem := &svcsdk.Secret{}
+					f0elemf32elem := &svcsdktypes.Secret{}
 					if f0elemf32iter.Name != nil {
-						f0elemf32elem.SetName(*f0elemf32iter.Name)
+						f0elemf32elem.Name = f0elemf32iter.Name
 					}
 					if f0elemf32iter.ValueFrom != nil {
-						f0elemf32elem.SetValueFrom(*f0elemf32iter.ValueFrom)
+						f0elemf32elem.ValueFrom = f0elemf32iter.ValueFrom
 					}
-					f0elemf32 = append(f0elemf32, f0elemf32elem)
+					f0elemf32 = append(f0elemf32, *f0elemf32elem)
 				}
-				f0elem.SetSecrets(f0elemf32)
+				f0elem.Secrets = f0elemf32
 			}
 			if f0iter.StartTimeout != nil {
-				f0elem.SetStartTimeout(*f0iter.StartTimeout)
+				startTimeoutCopy0 := *f0iter.StartTimeout
+				if startTimeoutCopy0 > math.MaxInt32 || startTimeoutCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field startTimeout is of type int32")
+				}
+				startTimeoutCopy := int32(startTimeoutCopy0)
+				f0elem.StartTimeout = &startTimeoutCopy
 			}
 			if f0iter.StopTimeout != nil {
-				f0elem.SetStopTimeout(*f0iter.StopTimeout)
+				stopTimeoutCopy0 := *f0iter.StopTimeout
+				if stopTimeoutCopy0 > math.MaxInt32 || stopTimeoutCopy0 < math.MinInt32 {
+					return nil, fmt.Errorf("error: field StopTimeout is of type int32")
+				}
+				stopTimeoutCopy := int32(stopTimeoutCopy0)
+				f0elem.StopTimeout = &stopTimeoutCopy
 			}
 			if f0iter.SystemControls != nil {
-				f0elemf35 := []*svcsdk.SystemControl{}
+				f0elemf35 := []svcsdktypes.SystemControl{}
 				for _, f0elemf35iter := range f0iter.SystemControls {
-					f0elemf35elem := &svcsdk.SystemControl{}
+					f0elemf35elem := &svcsdktypes.SystemControl{}
 					if f0elemf35iter.Namespace != nil {
-						f0elemf35elem.SetNamespace(*f0elemf35iter.Namespace)
+						f0elemf35elem.Namespace = f0elemf35iter.Namespace
 					}
 					if f0elemf35iter.Value != nil {
-						f0elemf35elem.SetValue(*f0elemf35iter.Value)
+						f0elemf35elem.Value = f0elemf35iter.Value
 					}
-					f0elemf35 = append(f0elemf35, f0elemf35elem)
+					f0elemf35 = append(f0elemf35, *f0elemf35elem)
 				}
-				f0elem.SetSystemControls(f0elemf35)
+				f0elem.SystemControls = f0elemf35
 			}
 			if f0iter.Ulimits != nil {
-				f0elemf36 := []*svcsdk.Ulimit{}
+				f0elemf36 := []svcsdktypes.Ulimit{}
 				for _, f0elemf36iter := range f0iter.Ulimits {
-					f0elemf36elem := &svcsdk.Ulimit{}
+					f0elemf36elem := &svcsdktypes.Ulimit{}
 					if f0elemf36iter.HardLimit != nil {
-						f0elemf36elem.SetHardLimit(*f0elemf36iter.HardLimit)
+						hardLimitCopy0 := *f0elemf36iter.HardLimit
+						if hardLimitCopy0 > math.MaxInt32 || hardLimitCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field hardLimit is of type int32")
+						}
+						hardLimitCopy := int32(hardLimitCopy0)
+						f0elemf36elem.HardLimit = hardLimitCopy
 					}
 					if f0elemf36iter.Name != nil {
-						f0elemf36elem.SetName(*f0elemf36iter.Name)
+						f0elemf36elem.Name = svcsdktypes.UlimitName(*f0elemf36iter.Name)
 					}
 					if f0elemf36iter.SoftLimit != nil {
-						f0elemf36elem.SetSoftLimit(*f0elemf36iter.SoftLimit)
+						softLimitCopy0 := *f0elemf36iter.SoftLimit
+						if softLimitCopy0 > math.MaxInt32 || softLimitCopy0 < math.MinInt32 {
+							return nil, fmt.Errorf("error: field softLimit is of type int32")
+						}
+						softLimitCopy := int32(softLimitCopy0)
+						f0elemf36elem.SoftLimit = softLimitCopy
 					}
-					f0elemf36 = append(f0elemf36, f0elemf36elem)
+					f0elemf36 = append(f0elemf36, *f0elemf36elem)
 				}
-				f0elem.SetUlimits(f0elemf36)
+				f0elem.Ulimits = f0elemf36
 			}
 			if f0iter.User != nil {
-				f0elem.SetUser(*f0iter.User)
+				f0elem.User = f0iter.User
 			}
 			if f0iter.VolumesFrom != nil {
-				f0elemf38 := []*svcsdk.VolumeFrom{}
+				f0elemf38 := []svcsdktypes.VolumeFrom{}
 				for _, f0elemf38iter := range f0iter.VolumesFrom {
-					f0elemf38elem := &svcsdk.VolumeFrom{}
+					f0elemf38elem := &svcsdktypes.VolumeFrom{}
 					if f0elemf38iter.ReadOnly != nil {
-						f0elemf38elem.SetReadOnly(*f0elemf38iter.ReadOnly)
+						f0elemf38elem.ReadOnly = f0elemf38iter.ReadOnly
 					}
 					if f0elemf38iter.SourceContainer != nil {
-						f0elemf38elem.SetSourceContainer(*f0elemf38iter.SourceContainer)
+						f0elemf38elem.SourceContainer = f0elemf38iter.SourceContainer
 					}
-					f0elemf38 = append(f0elemf38, f0elemf38elem)
+					f0elemf38 = append(f0elemf38, *f0elemf38elem)
 				}
-				f0elem.SetVolumesFrom(f0elemf38)
+				f0elem.VolumesFrom = f0elemf38
 			}
 			if f0iter.WorkingDirectory != nil {
-				f0elem.SetWorkingDirectory(*f0iter.WorkingDirectory)
+				f0elem.WorkingDirectory = f0iter.WorkingDirectory
 			}
-			f0 = append(f0, f0elem)
+			f0 = append(f0, *f0elem)
 		}
-		res.SetContainerDefinitions(f0)
+		res.ContainerDefinitions = f0
 	}
 	if r.ko.Spec.CPU != nil {
-		res.SetCpu(*r.ko.Spec.CPU)
+		res.Cpu = r.ko.Spec.CPU
 	}
 	if r.ko.Spec.EphemeralStorage != nil {
-		f2 := &svcsdk.EphemeralStorage{}
+		f2 := &svcsdktypes.EphemeralStorage{}
 		if r.ko.Spec.EphemeralStorage.SizeInGiB != nil {
-			f2.SetSizeInGiB(*r.ko.Spec.EphemeralStorage.SizeInGiB)
+			sizeInGiBCopy0 := *r.ko.Spec.EphemeralStorage.SizeInGiB
+			if sizeInGiBCopy0 > math.MaxInt32 || sizeInGiBCopy0 < math.MinInt32 {
+				return nil, fmt.Errorf("error: field sizeInGiB is of type int32")
+			}
+			sizeInGiBCopy := int32(sizeInGiBCopy0)
+			f2.SizeInGiB = sizeInGiBCopy
 		}
-		res.SetEphemeralStorage(f2)
+		res.EphemeralStorage = f2
 	}
 	if r.ko.Spec.ExecutionRoleARN != nil {
-		res.SetExecutionRoleArn(*r.ko.Spec.ExecutionRoleARN)
+		res.ExecutionRoleArn = r.ko.Spec.ExecutionRoleARN
 	}
 	if r.ko.Spec.Family != nil {
-		res.SetFamily(*r.ko.Spec.Family)
+		res.Family = r.ko.Spec.Family
 	}
 	if r.ko.Spec.InferenceAccelerators != nil {
-		f5 := []*svcsdk.InferenceAccelerator{}
+		f5 := []svcsdktypes.InferenceAccelerator{}
 		for _, f5iter := range r.ko.Spec.InferenceAccelerators {
-			f5elem := &svcsdk.InferenceAccelerator{}
+			f5elem := &svcsdktypes.InferenceAccelerator{}
 			if f5iter.DeviceName != nil {
-				f5elem.SetDeviceName(*f5iter.DeviceName)
+				f5elem.DeviceName = f5iter.DeviceName
 			}
 			if f5iter.DeviceType != nil {
-				f5elem.SetDeviceType(*f5iter.DeviceType)
+				f5elem.DeviceType = f5iter.DeviceType
 			}
-			f5 = append(f5, f5elem)
+			f5 = append(f5, *f5elem)
 		}
-		res.SetInferenceAccelerators(f5)
+		res.InferenceAccelerators = f5
 	}
 	if r.ko.Spec.IPCMode != nil {
-		res.SetIpcMode(*r.ko.Spec.IPCMode)
+		res.IpcMode = svcsdktypes.IpcMode(*r.ko.Spec.IPCMode)
 	}
 	if r.ko.Spec.Memory != nil {
-		res.SetMemory(*r.ko.Spec.Memory)
+		res.Memory = r.ko.Spec.Memory
 	}
 	if r.ko.Spec.NetworkMode != nil {
-		res.SetNetworkMode(*r.ko.Spec.NetworkMode)
+		res.NetworkMode = svcsdktypes.NetworkMode(*r.ko.Spec.NetworkMode)
 	}
 	if r.ko.Spec.PIDMode != nil {
-		res.SetPidMode(*r.ko.Spec.PIDMode)
+		res.PidMode = svcsdktypes.PidMode(*r.ko.Spec.PIDMode)
 	}
 	if r.ko.Spec.PlacementConstraints != nil {
-		f10 := []*svcsdk.TaskDefinitionPlacementConstraint{}
+		f10 := []svcsdktypes.TaskDefinitionPlacementConstraint{}
 		for _, f10iter := range r.ko.Spec.PlacementConstraints {
-			f10elem := &svcsdk.TaskDefinitionPlacementConstraint{}
+			f10elem := &svcsdktypes.TaskDefinitionPlacementConstraint{}
 			if f10iter.Expression != nil {
-				f10elem.SetExpression(*f10iter.Expression)
+				f10elem.Expression = f10iter.Expression
 			}
 			if f10iter.Type != nil {
-				f10elem.SetType(*f10iter.Type)
+				f10elem.Type = svcsdktypes.TaskDefinitionPlacementConstraintType(*f10iter.Type)
 			}
-			f10 = append(f10, f10elem)
+			f10 = append(f10, *f10elem)
 		}
-		res.SetPlacementConstraints(f10)
+		res.PlacementConstraints = f10
 	}
 	if r.ko.Spec.ProxyConfiguration != nil {
-		f11 := &svcsdk.ProxyConfiguration{}
+		f11 := &svcsdktypes.ProxyConfiguration{}
 		if r.ko.Spec.ProxyConfiguration.ContainerName != nil {
-			f11.SetContainerName(*r.ko.Spec.ProxyConfiguration.ContainerName)
+			f11.ContainerName = r.ko.Spec.ProxyConfiguration.ContainerName
 		}
 		if r.ko.Spec.ProxyConfiguration.Properties != nil {
-			f11f1 := []*svcsdk.KeyValuePair{}
+			f11f1 := []svcsdktypes.KeyValuePair{}
 			for _, f11f1iter := range r.ko.Spec.ProxyConfiguration.Properties {
-				f11f1elem := &svcsdk.KeyValuePair{}
+				f11f1elem := &svcsdktypes.KeyValuePair{}
 				if f11f1iter.Name != nil {
-					f11f1elem.SetName(*f11f1iter.Name)
+					f11f1elem.Name = f11f1iter.Name
 				}
 				if f11f1iter.Value != nil {
-					f11f1elem.SetValue(*f11f1iter.Value)
+					f11f1elem.Value = f11f1iter.Value
 				}
-				f11f1 = append(f11f1, f11f1elem)
+				f11f1 = append(f11f1, *f11f1elem)
 			}
-			f11.SetProperties(f11f1)
+			f11.Properties = f11f1
 		}
 		if r.ko.Spec.ProxyConfiguration.Type != nil {
-			f11.SetType(*r.ko.Spec.ProxyConfiguration.Type)
+			f11.Type = svcsdktypes.ProxyConfigurationType(*r.ko.Spec.ProxyConfiguration.Type)
 		}
-		res.SetProxyConfiguration(f11)
+		res.ProxyConfiguration = f11
 	}
 	if r.ko.Spec.RequiresCompatibilities != nil {
-		f12 := []*string{}
+		f12 := []svcsdktypes.Compatibility{}
 		for _, f12iter := range r.ko.Spec.RequiresCompatibilities {
 			var f12elem string
-			f12elem = *f12iter
-			f12 = append(f12, &f12elem)
+			f12elem = string(*f12iter)
+			f12 = append(f12, svcsdktypes.Compatibility(f12elem))
 		}
-		res.SetRequiresCompatibilities(f12)
+		res.RequiresCompatibilities = f12
 	}
 	if r.ko.Spec.RuntimePlatform != nil {
-		f13 := &svcsdk.RuntimePlatform{}
+		f13 := &svcsdktypes.RuntimePlatform{}
 		if r.ko.Spec.RuntimePlatform.CPUArchitecture != nil {
-			f13.SetCpuArchitecture(*r.ko.Spec.RuntimePlatform.CPUArchitecture)
+			f13.CpuArchitecture = svcsdktypes.CPUArchitecture(*r.ko.Spec.RuntimePlatform.CPUArchitecture)
 		}
 		if r.ko.Spec.RuntimePlatform.OperatingSystemFamily != nil {
-			f13.SetOperatingSystemFamily(*r.ko.Spec.RuntimePlatform.OperatingSystemFamily)
+			f13.OperatingSystemFamily = svcsdktypes.OSFamily(*r.ko.Spec.RuntimePlatform.OperatingSystemFamily)
 		}
-		res.SetRuntimePlatform(f13)
+		res.RuntimePlatform = f13
 	}
 	if r.ko.Spec.Tags != nil {
-		f14 := []*svcsdk.Tag{}
+		f14 := []svcsdktypes.Tag{}
 		for _, f14iter := range r.ko.Spec.Tags {
-			f14elem := &svcsdk.Tag{}
+			f14elem := &svcsdktypes.Tag{}
 			if f14iter.Key != nil {
-				f14elem.SetKey(*f14iter.Key)
+				f14elem.Key = f14iter.Key
 			}
 			if f14iter.Value != nil {
-				f14elem.SetValue(*f14iter.Value)
+				f14elem.Value = f14iter.Value
 			}
-			f14 = append(f14, f14elem)
+			f14 = append(f14, *f14elem)
 		}
-		res.SetTags(f14)
+		res.Tags = f14
 	}
 	if r.ko.Spec.TaskRoleARN != nil {
-		res.SetTaskRoleArn(*r.ko.Spec.TaskRoleARN)
+		res.TaskRoleArn = r.ko.Spec.TaskRoleARN
 	}
 	if r.ko.Spec.Volumes != nil {
-		f16 := []*svcsdk.Volume{}
+		f16 := []svcsdktypes.Volume{}
 		for _, f16iter := range r.ko.Spec.Volumes {
-			f16elem := &svcsdk.Volume{}
+			f16elem := &svcsdktypes.Volume{}
 			if f16iter.ConfiguredAtLaunch != nil {
-				f16elem.SetConfiguredAtLaunch(*f16iter.ConfiguredAtLaunch)
+				f16elem.ConfiguredAtLaunch = f16iter.ConfiguredAtLaunch
 			}
 			if f16iter.DockerVolumeConfiguration != nil {
-				f16elemf1 := &svcsdk.DockerVolumeConfiguration{}
+				f16elemf1 := &svcsdktypes.DockerVolumeConfiguration{}
 				if f16iter.DockerVolumeConfiguration.Autoprovision != nil {
-					f16elemf1.SetAutoprovision(*f16iter.DockerVolumeConfiguration.Autoprovision)
+					f16elemf1.Autoprovision = f16iter.DockerVolumeConfiguration.Autoprovision
 				}
 				if f16iter.DockerVolumeConfiguration.Driver != nil {
-					f16elemf1.SetDriver(*f16iter.DockerVolumeConfiguration.Driver)
+					f16elemf1.Driver = f16iter.DockerVolumeConfiguration.Driver
 				}
 				if f16iter.DockerVolumeConfiguration.DriverOpts != nil {
-					f16elemf1f2 := map[string]*string{}
-					for f16elemf1f2key, f16elemf1f2valiter := range f16iter.DockerVolumeConfiguration.DriverOpts {
-						var f16elemf1f2val string
-						f16elemf1f2val = *f16elemf1f2valiter
-						f16elemf1f2[f16elemf1f2key] = &f16elemf1f2val
-					}
-					f16elemf1.SetDriverOpts(f16elemf1f2)
+					f16elemf1.DriverOpts = aws.ToStringMap(f16iter.DockerVolumeConfiguration.DriverOpts)
 				}
 				if f16iter.DockerVolumeConfiguration.Labels != nil {
-					f16elemf1f3 := map[string]*string{}
-					for f16elemf1f3key, f16elemf1f3valiter := range f16iter.DockerVolumeConfiguration.Labels {
-						var f16elemf1f3val string
-						f16elemf1f3val = *f16elemf1f3valiter
-						f16elemf1f3[f16elemf1f3key] = &f16elemf1f3val
-					}
-					f16elemf1.SetLabels(f16elemf1f3)
+					f16elemf1.Labels = aws.ToStringMap(f16iter.DockerVolumeConfiguration.Labels)
 				}
 				if f16iter.DockerVolumeConfiguration.Scope != nil {
-					f16elemf1.SetScope(*f16iter.DockerVolumeConfiguration.Scope)
+					f16elemf1.Scope = svcsdktypes.Scope(*f16iter.DockerVolumeConfiguration.Scope)
 				}
-				f16elem.SetDockerVolumeConfiguration(f16elemf1)
+				f16elem.DockerVolumeConfiguration = f16elemf1
 			}
 			if f16iter.EFSVolumeConfiguration != nil {
-				f16elemf2 := &svcsdk.EFSVolumeConfiguration{}
+				f16elemf2 := &svcsdktypes.EFSVolumeConfiguration{}
 				if f16iter.EFSVolumeConfiguration.AuthorizationConfig != nil {
-					f16elemf2f0 := &svcsdk.EFSAuthorizationConfig{}
+					f16elemf2f0 := &svcsdktypes.EFSAuthorizationConfig{}
 					if f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID != nil {
-						f16elemf2f0.SetAccessPointId(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID)
+						f16elemf2f0.AccessPointId = f16iter.EFSVolumeConfiguration.AuthorizationConfig.AccessPointID
 					}
 					if f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM != nil {
-						f16elemf2f0.SetIam(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM)
+						f16elemf2f0.Iam = svcsdktypes.EFSAuthorizationConfigIAM(*f16iter.EFSVolumeConfiguration.AuthorizationConfig.IAM)
 					}
-					f16elemf2.SetAuthorizationConfig(f16elemf2f0)
+					f16elemf2.AuthorizationConfig = f16elemf2f0
 				}
 				if f16iter.EFSVolumeConfiguration.FileSystemID != nil {
-					f16elemf2.SetFileSystemId(*f16iter.EFSVolumeConfiguration.FileSystemID)
+					f16elemf2.FileSystemId = f16iter.EFSVolumeConfiguration.FileSystemID
 				}
 				if f16iter.EFSVolumeConfiguration.RootDirectory != nil {
-					f16elemf2.SetRootDirectory(*f16iter.EFSVolumeConfiguration.RootDirectory)
+					f16elemf2.RootDirectory = f16iter.EFSVolumeConfiguration.RootDirectory
 				}
 				if f16iter.EFSVolumeConfiguration.TransitEncryption != nil {
-					f16elemf2.SetTransitEncryption(*f16iter.EFSVolumeConfiguration.TransitEncryption)
+					f16elemf2.TransitEncryption = svcsdktypes.EFSTransitEncryption(*f16iter.EFSVolumeConfiguration.TransitEncryption)
 				}
 				if f16iter.EFSVolumeConfiguration.TransitEncryptionPort != nil {
-					f16elemf2.SetTransitEncryptionPort(*f16iter.EFSVolumeConfiguration.TransitEncryptionPort)
+					transitEncryptionPortCopy0 := *f16iter.EFSVolumeConfiguration.TransitEncryptionPort
+					if transitEncryptionPortCopy0 > math.MaxInt32 || transitEncryptionPortCopy0 < math.MinInt32 {
+						return nil, fmt.Errorf("error: field transitEncryptionPort is of type int32")
+					}
+					transitEncryptionPortCopy := int32(transitEncryptionPortCopy0)
+					f16elemf2.TransitEncryptionPort = &transitEncryptionPortCopy
 				}
-				f16elem.SetEfsVolumeConfiguration(f16elemf2)
+				f16elem.EfsVolumeConfiguration = f16elemf2
 			}
 			if f16iter.FsxWindowsFileServerVolumeConfiguration != nil {
-				f16elemf3 := &svcsdk.FSxWindowsFileServerVolumeConfiguration{}
+				f16elemf3 := &svcsdktypes.FSxWindowsFileServerVolumeConfiguration{}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig != nil {
-					f16elemf3f0 := &svcsdk.FSxWindowsFileServerAuthorizationConfig{}
+					f16elemf3f0 := &svcsdktypes.FSxWindowsFileServerAuthorizationConfig{}
 					if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter != nil {
-						f16elemf3f0.SetCredentialsParameter(*f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter)
+						f16elemf3f0.CredentialsParameter = f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.CredentialsParameter
 					}
 					if f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain != nil {
-						f16elemf3f0.SetDomain(*f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain)
+						f16elemf3f0.Domain = f16iter.FsxWindowsFileServerVolumeConfiguration.AuthorizationConfig.Domain
 					}
-					f16elemf3.SetAuthorizationConfig(f16elemf3f0)
+					f16elemf3.AuthorizationConfig = f16elemf3f0
 				}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID != nil {
-					f16elemf3.SetFileSystemId(*f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID)
+					f16elemf3.FileSystemId = f16iter.FsxWindowsFileServerVolumeConfiguration.FileSystemID
 				}
 				if f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory != nil {
-					f16elemf3.SetRootDirectory(*f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory)
+					f16elemf3.RootDirectory = f16iter.FsxWindowsFileServerVolumeConfiguration.RootDirectory
 				}
-				f16elem.SetFsxWindowsFileServerVolumeConfiguration(f16elemf3)
+				f16elem.FsxWindowsFileServerVolumeConfiguration = f16elemf3
 			}
 			if f16iter.Host != nil {
-				f16elemf4 := &svcsdk.HostVolumeProperties{}
+				f16elemf4 := &svcsdktypes.HostVolumeProperties{}
 				if f16iter.Host.SourcePath != nil {
-					f16elemf4.SetSourcePath(*f16iter.Host.SourcePath)
+					f16elemf4.SourcePath = f16iter.Host.SourcePath
 				}
-				f16elem.SetHost(f16elemf4)
+				f16elem.Host = f16elemf4
 			}
 			if f16iter.Name != nil {
-				f16elem.SetName(*f16iter.Name)
+				f16elem.Name = f16iter.Name
 			}
-			f16 = append(f16, f16elem)
+			f16 = append(f16, *f16elem)
 		}
-		res.SetVolumes(f16)
+		res.Volumes = f16
 	}
 
 	return res, nil
@@ -3857,7 +3586,7 @@ func (rm *resourceManager) sdkDelete(
 	if err != nil {
 		return nil, err
 	}
-	response, err := rm.sdkapi.ListTaskDefinitionsWithContext(ctx, &svcsdk.ListTaskDefinitionsInput{
+	response, err := rm.sdkapi.ListTaskDefinitions(ctx, &svcsdk.ListTaskDefinitionsInput{
 		FamilyPrefix: r.ko.Spec.Family,
 	})
 	if err != nil {
@@ -3866,9 +3595,9 @@ func (rm *resourceManager) sdkDelete(
 
 	for _, taskDefinitionArn := range response.TaskDefinitionArns {
 		input := &svcsdk.DeregisterTaskDefinitionInput{
-			TaskDefinition: taskDefinitionArn,
+			TaskDefinition: &taskDefinitionArn,
 		}
-		_, err := rm.sdkapi.DeregisterTaskDefinitionWithContext(ctx, input)
+		_, err := rm.sdkapi.DeregisterTaskDefinition(ctx, input)
 		rm.metrics.RecordAPICall("DELETE", "DeregisterTaskDefinition", err)
 		if err != nil {
 			return nil, err
@@ -3877,7 +3606,7 @@ func (rm *resourceManager) sdkDelete(
 	return nil, nil
 	var resp *svcsdk.DeregisterTaskDefinitionOutput
 	_ = resp
-	resp, err = rm.sdkapi.DeregisterTaskDefinitionWithContext(ctx, input)
+	resp, err = rm.sdkapi.DeregisterTaskDefinition(ctx, input)
 	rm.metrics.RecordAPICall("DELETE", "DeregisterTaskDefinition", err)
 	return nil, err
 }
@@ -3994,11 +3723,12 @@ func (rm *resourceManager) terminalAWSError(err error) bool {
 	if err == nil {
 		return false
 	}
-	awsErr, ok := ackerr.AWSError(err)
-	if !ok {
+
+	var terminalErr smithy.APIError
+	if !errors.As(err, &terminalErr) {
 		return false
 	}
-	switch awsErr.Code() {
+	switch terminalErr.ErrorCode() {
 	case "InvalidParameterException":
 		return true
 	default:

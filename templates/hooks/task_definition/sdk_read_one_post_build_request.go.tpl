@@ -1,3 +1,3 @@
-	input.Include = []*string{
-		aws.String("TAGS"),
+	input.Include =[]svcsdktypes.TaskDefinitionField{
+		svcsdktypes.TaskDefinitionFieldTags,
 	}
