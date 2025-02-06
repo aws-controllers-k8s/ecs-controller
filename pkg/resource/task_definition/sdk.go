@@ -1512,7 +1512,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field cpu is of type int32")
+					return nil, fmt.Errorf("error: field Cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy
@@ -1771,7 +1771,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.Memory != nil {
 				memoryCopy0 := *f0iter.Memory
 				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memory is of type int32")
+					return nil, fmt.Errorf("error: field Memory is of type int32")
 				}
 				memoryCopy := int32(memoryCopy0)
 				f0elem.Memory = &memoryCopy
@@ -1779,7 +1779,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.MemoryReservation != nil {
 				memoryReservationCopy0 := *f0iter.MemoryReservation
 				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
+					return nil, fmt.Errorf("error: field memoryReservation is of type int32")
 				}
 				memoryReservationCopy := int32(memoryReservationCopy0)
 				f0elem.MemoryReservation = &memoryReservationCopy
@@ -1887,7 +1887,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.StartTimeout != nil {
 				startTimeoutCopy0 := *f0iter.StartTimeout
 				if startTimeoutCopy0 > math.MaxInt32 || startTimeoutCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field startTimeout is of type int32")
+					return nil, fmt.Errorf("error: field StartTimeout is of type int32")
 				}
 				startTimeoutCopy := int32(startTimeoutCopy0)
 				f0elem.StartTimeout = &startTimeoutCopy
@@ -2903,7 +2903,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field cpu is of type int32")
+					return nil, fmt.Errorf("error: field Cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy
@@ -3162,7 +3162,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.Memory != nil {
 				memoryCopy0 := *f0iter.Memory
 				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memory is of type int32")
+					return nil, fmt.Errorf("error: field Memory is of type int32")
 				}
 				memoryCopy := int32(memoryCopy0)
 				f0elem.Memory = &memoryCopy
@@ -3170,7 +3170,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.MemoryReservation != nil {
 				memoryReservationCopy0 := *f0iter.MemoryReservation
 				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
+					return nil, fmt.Errorf("error: field memoryReservation is of type int32")
 				}
 				memoryReservationCopy := int32(memoryReservationCopy0)
 				f0elem.MemoryReservation = &memoryReservationCopy
@@ -3278,7 +3278,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.StartTimeout != nil {
 				startTimeoutCopy0 := *f0iter.StartTimeout
 				if startTimeoutCopy0 > math.MaxInt32 || startTimeoutCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field startTimeout is of type int32")
+					return nil, fmt.Errorf("error: field StartTimeout is of type int32")
 				}
 				startTimeoutCopy := int32(startTimeoutCopy0)
 				f0elem.StartTimeout = &startTimeoutCopy
