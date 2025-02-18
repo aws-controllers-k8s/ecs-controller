@@ -1662,7 +1662,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.HealthCheckGracePeriodSeconds != nil {
 		healthCheckGracePeriodSecondsCopy0 := *r.ko.Spec.HealthCheckGracePeriodSeconds
 		if healthCheckGracePeriodSecondsCopy0 > math.MaxInt32 || healthCheckGracePeriodSecondsCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field healthCheckGracePeriodSeconds is of type int32")
+			return nil, fmt.Errorf("error: field HealthCheckGracePeriodSeconds is of type int32")
 		}
 		healthCheckGracePeriodSecondsCopy := int32(healthCheckGracePeriodSecondsCopy0)
 		res.HealthCheckGracePeriodSeconds = &healthCheckGracePeriodSecondsCopy
@@ -1982,7 +1982,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 				if f22iter.ManagedEBSVolume.Throughput != nil {
 					throughputCopy0 := *f22iter.ManagedEBSVolume.Throughput
 					if throughputCopy0 > math.MaxInt32 || throughputCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field Throughput is of type int32")
+						return nil, fmt.Errorf("error: field throughput is of type int32")
 					}
 					throughputCopy := int32(throughputCopy0)
 					f22elemf0.Throughput = &throughputCopy
@@ -2813,7 +2813,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	if r.ko.Spec.DesiredCount != nil {
 		desiredCountCopy0 := *r.ko.Spec.DesiredCount
 		if desiredCountCopy0 > math.MaxInt32 || desiredCountCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field desiredCount is of type int32")
+			return nil, fmt.Errorf("error: field DesiredCount is of type int32")
 		}
 		desiredCountCopy := int32(desiredCountCopy0)
 		res.DesiredCount = &desiredCountCopy
@@ -3121,7 +3121,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 				if f19iter.ManagedEBSVolume.Throughput != nil {
 					throughputCopy0 := *f19iter.ManagedEBSVolume.Throughput
 					if throughputCopy0 > math.MaxInt32 || throughputCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field Throughput is of type int32")
+						return nil, fmt.Errorf("error: field throughput is of type int32")
 					}
 					throughputCopy := int32(throughputCopy0)
 					f19elemf0.Throughput = &throughputCopy
