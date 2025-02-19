@@ -31,7 +31,9 @@ type TaskDefinitionSpec struct {
 
 	// A list of container definitions in JSON format that describe the different
 	// containers that make up your task.
+
 	// +kubebuilder:validation:Required
+
 	ContainerDefinitions []*ContainerDefinition `json:"containerDefinitions"`
 	// The number of CPU units used by the task. It can be expressed as an integer
 	// using CPU units (for example, 1024) or as a string using vCPUs (for example,
@@ -52,26 +54,27 @@ type TaskDefinitionSpec struct {
 	// The CPU units cannot be less than 1 vCPU when you use Windows containers
 	// on Fargate.
 	//
-	//   - 256 (.25 vCPU) - Available memory values: 512 (0.5 GB), 1024 (1 GB),
-	//     2048 (2 GB)
+	//    * 256 (.25 vCPU) - Available memory values: 512 (0.5 GB), 1024 (1 GB),
+	//    2048 (2 GB)
 	//
-	//   - 512 (.5 vCPU) - Available memory values: 1024 (1 GB), 2048 (2 GB), 3072
-	//     (3 GB), 4096 (4 GB)
+	//    * 512 (.5 vCPU) - Available memory values: 1024 (1 GB), 2048 (2 GB), 3072
+	//    (3 GB), 4096 (4 GB)
 	//
-	//   - 1024 (1 vCPU) - Available memory values: 2048 (2 GB), 3072 (3 GB), 4096
-	//     (4 GB), 5120 (5 GB), 6144 (6 GB), 7168 (7 GB), 8192 (8 GB)
+	//    * 1024 (1 vCPU) - Available memory values: 2048 (2 GB), 3072 (3 GB), 4096
+	//    (4 GB), 5120 (5 GB), 6144 (6 GB), 7168 (7 GB), 8192 (8 GB)
 	//
-	//   - 2048 (2 vCPU) - Available memory values: 4096 (4 GB) and 16384 (16 GB)
-	//     in increments of 1024 (1 GB)
+	//    * 2048 (2 vCPU) - Available memory values: 4096 (4 GB) and 16384 (16 GB)
+	//    in increments of 1024 (1 GB)
 	//
-	//   - 4096 (4 vCPU) - Available memory values: 8192 (8 GB) and 30720 (30 GB)
-	//     in increments of 1024 (1 GB)
+	//    * 4096 (4 vCPU) - Available memory values: 8192 (8 GB) and 30720 (30 GB)
+	//    in increments of 1024 (1 GB)
 	//
-	//   - 8192 (8 vCPU) - Available memory values: 16 GB and 60 GB in 4 GB increments
-	//     This option requires Linux platform 1.4.0 or later.
+	//    * 8192 (8 vCPU) - Available memory values: 16 GB and 60 GB in 4 GB increments
+	//    This option requires Linux platform 1.4.0 or later.
 	//
-	//   - 16384 (16vCPU) - Available memory values: 32GB and 120 GB in 8 GB increments
-	//     This option requires Linux platform 1.4.0 or later.
+	//    * 16384 (16vCPU) - Available memory values: 32GB and 120 GB in 8 GB increments
+	//    This option requires Linux platform 1.4.0 or later.
+
 	CPU *string `json:"cpu,omitempty"`
 	// The amount of ephemeral storage to allocate for the task. This parameter
 	// is used to expand the total amount of ephemeral storage available, beyond
@@ -82,23 +85,28 @@ type TaskDefinitionSpec struct {
 	// For tasks using the Fargate launch type, the task requires the following
 	// platforms:
 	//
-	//   - Linux platform version 1.4.0 or later.
+	//    * Linux platform version 1.4.0 or later.
 	//
-	//   - Windows platform version 1.0.0 or later.
+	//    * Windows platform version 1.0.0 or later.
+
 	EphemeralStorage *EphemeralStorage `json:"ephemeralStorage,omitempty"`
 	// The Amazon Resource Name (ARN) of the task execution role that grants the
 	// Amazon ECS container agent permission to make Amazon Web Services API calls
 	// on your behalf. For informationabout the required IAM roles for Amazon ECS,
 	// see IAM roles for Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-ecs-iam-role-overview.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	ExecutionRoleARN *string `json:"executionRoleARN,omitempty"`
 	// You must specify a family for a task definition. You can use it track multiple
 	// versions of the same task definition. The family is used as a name for your
 	// task definition. Up to 255 letters (uppercase and lowercase), numbers, underscores,
 	// and hyphens are allowed.
+
 	// +kubebuilder:validation:Required
+
 	Family *string `json:"family"`
 	// The Elastic Inference accelerators to use for the containers in the task.
+
 	InferenceAccelerators []*InferenceAccelerator `json:"inferenceAccelerators,omitempty"`
 	// The IPC resource namespace to use for the containers in the task. The valid
 	// values are host, task, or none. If host is specified, then all containers
@@ -118,13 +126,14 @@ type TaskDefinitionSpec struct {
 	// namespace. For more information, see System Controls (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
-	//   - For tasks that use the host IPC mode, IPC namespace related systemControls
-	//     are not supported.
+	//    * For tasks that use the host IPC mode, IPC namespace related systemControls
+	//    are not supported.
 	//
-	//   - For tasks that use the task IPC mode, IPC namespace related systemControls
-	//     will apply to all containers within a task.
+	//    * For tasks that use the task IPC mode, IPC namespace related systemControls
+	//    will apply to all containers within a task.
 	//
 	// This parameter is not supported for Windows containers or tasks run on Fargate.
+
 	IPCMode *string `json:"ipcMode,omitempty"`
 	// The amount of memory (in MiB) used by the task. It can be expressed as an
 	// integer using MiB (for example ,1024) or as a string using GB (for example,
@@ -143,26 +152,27 @@ type TaskDefinitionSpec struct {
 	// The CPU units cannot be less than 1 vCPU when you use Windows containers
 	// on Fargate.
 	//
-	//   - 512 (0.5 GB), 1024 (1 GB), 2048 (2 GB) - Available cpu values: 256 (.25
-	//     vCPU)
+	//    * 512 (0.5 GB), 1024 (1 GB), 2048 (2 GB) - Available cpu values: 256 (.25
+	//    vCPU)
 	//
-	//   - 1024 (1 GB), 2048 (2 GB), 3072 (3 GB), 4096 (4 GB) - Available cpu values:
-	//     512 (.5 vCPU)
+	//    * 1024 (1 GB), 2048 (2 GB), 3072 (3 GB), 4096 (4 GB) - Available cpu values:
+	//    512 (.5 vCPU)
 	//
-	//   - 2048 (2 GB), 3072 (3 GB), 4096 (4 GB), 5120 (5 GB), 6144 (6 GB), 7168
-	//     (7 GB), 8192 (8 GB) - Available cpu values: 1024 (1 vCPU)
+	//    * 2048 (2 GB), 3072 (3 GB), 4096 (4 GB), 5120 (5 GB), 6144 (6 GB), 7168
+	//    (7 GB), 8192 (8 GB) - Available cpu values: 1024 (1 vCPU)
 	//
-	//   - Between 4096 (4 GB) and 16384 (16 GB) in increments of 1024 (1 GB) -
-	//     Available cpu values: 2048 (2 vCPU)
+	//    * Between 4096 (4 GB) and 16384 (16 GB) in increments of 1024 (1 GB) -
+	//    Available cpu values: 2048 (2 vCPU)
 	//
-	//   - Between 8192 (8 GB) and 30720 (30 GB) in increments of 1024 (1 GB) -
-	//     Available cpu values: 4096 (4 vCPU)
+	//    * Between 8192 (8 GB) and 30720 (30 GB) in increments of 1024 (1 GB) -
+	//    Available cpu values: 4096 (4 vCPU)
 	//
-	//   - Between 16 GB and 60 GB in 4 GB increments - Available cpu values: 8192
-	//     (8 vCPU) This option requires Linux platform 1.4.0 or later.
+	//    * Between 16 GB and 60 GB in 4 GB increments - Available cpu values: 8192
+	//    (8 vCPU) This option requires Linux platform 1.4.0 or later.
 	//
-	//   - Between 32GB and 120 GB in 8 GB increments - Available cpu values: 16384
-	//     (16 vCPU) This option requires Linux platform 1.4.0 or later.
+	//    * Between 32GB and 120 GB in 8 GB increments - Available cpu values: 16384
+	//    (16 vCPU) This option requires Linux platform 1.4.0 or later.
+
 	Memory *string `json:"memory,omitempty"`
 	// The Docker networking mode to use for the containers in the task. The valid
 	// values are none, bridge, awsvpc, and host. If no network mode is specified,
@@ -193,6 +203,7 @@ type TaskDefinitionSpec struct {
 	//
 	// If the network mode is host, you cannot run multiple instantiations of the
 	// same task on a single container instance when port mappings are used.
+
 	NetworkMode *string `json:"networkMode,omitempty"`
 	// The process namespace to use for the containers in the task. The valid values
 	// are host or task. On Fargate for Linux containers, the only valid value is
@@ -216,10 +227,12 @@ type TaskDefinitionSpec struct {
 	// This parameter is only supported for tasks that are hosted on Fargate if
 	// the tasks are using platform version 1.4.0 or later (Linux). This isn't supported
 	// for Windows containers on Fargate.
+
 	PIDMode *string `json:"pidMode,omitempty"`
 	// An array of placement constraint objects to use for the task. You can specify
 	// a maximum of 10 constraints for each task. This limit includes constraints
 	// in the task definition and those specified at runtime.
+
 	PlacementConstraints []*TaskDefinitionPlacementConstraint `json:"placementConstraints,omitempty"`
 	// The configuration details for the App Mesh proxy.
 	//
@@ -230,14 +243,17 @@ type TaskDefinitionSpec struct {
 	// then they contain the required versions of the container agent and ecs-init.
 	// For more information, see Amazon ECS-optimized AMI versions (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-ami-versions.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	ProxyConfiguration *ProxyConfiguration `json:"proxyConfiguration,omitempty"`
 	// The task launch type that Amazon ECS validates the task definition against.
 	// A client exception is returned if the task definition doesn't validate against
 	// the compatibilities specified. If no value is specified, the parameter is
 	// omitted from the response.
+
 	RequiresCompatibilities []*string `json:"requiresCompatibilities,omitempty"`
 	// The operating system that your tasks definitions run on. A platform family
 	// is specified only for tasks using the Fargate launch type.
+
 	RuntimePlatform *RuntimePlatform `json:"runtimePlatform,omitempty"`
 	// The metadata that you apply to the task definition to help you categorize
 	// and organize them. Each tag consists of a key and an optional value. You
@@ -245,36 +261,40 @@ type TaskDefinitionSpec struct {
 	//
 	// The following basic restrictions apply to tags:
 	//
-	//   - Maximum number of tags per resource - 50
+	//    * Maximum number of tags per resource - 50
 	//
-	//   - For each resource, each tag key must be unique, and each tag key can
-	//     have only one value.
+	//    * For each resource, each tag key must be unique, and each tag key can
+	//    have only one value.
 	//
-	//   - Maximum key length - 128 Unicode characters in UTF-8
+	//    * Maximum key length - 128 Unicode characters in UTF-8
 	//
-	//   - Maximum value length - 256 Unicode characters in UTF-8
+	//    * Maximum value length - 256 Unicode characters in UTF-8
 	//
-	//   - If your tagging schema is used across multiple services and resources,
-	//     remember that other services may have restrictions on allowed characters.
-	//     Generally allowed characters are: letters, numbers, and spaces representable
-	//     in UTF-8, and the following characters: + - = . _ : / @.
+	//    * If your tagging schema is used across multiple services and resources,
+	//    remember that other services may have restrictions on allowed characters.
+	//    Generally allowed characters are: letters, numbers, and spaces representable
+	//    in UTF-8, and the following characters: + - = . _ : / @.
 	//
-	//   - Tag keys and values are case-sensitive.
+	//    * Tag keys and values are case-sensitive.
 	//
-	//   - Do not use aws:, AWS:, or any upper or lowercase combination of such
-	//     as a prefix for either keys or values as it is reserved for Amazon Web
-	//     Services use. You cannot edit or delete tag keys or values with this prefix.
-	//     Tags with this prefix do not count against your tags per resource limit.
+	//    * Do not use aws:, AWS:, or any upper or lowercase combination of such
+	//    as a prefix for either keys or values as it is reserved for Amazon Web
+	//    Services use. You cannot edit or delete tag keys or values with this prefix.
+	//    Tags with this prefix do not count against your tags per resource limit.
+
 	Tags []*Tag `json:"tags,omitempty"`
 	// The short name or full Amazon Resource Name (ARN) of the IAM role that containers
 	// in this task can assume. All containers in this task are granted the permissions
 	// that are specified in this role. For more information, see IAM Roles for
 	// Tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html)
 	// in the Amazon Elastic Container Service Developer Guide.
-	TaskRoleARN *string                                  `json:"taskRoleARN,omitempty"`
+
+	TaskRoleARN *string `json:"taskRoleARN,omitempty"`
+
 	TaskRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"taskRoleRef,omitempty"`
 	// A list of volume definitions in JSON format that containers in your task
 	// might use.
+
 	Volumes []*Volume `json:"volumes,omitempty"`
 }
 
@@ -285,7 +305,7 @@ type TaskDefinitionStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
