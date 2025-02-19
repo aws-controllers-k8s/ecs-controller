@@ -32,23 +32,29 @@ type ServiceSpec struct {
 	// defaultCapacityProviderStrategy for the cluster is used.
 	//
 	// A capacity provider strategy may contain a maximum of 6 capacity providers.
+
 	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
 	// The short name or full Amazon Resource Name (ARN) of the cluster that you
 	// run your service on. If you do not specify a cluster, the default cluster
 	// is assumed.
-	Cluster    *string                                  `json:"cluster,omitempty"`
+
+	Cluster *string `json:"cluster,omitempty"`
+
 	ClusterRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"clusterRef,omitempty"`
 	// Optional deployment parameters that control how many tasks run during the
 	// deployment and the ordering of stopping and starting tasks.
+
 	DeploymentConfiguration *DeploymentConfiguration `json:"deploymentConfiguration,omitempty"`
 	// The deployment controller to use for the service. If no deployment controller
 	// is specified, the default value of ECS is used.
+
 	DeploymentController *DeploymentController `json:"deploymentController,omitempty"`
 	// The number of instantiations of the specified task definition to place and
 	// keep running in your service.
 	//
 	// This is required if schedulingStrategy is REPLICA or isn't specified. If
 	// schedulingStrategy is DAEMON then this isn't required.
+
 	DesiredCount *int64 `json:"desiredCount,omitempty"`
 	// Specifies whether to turn on Amazon ECS managed tags for the tasks within
 	// the service. For more information, see Tagging your Amazon ECS resources
@@ -57,10 +63,12 @@ type ServiceSpec struct {
 	//
 	// When you use Amazon ECS managed tags, you need to set the propagateTags request
 	// parameter.
+
 	EnableECSManagedTags *bool `json:"enableECSManagedTags,omitempty"`
 	// Determines whether the execute command functionality is turned on for the
 	// service. If true, this enables execute command functionality on all containers
 	// in the service tasks.
+
 	EnableExecuteCommand *bool `json:"enableExecuteCommand,omitempty"`
 	// The period of time, in seconds, that the Amazon ECS service scheduler ignores
 	// unhealthy Elastic Load Balancing, VPC Lattice, and container health checks
@@ -74,6 +82,7 @@ type ServiceSpec struct {
 	// health check status. This grace period can prevent the service scheduler
 	// from marking tasks as unhealthy and stopping them before they have time to
 	// come up.
+
 	HealthCheckGracePeriodSeconds *int64 `json:"healthCheckGracePeriodSeconds,omitempty"`
 	// The infrastructure that you run your service on. For more information, see
 	// Amazon ECS launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html)
@@ -95,6 +104,7 @@ type ServiceSpec struct {
 	// A service can use either a launch type or a capacity provider strategy. If
 	// a launchType is specified, the capacityProviderStrategy parameter must be
 	// omitted.
+
 	LaunchType *string `json:"launchType,omitempty"`
 	// A load balancer object representing the load balancers to use with your service.
 	// For more information, see Service load balancing (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html)
@@ -143,31 +153,38 @@ type ServiceSpec struct {
 	// target type, not instance. This is because tasks that use the awsvpc network
 	// mode are associated with an elastic network interface, not an Amazon EC2
 	// instance.
+
 	LoadBalancers []*LoadBalancer `json:"loadBalancers,omitempty"`
 	// The name of your service. Up to 255 letters (uppercase and lowercase), numbers,
 	// underscores, and hyphens are allowed. Service names must be unique within
 	// a cluster, but you can have similarly named services in multiple clusters
 	// within a Region or across multiple Regions.
+
 	// +kubebuilder:validation:Required
+
 	Name *string `json:"name"`
 	// The network configuration for the service. This parameter is required for
 	// task definitions that use the awsvpc network mode to receive their own elastic
 	// network interface, and it isn't supported for other network modes. For more
 	// information, see Task networking (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-networking.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	NetworkConfiguration *NetworkConfiguration `json:"networkConfiguration,omitempty"`
 	// An array of placement constraint objects to use for tasks in your service.
 	// You can specify a maximum of 10 constraints for each task. This limit includes
 	// constraints in the task definition and those specified at runtime.
+
 	PlacementConstraints []*PlacementConstraint `json:"placementConstraints,omitempty"`
 	// The placement strategy objects to use for tasks in your service. You can
 	// specify a maximum of 5 strategy rules for each service.
+
 	PlacementStrategy []*PlacementStrategy `json:"placementStrategy,omitempty"`
 	// The platform version that your tasks in the service are running on. A platform
 	// version is specified only for tasks using the Fargate launch type. If one
 	// isn't specified, the LATEST platform version is used. For more information,
 	// see Fargate platform versions (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/platform_versions.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	PlatformVersion *string `json:"platformVersion,omitempty"`
 	// Specifies whether to propagate the tags from the task definition to the task.
 	// If no value is specified, the tags aren't propagated. Tags can only be propagated
@@ -180,6 +197,7 @@ type ServiceSpec struct {
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
 	// The default is NONE.
+
 	PropagateTags *string `json:"propagateTags,omitempty"`
 	// The name or full Amazon Resource Name (ARN) of the IAM role that allows Amazon
 	// ECS to make calls to your load balancer on your behalf. This parameter is
@@ -203,29 +221,32 @@ type ServiceSpec struct {
 	// would specify /foo/bar as the role name. For more information, see Friendly
 	// names and paths (https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-friendly-names)
 	// in the IAM User Guide.
-	Role    *string                                  `json:"role,omitempty"`
+
+	Role *string `json:"role,omitempty"`
+
 	RoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"roleRef,omitempty"`
 	// The scheduling strategy to use for the service. For more information, see
 	// Services (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html).
 	//
 	// There are two service scheduler strategies available:
 	//
-	//   - REPLICA-The replica scheduling strategy places and maintains the desired
-	//     number of tasks across your cluster. By default, the service scheduler
-	//     spreads tasks across Availability Zones. You can use task placement strategies
-	//     and constraints to customize task placement decisions. This scheduler
-	//     strategy is required if the service uses the CODE_DEPLOY or EXTERNAL deployment
-	//     controller types.
+	//    * REPLICA-The replica scheduling strategy places and maintains the desired
+	//    number of tasks across your cluster. By default, the service scheduler
+	//    spreads tasks across Availability Zones. You can use task placement strategies
+	//    and constraints to customize task placement decisions. This scheduler
+	//    strategy is required if the service uses the CODE_DEPLOY or EXTERNAL deployment
+	//    controller types.
 	//
-	//   - DAEMON-The daemon scheduling strategy deploys exactly one task on each
-	//     active container instance that meets all of the task placement constraints
-	//     that you specify in your cluster. The service scheduler also evaluates
-	//     the task placement constraints for running tasks and will stop tasks that
-	//     don't meet the placement constraints. When you're using this strategy,
-	//     you don't need to specify a desired number of tasks, a task placement
-	//     strategy, or use Service Auto Scaling policies. Tasks using the Fargate
-	//     launch type or the CODE_DEPLOY or EXTERNAL deployment controller types
-	//     don't support the DAEMON scheduling strategy.
+	//    * DAEMON-The daemon scheduling strategy deploys exactly one task on each
+	//    active container instance that meets all of the task placement constraints
+	//    that you specify in your cluster. The service scheduler also evaluates
+	//    the task placement constraints for running tasks and will stop tasks that
+	//    don't meet the placement constraints. When you're using this strategy,
+	//    you don't need to specify a desired number of tasks, a task placement
+	//    strategy, or use Service Auto Scaling policies. Tasks using the Fargate
+	//    launch type or the CODE_DEPLOY or EXTERNAL deployment controller types
+	//    don't support the DAEMON scheduling strategy.
+
 	SchedulingStrategy *string `json:"schedulingStrategy,omitempty"`
 	// The configuration for this service to discover and connect to services, and
 	// be discovered by, and connected from, other services within a namespace.
@@ -237,12 +258,14 @@ type ServiceSpec struct {
 	// services create are supported with Service Connect. For more information,
 	// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	ServiceConnectConfiguration *ServiceConnectConfiguration `json:"serviceConnectConfiguration,omitempty"`
 	// The details of the service discovery registry to associate with this service.
 	// For more information, see Service discovery (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html).
 	//
 	// Each service may be associated with one service registry. Multiple service
 	// registries for each service isn't supported.
+
 	ServiceRegistries []*ServiceRegistry `json:"serviceRegistries,omitempty"`
 	// The metadata that you apply to the service to help you categorize and organize
 	// them. Each tag consists of a key and an optional value, both of which you
@@ -250,26 +273,27 @@ type ServiceSpec struct {
 	//
 	// The following basic restrictions apply to tags:
 	//
-	//   - Maximum number of tags per resource - 50
+	//    * Maximum number of tags per resource - 50
 	//
-	//   - For each resource, each tag key must be unique, and each tag key can
-	//     have only one value.
+	//    * For each resource, each tag key must be unique, and each tag key can
+	//    have only one value.
 	//
-	//   - Maximum key length - 128 Unicode characters in UTF-8
+	//    * Maximum key length - 128 Unicode characters in UTF-8
 	//
-	//   - Maximum value length - 256 Unicode characters in UTF-8
+	//    * Maximum value length - 256 Unicode characters in UTF-8
 	//
-	//   - If your tagging schema is used across multiple services and resources,
-	//     remember that other services may have restrictions on allowed characters.
-	//     Generally allowed characters are: letters, numbers, and spaces representable
-	//     in UTF-8, and the following characters: + - = . _ : / @.
+	//    * If your tagging schema is used across multiple services and resources,
+	//    remember that other services may have restrictions on allowed characters.
+	//    Generally allowed characters are: letters, numbers, and spaces representable
+	//    in UTF-8, and the following characters: + - = . _ : / @.
 	//
-	//   - Tag keys and values are case-sensitive.
+	//    * Tag keys and values are case-sensitive.
 	//
-	//   - Do not use aws:, AWS:, or any upper or lowercase combination of such
-	//     as a prefix for either keys or values as it is reserved for Amazon Web
-	//     Services use. You cannot edit or delete tag keys or values with this prefix.
-	//     Tags with this prefix do not count against your tags per resource limit.
+	//    * Do not use aws:, AWS:, or any upper or lowercase combination of such
+	//    as a prefix for either keys or values as it is reserved for Amazon Web
+	//    Services use. You cannot edit or delete tag keys or values with this prefix.
+	//    Tags with this prefix do not count against your tags per resource limit.
+
 	Tags []*Tag `json:"tags,omitempty"`
 	// The family and revision (family:revision) or full ARN of the task definition
 	// to run in your service. If a revision isn't specified, the latest ACTIVE
@@ -280,11 +304,14 @@ type ServiceSpec struct {
 	//
 	// For more information about deployment types, see Amazon ECS deployment types
 	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-types.html).
-	TaskDefinition    *string                                  `json:"taskDefinition,omitempty"`
+
+	TaskDefinition *string `json:"taskDefinition,omitempty"`
+
 	TaskDefinitionRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"taskDefinitionRef,omitempty"`
 	// The configuration for a volume specified in the task definition as a volume
 	// that is configured at launch time. Currently, the only supported volume type
 	// is an Amazon EBS volume.
+
 	VolumeConfigurations []*ServiceVolumeConfiguration `json:"volumeConfigurations,omitempty"`
 }
 
@@ -295,7 +322,7 @@ type ServiceStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource

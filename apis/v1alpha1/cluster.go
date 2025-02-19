@@ -48,8 +48,10 @@ type ClusterSpec struct {
 	// The PutCapacityProvider (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutCapacityProvider.html)
 	// API operation is used to update the list of available capacity providers
 	// for a cluster after the cluster is created.
+
 	CapacityProviders []*string `json:"capacityProviders,omitempty"`
 	// The execute command configuration for the cluster.
+
 	Configuration *ClusterConfiguration `json:"configuration,omitempty"`
 	// The capacity provider strategy to set as the default for the cluster. After
 	// a default capacity provider strategy is set for a cluster, when you call
@@ -62,10 +64,12 @@ type ClusterSpec struct {
 	// it was created, it can be defined later with the PutClusterCapacityProviders
 	// (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutClusterCapacityProviders.html)
 	// API operation.
+
 	DefaultCapacityProviderStrategy []*CapacityProviderStrategyItem `json:"defaultCapacityProviderStrategy,omitempty"`
 	// The name of your cluster. If you don't specify a name for your cluster, you
 	// create a cluster that's named default. Up to 255 letters (uppercase and lowercase),
 	// numbers, underscores, and hyphens are allowed.
+
 	Name *string `json:"name,omitempty"`
 	// Use this parameter to set a default Service Connect namespace. After you
 	// set a default Service Connect namespace, any new services with Service Connect
@@ -82,37 +86,40 @@ type ClusterSpec struct {
 	// services create are supported with Service Connect. For more information,
 	// see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+
 	ServiceConnectDefaults *ClusterServiceConnectDefaultsRequest `json:"serviceConnectDefaults,omitempty"`
 	// The setting to use when creating a cluster. This parameter is used to turn
 	// on CloudWatch Container Insights for a cluster. If this value is specified,
 	// it overrides the containerInsights value set with PutAccountSetting (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutAccountSetting.html)
 	// or PutAccountSettingDefault (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_PutAccountSettingDefault.html).
+
 	Settings []*ClusterSetting `json:"settings,omitempty"`
 	// The metadata that you apply to the cluster to help you categorize and organize
 	// them. Each tag consists of a key and an optional value. You define both.
 	//
 	// The following basic restrictions apply to tags:
 	//
-	//   - Maximum number of tags per resource - 50
+	//    * Maximum number of tags per resource - 50
 	//
-	//   - For each resource, each tag key must be unique, and each tag key can
-	//     have only one value.
+	//    * For each resource, each tag key must be unique, and each tag key can
+	//    have only one value.
 	//
-	//   - Maximum key length - 128 Unicode characters in UTF-8
+	//    * Maximum key length - 128 Unicode characters in UTF-8
 	//
-	//   - Maximum value length - 256 Unicode characters in UTF-8
+	//    * Maximum value length - 256 Unicode characters in UTF-8
 	//
-	//   - If your tagging schema is used across multiple services and resources,
-	//     remember that other services may have restrictions on allowed characters.
-	//     Generally allowed characters are: letters, numbers, and spaces representable
-	//     in UTF-8, and the following characters: + - = . _ : / @.
+	//    * If your tagging schema is used across multiple services and resources,
+	//    remember that other services may have restrictions on allowed characters.
+	//    Generally allowed characters are: letters, numbers, and spaces representable
+	//    in UTF-8, and the following characters: + - = . _ : / @.
 	//
-	//   - Tag keys and values are case-sensitive.
+	//    * Tag keys and values are case-sensitive.
 	//
-	//   - Do not use aws:, AWS:, or any upper or lowercase combination of such
-	//     as a prefix for either keys or values as it is reserved for Amazon Web
-	//     Services use. You cannot edit or delete tag keys or values with this prefix.
-	//     Tags with this prefix do not count against your tags per resource limit.
+	//    * Do not use aws:, AWS:, or any upper or lowercase combination of such
+	//    as a prefix for either keys or values as it is reserved for Amazon Web
+	//    Services use. You cannot edit or delete tag keys or values with this prefix.
+	//    Tags with this prefix do not count against your tags per resource limit.
+
 	Tags []*Tag `json:"tags,omitempty"`
 }
 
@@ -123,7 +130,7 @@ type ClusterStatus struct {
 	// constructed ARN for the resource
 	// +kubebuilder:validation:Optional
 	ACKResourceMetadata *ackv1alpha1.ResourceMetadata `json:"ackResourceMetadata"`
-	// All CRS managed by ACK have a common `Status.Conditions` member that
+	// All CRs managed by ACK have a common `Status.Conditions` member that
 	// contains a collection of `ackv1alpha1.Condition` objects that describe
 	// the various terminal states of the CR and its backend AWS service API
 	// resource
