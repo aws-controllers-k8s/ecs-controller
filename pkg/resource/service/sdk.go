@@ -1662,7 +1662,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.HealthCheckGracePeriodSeconds != nil {
 		healthCheckGracePeriodSecondsCopy0 := *r.ko.Spec.HealthCheckGracePeriodSeconds
 		if healthCheckGracePeriodSecondsCopy0 > math.MaxInt32 || healthCheckGracePeriodSecondsCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field HealthCheckGracePeriodSeconds is of type int32")
+			return nil, fmt.Errorf("error: field healthCheckGracePeriodSeconds is of type int32")
 		}
 		healthCheckGracePeriodSecondsCopy := int32(healthCheckGracePeriodSecondsCopy0)
 		res.HealthCheckGracePeriodSeconds = &healthCheckGracePeriodSecondsCopy
@@ -2827,7 +2827,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	if r.ko.Spec.HealthCheckGracePeriodSeconds != nil {
 		healthCheckGracePeriodSecondsCopy0 := *r.ko.Spec.HealthCheckGracePeriodSeconds
 		if healthCheckGracePeriodSecondsCopy0 > math.MaxInt32 || healthCheckGracePeriodSecondsCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field HealthCheckGracePeriodSeconds is of type int32")
+			return nil, fmt.Errorf("error: field healthCheckGracePeriodSeconds is of type int32")
 		}
 		healthCheckGracePeriodSecondsCopy := int32(healthCheckGracePeriodSecondsCopy0)
 		res.HealthCheckGracePeriodSeconds = &healthCheckGracePeriodSecondsCopy
