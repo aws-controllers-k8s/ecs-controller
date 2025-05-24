@@ -1779,7 +1779,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.MemoryReservation != nil {
 				memoryReservationCopy0 := *f0iter.MemoryReservation
 				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memoryReservation is of type int32")
+					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
 				}
 				memoryReservationCopy := int32(memoryReservationCopy0)
 				f0elem.MemoryReservation = &memoryReservationCopy
@@ -3170,7 +3170,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.MemoryReservation != nil {
 				memoryReservationCopy0 := *f0iter.MemoryReservation
 				if memoryReservationCopy0 > math.MaxInt32 || memoryReservationCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memoryReservation is of type int32")
+					return nil, fmt.Errorf("error: field MemoryReservation is of type int32")
 				}
 				memoryReservationCopy := int32(memoryReservationCopy0)
 				f0elem.MemoryReservation = &memoryReservationCopy
