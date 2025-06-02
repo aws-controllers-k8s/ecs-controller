@@ -1771,7 +1771,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.Memory != nil {
 				memoryCopy0 := *f0iter.Memory
 				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memory is of type int32")
+					return nil, fmt.Errorf("error: field Memory is of type int32")
 				}
 				memoryCopy := int32(memoryCopy0)
 				f0elem.Memory = &memoryCopy
@@ -3162,7 +3162,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.Memory != nil {
 				memoryCopy0 := *f0iter.Memory
 				if memoryCopy0 > math.MaxInt32 || memoryCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field memory is of type int32")
+					return nil, fmt.Errorf("error: field Memory is of type int32")
 				}
 				memoryCopy := int32(memoryCopy0)
 				f0elem.Memory = &memoryCopy
