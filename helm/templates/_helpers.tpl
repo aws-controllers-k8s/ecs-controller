@@ -82,6 +82,7 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - capacityproviders
   - clusters
   - services
   - taskdefinitions
@@ -96,6 +97,7 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - capacityproviders/status
   - clusters/status
   - services/status
   - taskdefinitions/status

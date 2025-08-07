@@ -1648,7 +1648,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 	if r.ko.Spec.DesiredCount != nil {
 		desiredCountCopy0 := *r.ko.Spec.DesiredCount
 		if desiredCountCopy0 > math.MaxInt32 || desiredCountCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field DesiredCount is of type int32")
+			return nil, fmt.Errorf("error: field desiredCount is of type int32")
 		}
 		desiredCountCopy := int32(desiredCountCopy0)
 		res.DesiredCount = &desiredCountCopy
@@ -2813,7 +2813,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	if r.ko.Spec.DesiredCount != nil {
 		desiredCountCopy0 := *r.ko.Spec.DesiredCount
 		if desiredCountCopy0 > math.MaxInt32 || desiredCountCopy0 < math.MinInt32 {
-			return nil, fmt.Errorf("error: field desiredCount is of type int32")
+			return nil, fmt.Errorf("error: field DesiredCount is of type int32")
 		}
 		desiredCountCopy := int32(desiredCountCopy0)
 		res.DesiredCount = &desiredCountCopy

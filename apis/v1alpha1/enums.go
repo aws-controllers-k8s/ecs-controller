@@ -61,11 +61,11 @@ const (
 	CapacityProviderField_TAGS CapacityProviderField = "TAGS"
 )
 
-type CapacityProviderStatus string
+type CapacityProviderStatus_SDK string
 
 const (
-	CapacityProviderStatus_ACTIVE   CapacityProviderStatus = "ACTIVE"
-	CapacityProviderStatus_INACTIVE CapacityProviderStatus = "INACTIVE"
+	CapacityProviderStatus_SDK_ACTIVE   CapacityProviderStatus_SDK = "ACTIVE"
+	CapacityProviderStatus_SDK_INACTIVE CapacityProviderStatus_SDK = "INACTIVE"
 )
 
 type CapacityProviderUpdateStatus string

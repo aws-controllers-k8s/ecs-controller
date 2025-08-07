@@ -1,0 +1,267 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.2
+  name: capacityproviders.ecs.services.k8s.aws
+spec:
+  group: ecs.services.k8s.aws
+  names:
+    kind: CapacityProvider
+    listKind: CapacityProviderList
+    plural: capacityproviders
+    singular: capacityprovider
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.name
+      name: CAPACITYPROVIDER
+      type: string
+    - jsonPath: .status.status
+      name: STATUS
+      type: string
+    - jsonPath: .status.updateStatus
+      name: UPDATESTATUS
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CapacityProvider is the Schema for the CapacityProviders API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              CapacityProviderSpec defines the desired state of CapacityProvider.
+
+              The details for a capacity provider.
+            properties:
+              autoScalingGroupProvider:
+                description: The details of the Auto Scaling group for the capacity
+                  provider.
+                properties:
+                  autoScalingGroupARN:
+                    type: string
+                  managedDraining:
+                    type: string
+                  managedScaling:
+                    description: |-
+                      The managed scaling settings for the Auto Scaling group capacity provider.
+
+                      When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+                      actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+                      policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+                      value as the target value for the metric. For more information, see Using
+                      managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+                      in the Amazon Elastic Container Service Developer Guide.
+
+                      If managed scaling is off, the user must manage the scaling of the Auto Scaling
+                      group.
+                    properties:
+                      instanceWarmupPeriod:
+                        format: int64
+                        type: integer
+                      maximumScalingStepSize:
+                        format: int64
+                        type: integer
+                      minimumScalingStepSize:
+                        format: int64
+                        type: integer
+                      status:
+                        type: string
+                      targetCapacity:
+                        format: int64
+                        type: integer
+                    type: object
+                  managedTerminationProtection:
+                    type: string
+                type: object
+              name:
+                description: |-
+                  The name of the capacity provider. Up to 255 characters are allowed. They
+                  include letters (both upper and lowercase letters), numbers, underscores
+                  (_), and hyphens (-). The name can't be prefixed with "aws", "ecs", or "fargate".
+                type: string
+              tags:
+                description: |-
+                  The metadata that you apply to the capacity provider to categorize and organize
+                  them more conveniently. Each tag consists of a key and an optional value.
+                  You define both of them.
+
+                  The following basic restrictions apply to tags:
+
+                    - Maximum number of tags per resource - 50
+
+                    - For each resource, each tag key must be unique, and each tag key can
+                      have only one value.
+
+                    - Maximum key length - 128 Unicode characters in UTF-8
+
+                    - Maximum value length - 256 Unicode characters in UTF-8
+
+                    - If your tagging schema is used across multiple services and resources,
+                      remember that other services may have restrictions on allowed characters.
+                      Generally allowed characters are: letters, numbers, and spaces representable
+                      in UTF-8, and the following characters: + - = . _ : / @.
+
+                    - Tag keys and values are case-sensitive.
+
+                    - Do not use aws:, AWS:, or any upper or lowercase combination of such
+                      as a prefix for either keys or values as it is reserved for Amazon Web
+                      Services use. You cannot edit or delete tag keys or values with this prefix.
+                      Tags with this prefix do not count against your tags per resource limit.
+                items:
+                  description: |-
+                    The metadata that you apply to a resource to help you categorize and organize
+                    them. Each tag consists of a key and an optional value. You define them.
+
+                    The following basic restrictions apply to tags:
+
+                      - Maximum number of tags per resource - 50
+
+                      - For each resource, each tag key must be unique, and each tag key can
+                        have only one value.
+
+                      - Maximum key length - 128 Unicode characters in UTF-8
+
+                      - Maximum value length - 256 Unicode characters in UTF-8
+
+                      - If your tagging schema is used across multiple services and resources,
+                        remember that other services may have restrictions on allowed characters.
+                        Generally allowed characters are: letters, numbers, and spaces representable
+                        in UTF-8, and the following characters: + - = . _ : / @.
+
+                      - Tag keys and values are case-sensitive.
+
+                      - Do not use aws:, AWS:, or any upper or lowercase combination of such
+                        as a prefix for either keys or values as it is reserved for Amazon Web
+                        Services use. You cannot edit or delete tag keys or values with this prefix.
+                        Tags with this prefix do not count against your tags per resource limit.
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+                  type: object
+                type: array
+            required:
+            - autoScalingGroupProvider
+            type: object
+          status:
+            description: CapacityProviderStatus defines the observed state of CapacityProvider
+            properties:
+              ackResourceMetadata:
+                description: |-
+                  All CRs managed by ACK have a common `Status.ACKResourceMetadata` member
+                  that is used to contain resource sync state, account ownership,
+                  constructed ARN for the resource
+                properties:
+                  arn:
+                    description: |-
+                      ARN is the Amazon Resource Name for the resource. This is a
+                      globally-unique identifier and is set only by the ACK service controller
+                      once the controller has orchestrated the creation of the resource OR
+                      when it has verified that an "adopted" resource (a resource where the
+                      ARN annotation was set by the Kubernetes user on the CR) exists and
+                      matches the supplied CR's Spec field values.
+                      https://github.com/aws/aws-controllers-k8s/issues/270
+                    type: string
+                  ownerAccountID:
+                    description: |-
+                      OwnerAccountID is the AWS Account ID of the account that owns the
+                      backend AWS service API resource.
+                    type: string
+                  region:
+                    description: Region is the AWS region in which the resource exists
+                      or will exist.
+                    type: string
+                required:
+                - ownerAccountID
+                - region
+                type: object
+              conditions:
+                description: |-
+                  All CRs managed by ACK have a common `Status.Conditions` member that
+                  contains a collection of `ackv1alpha1.Condition` objects that describe
+                  the various terminal states of the CR and its backend AWS service API
+                  resource
+                items:
+                  description: |-
+                    Condition is the common struct used by all CRDs managed by ACK service
+                    controllers to indicate terminal states  of the CR and its backend AWS
+                    service API resource
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type is the type of the Condition
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              status:
+                description: |-
+                  The current status of the capacity provider. Only capacity providers in an
+                  ACTIVE state can be used in a cluster. When a capacity provider is successfully
+                  deleted, it has an INACTIVE status.
+                type: string
+              updateStatus:
+                description: |-
+                  The update status of the capacity provider. The following are the possible
+                  states that is returned.
+
+                  DELETE_IN_PROGRESS
+
+                  The capacity provider is in the process of being deleted.
+
+                  DELETE_COMPLETE
+
+                  The capacity provider was successfully deleted and has an INACTIVE status.
+
+                  DELETE_FAILED
+
+                  The capacity provider can't be deleted. The update status reason provides
+                  further details about why the delete failed.
+                type: string
+              updateStatusReason:
+                description: |-
+                  The update status reason. This provides further details about the update
+                  status for the capacity provider.
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

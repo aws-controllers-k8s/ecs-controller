@@ -68,14 +68,38 @@ type Attribute struct {
 // The details of the Auto Scaling group for the capacity provider.
 type AutoScalingGroupProvider struct {
 	AutoScalingGroupARN *string `json:"autoScalingGroupARN,omitempty"`
+	ManagedDraining     *string `json:"managedDraining,omitempty"`
+	// The managed scaling settings for the Auto Scaling group capacity provider.
+	//
+	// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+	// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+	// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+	// value as the target value for the metric. For more information, see Using
+	// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+	// group.
+	ManagedScaling               *ManagedScaling `json:"managedScaling,omitempty"`
+	ManagedTerminationProtection *string         `json:"managedTerminationProtection,omitempty"`
 }
 
-// The details for a capacity provider.
-type CapacityProvider struct {
-	CapacityProviderARN *string `json:"capacityProviderARN,omitempty"`
-	Name                *string `json:"name,omitempty"`
-	Tags                []*Tag  `json:"tags,omitempty"`
-	UpdateStatusReason  *string `json:"updateStatusReason,omitempty"`
+// The details of the Auto Scaling group capacity provider to update.
+type AutoScalingGroupProviderUpdate struct {
+	ManagedDraining *string `json:"managedDraining,omitempty"`
+	// The managed scaling settings for the Auto Scaling group capacity provider.
+	//
+	// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+	// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+	// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+	// value as the target value for the metric. For more information, see Using
+	// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+	// group.
+	ManagedScaling               *ManagedScaling `json:"managedScaling,omitempty"`
+	ManagedTerminationProtection *string         `json:"managedTerminationProtection,omitempty"`
 }
 
 // The details of a capacity provider strategy. A capacity provider strategy
@@ -112,6 +136,18 @@ type CapacityProviderStrategyItem struct {
 	Base             *int64  `json:"base,omitempty"`
 	CapacityProvider *string `json:"capacityProvider,omitempty"`
 	Weight           *int64  `json:"weight,omitempty"`
+}
+
+// The details for a capacity provider.
+type CapacityProvider_SDK struct {
+	// The details of the Auto Scaling group for the capacity provider.
+	AutoScalingGroupProvider *AutoScalingGroupProvider `json:"autoScalingGroupProvider,omitempty"`
+	CapacityProviderARN      *string                   `json:"capacityProviderARN,omitempty"`
+	Name                     *string                   `json:"name,omitempty"`
+	Status                   *string                   `json:"status,omitempty"`
+	Tags                     []*Tag                    `json:"tags,omitempty"`
+	UpdateStatus             *string                   `json:"updateStatus,omitempty"`
+	UpdateStatusReason       *string                   `json:"updateStatusReason,omitempty"`
 }
 
 // The execute command and managed storage configuration for the cluster.
@@ -1060,6 +1096,25 @@ type ManagedAgentStateChange struct {
 	ContainerName *string `json:"containerName,omitempty"`
 	Reason        *string `json:"reason,omitempty"`
 	Status        *string `json:"status,omitempty"`
+}
+
+// The managed scaling settings for the Auto Scaling group capacity provider.
+//
+// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+// value as the target value for the metric. For more information, see Using
+// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+// group.
+type ManagedScaling struct {
+	InstanceWarmupPeriod   *int64  `json:"instanceWarmupPeriod,omitempty"`
+	MaximumScalingStepSize *int64  `json:"maximumScalingStepSize,omitempty"`
+	MinimumScalingStepSize *int64  `json:"minimumScalingStepSize,omitempty"`
+	Status                 *string `json:"status,omitempty"`
+	TargetCapacity         *int64  `json:"targetCapacity,omitempty"`
 }
 
 // The managed storage configuration for the cluster.

@@ -16,6 +16,7 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - capacityproviders
   - clusters
   - services
   - taskdefinitions

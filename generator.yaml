@@ -4,7 +4,7 @@ ignore:
   resource_names:
   # Cluster
   # Service
-  - CapacityProvider
+  # CapacityProvider - Removed from ignore list
   # TaskDefinition
   - TaskSet
   field_paths:
@@ -44,6 +44,11 @@ operations:
     - ReadMany
     resource_name: Service
     output_wrapper_field_path: Services
+  DescribeCapacityProviders:
+    operation_type:
+    - ReadMany
+    resource_name: CapacityProvider
+    output_wrapper_field_path: CapacityProviders
 resources: 
   Cluster: 
     fields:
@@ -248,3 +253,50 @@ resources:
     exceptions:
       terminal_codes:
       - InvalidParameterException
+  CapacityProvider:
+    fields:
+      Name:
+        is_primary_key: true
+        print:
+          name: CAPACITYPROVIDER
+      Status:
+        is_read_only: true
+        print:
+          name: STATUS
+      AutoScalingGroupProvider.AutoScalingGroupArn:
+        # Removed the reference to avoid dependency on autoscaling-controller
+        is_read_only: false
+      UpdateStatus:
+        is_read_only: true
+        print:
+          name: UPDATESTATUS
+      UpdateStatusReason:
+        is_read_only: true
+    hooks:
+      sdk_create_post_set_output:
+        template_path: hooks/capacity_provider/sdk_create_post_set_output.go.tpl
+      sdk_update_pre_build_request:
+        template_path: hooks/capacity_provider/sdk_update_pre_build_request.go.tpl
+      sdk_read_one_post_set_output:
+        template_path: hooks/capacity_provider/sdk_read_one_post_set_output.go.tpl
+    list_operation:
+      match_fields:
+      - Name
+    exceptions:
+      errors:
+        404:
+          code: CapacityProviderNotFoundException
+      terminal_codes:
+      - InvalidParameterException
+      - ClientException
+    renames:
+      operations:
+        CreateCapacityProvider:
+          input_fields:
+            CapacityProviderName: Name
+        DeleteCapacityProvider:
+          input_fields:
+            CapacityProviderName: Name
+        DescribeCapacityProviders:
+          input_fields:
+            CapacityProviderName: Name
