@@ -1943,7 +1943,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 				if f22iter.ManagedEBSVolume.SizeInGiB != nil {
 					sizeInGiBCopy0 := *f22iter.ManagedEBSVolume.SizeInGiB
 					if sizeInGiBCopy0 > math.MaxInt32 || sizeInGiBCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field SizeInGiB is of type int32")
+						return nil, fmt.Errorf("error: field sizeInGiB is of type int32")
 					}
 					sizeInGiBCopy := int32(sizeInGiBCopy0)
 					f22elemf0.SizeInGiB = &sizeInGiBCopy
@@ -3082,7 +3082,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 				if f19iter.ManagedEBSVolume.SizeInGiB != nil {
 					sizeInGiBCopy0 := *f19iter.ManagedEBSVolume.SizeInGiB
 					if sizeInGiBCopy0 > math.MaxInt32 || sizeInGiBCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field SizeInGiB is of type int32")
+						return nil, fmt.Errorf("error: field sizeInGiB is of type int32")
 					}
 					sizeInGiBCopy := int32(sizeInGiBCopy0)
 					f19elemf0.SizeInGiB = &sizeInGiBCopy

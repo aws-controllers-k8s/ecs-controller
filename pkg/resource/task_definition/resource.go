@@ -97,11 +97,11 @@ func (r *resource) SetIdentifiers(identifier *ackv1alpha1.AWSIdentifiers) error 
 
 // PopulateResourceFromAnnotation populates the fields passed from adoption annotation
 func (r *resource) PopulateResourceFromAnnotation(fields map[string]string) error {
-	tmp, ok := fields["family"]
+	primaryKey, ok := fields["family"]
 	if !ok {
 		return ackerrors.NewTerminalError(fmt.Errorf("required field missing: family"))
 	}
-	r.ko.Spec.Family = &tmp
+	r.ko.Spec.Family = &primaryKey
 
 	return nil
 }
