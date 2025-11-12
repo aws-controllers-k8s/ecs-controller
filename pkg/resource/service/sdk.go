@@ -1929,7 +1929,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 				if f22iter.ManagedEBSVolume.IOPS != nil {
 					iopsCopy0 := *f22iter.ManagedEBSVolume.IOPS
 					if iopsCopy0 > math.MaxInt32 || iopsCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field iops is of type int32")
+						return nil, fmt.Errorf("error: field Iops is of type int32")
 					}
 					iopsCopy := int32(iopsCopy0)
 					f22elemf0.Iops = &iopsCopy
@@ -3068,7 +3068,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 				if f19iter.ManagedEBSVolume.IOPS != nil {
 					iopsCopy0 := *f19iter.ManagedEBSVolume.IOPS
 					if iopsCopy0 > math.MaxInt32 || iopsCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field iops is of type int32")
+						return nil, fmt.Errorf("error: field Iops is of type int32")
 					}
 					iopsCopy := int32(iopsCopy0)
 					f19elemf0.Iops = &iopsCopy
