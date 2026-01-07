@@ -17,16 +17,15 @@ package cluster
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -114,7 +113,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.DefaultCapacityProviderStrategy) != len(b.ko.Spec.DefaultCapacityProviderStrategy) {
 		delta.Add("Spec.DefaultCapacityProviderStrategy", a.ko.Spec.DefaultCapacityProviderStrategy, b.ko.Spec.DefaultCapacityProviderStrategy)
 	} else if len(a.ko.Spec.DefaultCapacityProviderStrategy) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.DefaultCapacityProviderStrategy, b.ko.Spec.DefaultCapacityProviderStrategy) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.DefaultCapacityProviderStrategy, b.ko.Spec.DefaultCapacityProviderStrategy) {
 			delta.Add("Spec.DefaultCapacityProviderStrategy", a.ko.Spec.DefaultCapacityProviderStrategy, b.ko.Spec.DefaultCapacityProviderStrategy)
 		}
 	}
@@ -139,7 +138,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.Settings) != len(b.ko.Spec.Settings) {
 		delta.Add("Spec.Settings", a.ko.Spec.Settings, b.ko.Spec.Settings)
 	} else if len(a.ko.Spec.Settings) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.Settings, b.ko.Spec.Settings) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.Settings, b.ko.Spec.Settings) {
 			delta.Add("Spec.Settings", a.ko.Spec.Settings, b.ko.Spec.Settings)
 		}
 	}
