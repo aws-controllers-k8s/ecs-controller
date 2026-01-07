@@ -17,16 +17,15 @@ package task_definition
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -46,7 +45,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.ContainerDefinitions) != len(b.ko.Spec.ContainerDefinitions) {
 		delta.Add("Spec.ContainerDefinitions", a.ko.Spec.ContainerDefinitions, b.ko.Spec.ContainerDefinitions)
 	} else if len(a.ko.Spec.ContainerDefinitions) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.ContainerDefinitions, b.ko.Spec.ContainerDefinitions) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ContainerDefinitions, b.ko.Spec.ContainerDefinitions) {
 			delta.Add("Spec.ContainerDefinitions", a.ko.Spec.ContainerDefinitions, b.ko.Spec.ContainerDefinitions)
 		}
 	}
@@ -85,7 +84,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.InferenceAccelerators) != len(b.ko.Spec.InferenceAccelerators) {
 		delta.Add("Spec.InferenceAccelerators", a.ko.Spec.InferenceAccelerators, b.ko.Spec.InferenceAccelerators)
 	} else if len(a.ko.Spec.InferenceAccelerators) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.InferenceAccelerators, b.ko.Spec.InferenceAccelerators) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.InferenceAccelerators, b.ko.Spec.InferenceAccelerators) {
 			delta.Add("Spec.InferenceAccelerators", a.ko.Spec.InferenceAccelerators, b.ko.Spec.InferenceAccelerators)
 		}
 	}
@@ -120,7 +119,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.PlacementConstraints) != len(b.ko.Spec.PlacementConstraints) {
 		delta.Add("Spec.PlacementConstraints", a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints)
 	} else if len(a.ko.Spec.PlacementConstraints) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints) {
 			delta.Add("Spec.PlacementConstraints", a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints)
 		}
 	}
@@ -137,7 +136,7 @@ func newResourceDelta(
 		if len(a.ko.Spec.ProxyConfiguration.Properties) != len(b.ko.Spec.ProxyConfiguration.Properties) {
 			delta.Add("Spec.ProxyConfiguration.Properties", a.ko.Spec.ProxyConfiguration.Properties, b.ko.Spec.ProxyConfiguration.Properties)
 		} else if len(a.ko.Spec.ProxyConfiguration.Properties) > 0 {
-			if !reflect.DeepEqual(a.ko.Spec.ProxyConfiguration.Properties, b.ko.Spec.ProxyConfiguration.Properties) {
+			if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ProxyConfiguration.Properties, b.ko.Spec.ProxyConfiguration.Properties) {
 				delta.Add("Spec.ProxyConfiguration.Properties", a.ko.Spec.ProxyConfiguration.Properties, b.ko.Spec.ProxyConfiguration.Properties)
 			}
 		}
@@ -186,13 +185,13 @@ func newResourceDelta(
 			delta.Add("Spec.TaskRoleARN", a.ko.Spec.TaskRoleARN, b.ko.Spec.TaskRoleARN)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.TaskRoleRef, b.ko.Spec.TaskRoleRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.TaskRoleRef, b.ko.Spec.TaskRoleRef) {
 		delta.Add("Spec.TaskRoleRef", a.ko.Spec.TaskRoleRef, b.ko.Spec.TaskRoleRef)
 	}
 	if len(a.ko.Spec.Volumes) != len(b.ko.Spec.Volumes) {
 		delta.Add("Spec.Volumes", a.ko.Spec.Volumes, b.ko.Spec.Volumes)
 	} else if len(a.ko.Spec.Volumes) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.Volumes, b.ko.Spec.Volumes) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.Volumes, b.ko.Spec.Volumes) {
 			delta.Add("Spec.Volumes", a.ko.Spec.Volumes, b.ko.Spec.Volumes)
 		}
 	}

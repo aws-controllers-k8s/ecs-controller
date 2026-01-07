@@ -17,16 +17,15 @@ package service
 
 import (
 	"bytes"
-	"reflect"
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
 var (
 	_ = &bytes.Buffer{}
-	_ = &reflect.Method{}
 	_ = &acktags.Tags{}
 )
 
@@ -46,7 +45,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.CapacityProviderStrategy) != len(b.ko.Spec.CapacityProviderStrategy) {
 		delta.Add("Spec.CapacityProviderStrategy", a.ko.Spec.CapacityProviderStrategy, b.ko.Spec.CapacityProviderStrategy)
 	} else if len(a.ko.Spec.CapacityProviderStrategy) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.CapacityProviderStrategy, b.ko.Spec.CapacityProviderStrategy) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.CapacityProviderStrategy, b.ko.Spec.CapacityProviderStrategy) {
 			delta.Add("Spec.CapacityProviderStrategy", a.ko.Spec.CapacityProviderStrategy, b.ko.Spec.CapacityProviderStrategy)
 		}
 	}
@@ -57,7 +56,7 @@ func newResourceDelta(
 			delta.Add("Spec.Cluster", a.ko.Spec.Cluster, b.ko.Spec.Cluster)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.ClusterRef, b.ko.Spec.ClusterRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ClusterRef, b.ko.Spec.ClusterRef) {
 		delta.Add("Spec.ClusterRef", a.ko.Spec.ClusterRef, b.ko.Spec.ClusterRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration, b.ko.Spec.DeploymentConfiguration) {
@@ -170,7 +169,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.LoadBalancers) != len(b.ko.Spec.LoadBalancers) {
 		delta.Add("Spec.LoadBalancers", a.ko.Spec.LoadBalancers, b.ko.Spec.LoadBalancers)
 	} else if len(a.ko.Spec.LoadBalancers) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.LoadBalancers, b.ko.Spec.LoadBalancers) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.LoadBalancers, b.ko.Spec.LoadBalancers) {
 			delta.Add("Spec.LoadBalancers", a.ko.Spec.LoadBalancers, b.ko.Spec.LoadBalancers)
 		}
 	}
@@ -213,14 +212,14 @@ func newResourceDelta(
 	if len(a.ko.Spec.PlacementConstraints) != len(b.ko.Spec.PlacementConstraints) {
 		delta.Add("Spec.PlacementConstraints", a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints)
 	} else if len(a.ko.Spec.PlacementConstraints) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints) {
 			delta.Add("Spec.PlacementConstraints", a.ko.Spec.PlacementConstraints, b.ko.Spec.PlacementConstraints)
 		}
 	}
 	if len(a.ko.Spec.PlacementStrategy) != len(b.ko.Spec.PlacementStrategy) {
 		delta.Add("Spec.PlacementStrategy", a.ko.Spec.PlacementStrategy, b.ko.Spec.PlacementStrategy)
 	} else if len(a.ko.Spec.PlacementStrategy) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.PlacementStrategy, b.ko.Spec.PlacementStrategy) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.PlacementStrategy, b.ko.Spec.PlacementStrategy) {
 			delta.Add("Spec.PlacementStrategy", a.ko.Spec.PlacementStrategy, b.ko.Spec.PlacementStrategy)
 		}
 	}
@@ -245,7 +244,7 @@ func newResourceDelta(
 			delta.Add("Spec.Role", a.ko.Spec.Role, b.ko.Spec.Role)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.RoleRef, b.ko.Spec.RoleRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.RoleRef, b.ko.Spec.RoleRef) {
 		delta.Add("Spec.RoleRef", a.ko.Spec.RoleRef, b.ko.Spec.RoleRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.SchedulingStrategy, b.ko.Spec.SchedulingStrategy) {
@@ -285,7 +284,7 @@ func newResourceDelta(
 			if len(a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions) != len(b.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions) {
 				delta.Add("Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions", a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions, b.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions)
 			} else if len(a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions) > 0 {
-				if !reflect.DeepEqual(a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions, b.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions) {
+				if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions, b.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions) {
 					delta.Add("Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions", a.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions, b.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions)
 				}
 			}
@@ -300,7 +299,7 @@ func newResourceDelta(
 		if len(a.ko.Spec.ServiceConnectConfiguration.Services) != len(b.ko.Spec.ServiceConnectConfiguration.Services) {
 			delta.Add("Spec.ServiceConnectConfiguration.Services", a.ko.Spec.ServiceConnectConfiguration.Services, b.ko.Spec.ServiceConnectConfiguration.Services)
 		} else if len(a.ko.Spec.ServiceConnectConfiguration.Services) > 0 {
-			if !reflect.DeepEqual(a.ko.Spec.ServiceConnectConfiguration.Services, b.ko.Spec.ServiceConnectConfiguration.Services) {
+			if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ServiceConnectConfiguration.Services, b.ko.Spec.ServiceConnectConfiguration.Services) {
 				delta.Add("Spec.ServiceConnectConfiguration.Services", a.ko.Spec.ServiceConnectConfiguration.Services, b.ko.Spec.ServiceConnectConfiguration.Services)
 			}
 		}
@@ -308,7 +307,7 @@ func newResourceDelta(
 	if len(a.ko.Spec.ServiceRegistries) != len(b.ko.Spec.ServiceRegistries) {
 		delta.Add("Spec.ServiceRegistries", a.ko.Spec.ServiceRegistries, b.ko.Spec.ServiceRegistries)
 	} else if len(a.ko.Spec.ServiceRegistries) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.ServiceRegistries, b.ko.Spec.ServiceRegistries) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ServiceRegistries, b.ko.Spec.ServiceRegistries) {
 			delta.Add("Spec.ServiceRegistries", a.ko.Spec.ServiceRegistries, b.ko.Spec.ServiceRegistries)
 		}
 	}
@@ -324,13 +323,13 @@ func newResourceDelta(
 			delta.Add("Spec.TaskDefinition", a.ko.Spec.TaskDefinition, b.ko.Spec.TaskDefinition)
 		}
 	}
-	if !reflect.DeepEqual(a.ko.Spec.TaskDefinitionRef, b.ko.Spec.TaskDefinitionRef) {
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.TaskDefinitionRef, b.ko.Spec.TaskDefinitionRef) {
 		delta.Add("Spec.TaskDefinitionRef", a.ko.Spec.TaskDefinitionRef, b.ko.Spec.TaskDefinitionRef)
 	}
 	if len(a.ko.Spec.VolumeConfigurations) != len(b.ko.Spec.VolumeConfigurations) {
 		delta.Add("Spec.VolumeConfigurations", a.ko.Spec.VolumeConfigurations, b.ko.Spec.VolumeConfigurations)
 	} else if len(a.ko.Spec.VolumeConfigurations) > 0 {
-		if !reflect.DeepEqual(a.ko.Spec.VolumeConfigurations, b.ko.Spec.VolumeConfigurations) {
+		if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.VolumeConfigurations, b.ko.Spec.VolumeConfigurations) {
 			delta.Add("Spec.VolumeConfigurations", a.ko.Spec.VolumeConfigurations, b.ko.Spec.VolumeConfigurations)
 		}
 	}
