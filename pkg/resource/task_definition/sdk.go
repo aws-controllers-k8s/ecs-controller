@@ -1512,7 +1512,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field Cpu is of type int32")
+					return nil, fmt.Errorf("error: field cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy
@@ -1895,7 +1895,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.StopTimeout != nil {
 				stopTimeoutCopy0 := *f0iter.StopTimeout
 				if stopTimeoutCopy0 > math.MaxInt32 || stopTimeoutCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field stopTimeout is of type int32")
+					return nil, fmt.Errorf("error: field StopTimeout is of type int32")
 				}
 				stopTimeoutCopy := int32(stopTimeoutCopy0)
 				f0elem.StopTimeout = &stopTimeoutCopy
@@ -2903,7 +2903,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field Cpu is of type int32")
+					return nil, fmt.Errorf("error: field cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy
@@ -3286,7 +3286,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.StopTimeout != nil {
 				stopTimeoutCopy0 := *f0iter.StopTimeout
 				if stopTimeoutCopy0 > math.MaxInt32 || stopTimeoutCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field stopTimeout is of type int32")
+					return nil, fmt.Errorf("error: field StopTimeout is of type int32")
 				}
 				stopTimeoutCopy := int32(stopTimeoutCopy0)
 				f0elem.StopTimeout = &stopTimeoutCopy
@@ -3630,6 +3630,9 @@ func (rm *resourceManager) setStatusDefaults(
 	}
 	if ko.Status.ACKResourceMetadata.Region == nil {
 		ko.Status.ACKResourceMetadata.Region = &rm.awsRegion
+	}
+	if ko.Status.ACKResourceMetadata.Partition == nil {
+		ko.Status.ACKResourceMetadata.Partition = &rm.awsPartition
 	}
 	if ko.Status.ACKResourceMetadata.OwnerAccountID == nil {
 		ko.Status.ACKResourceMetadata.OwnerAccountID = &rm.awsAccountID
