@@ -4,13 +4,16 @@ ignore:
   resource_names:
   # Cluster
   # Service
-  - CapacityProvider
+  # CapacityProvider
   # TaskDefinition
   - TaskSet
+  - ExpressGatewayService
+  - Daemon
   field_paths:
   - DescribeTaskDefinitionOutput.Tags
   - RegisterTaskDefinitionOutput.Tags
   - CreateServiceInput.ClientToken
+  - CreateServiceInput.DeploymentConfiguration.LifecycleHooks
   - CreateServiceOutput.Service.AvailabilityZoneRebalancing
   - CreateServiceInput.VpcLatticeConfigurations
   - CreateServiceInput.AvailabilityZoneRebalancing
@@ -20,6 +23,11 @@ ignore:
   - Deployment.VpcLatticeConfigurations
   - ContainerDefinition.VersionConsistency
 operations:
+  DescribeCapacityProviders:
+    operation_type:
+    - ReadMany
+    resource_name: CapacityProvider
+    output_wrapper_field_path: CapacityProviders
   DescribeClusters:
     operation_type:
     - ReadMany
@@ -44,7 +52,38 @@ operations:
     - ReadMany
     resource_name: Service
     output_wrapper_field_path: Services
-resources: 
+resources:
+  CapacityProvider:
+    fields:
+      Name:
+        is_primary_key: true
+        is_immutable: true
+      AutoScalingGroupProvider.AutoScalingGroupArn:
+        is_immutable: true
+      Cluster:
+        is_immutable: true
+      CapacityProviderArn:
+        is_read_only: true
+      Status:
+        is_read_only: true
+      UpdateStatus:
+        is_read_only: true
+      UpdateStatusReason:
+        is_read_only: true
+    list_operation:
+      match_fields:
+      - Name
+    hooks:
+      sdk_read_many_post_build_request:
+        template_path: hooks/capacity_provider/sdk_read_many_post_build_request.go.tpl
+    renames:
+      operations:
+        DeleteCapacityProvider:
+          input_fields:
+            CapacityProvider: Name
+    exceptions:
+      terminal_codes:
+      - InvalidParameterException
   Cluster: 
     fields:
       Name:

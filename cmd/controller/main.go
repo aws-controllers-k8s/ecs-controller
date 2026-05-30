@@ -42,6 +42,7 @@ import (
 	svctypes "github.com/aws-controllers-k8s/ecs-controller/apis/v1alpha1"
 	svcresource "github.com/aws-controllers-k8s/ecs-controller/pkg/resource"
 
+	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/capacity_provider"
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/cluster"
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/service"
 	_ "github.com/aws-controllers-k8s/ecs-controller/pkg/resource/task_definition"

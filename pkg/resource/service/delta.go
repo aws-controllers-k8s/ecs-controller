@@ -87,6 +87,31 @@ func newResourceDelta(
 				}
 			}
 		}
+		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes) {
+			delta.Add("Spec.DeploymentConfiguration.BakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes)
+		} else if a.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes != nil && b.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes != nil {
+			if *a.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes != *b.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes {
+				delta.Add("Spec.DeploymentConfiguration.BakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes)
+			}
+		}
+		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.CanaryConfiguration, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration) {
+			delta.Add("Spec.DeploymentConfiguration.CanaryConfiguration", a.ko.Spec.DeploymentConfiguration.CanaryConfiguration, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration)
+		} else if a.ko.Spec.DeploymentConfiguration.CanaryConfiguration != nil && b.ko.Spec.DeploymentConfiguration.CanaryConfiguration != nil {
+			if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes) {
+				delta.Add("Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes)
+			} else if a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil && b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
+				if *a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != *b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes {
+					delta.Add("Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes)
+				}
+			}
+			if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent) {
+				delta.Add("Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent", a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent)
+			} else if a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil && b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
+				if *a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != *b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent {
+					delta.Add("Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent", a.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent, b.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent)
+				}
+			}
+		}
 		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker, b.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker) {
 			delta.Add("Spec.DeploymentConfiguration.DeploymentCircuitBreaker", a.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker, b.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker)
 		} else if a.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker != nil && b.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
@@ -105,6 +130,24 @@ func newResourceDelta(
 				}
 			}
 		}
+		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.LinearConfiguration, b.ko.Spec.DeploymentConfiguration.LinearConfiguration) {
+			delta.Add("Spec.DeploymentConfiguration.LinearConfiguration", a.ko.Spec.DeploymentConfiguration.LinearConfiguration, b.ko.Spec.DeploymentConfiguration.LinearConfiguration)
+		} else if a.ko.Spec.DeploymentConfiguration.LinearConfiguration != nil && b.ko.Spec.DeploymentConfiguration.LinearConfiguration != nil {
+			if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes) {
+				delta.Add("Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes)
+			} else if a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil && b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
+				if *a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != *b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes {
+					delta.Add("Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes", a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes)
+				}
+			}
+			if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent) {
+				delta.Add("Spec.DeploymentConfiguration.LinearConfiguration.StepPercent", a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent)
+			} else if a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent != nil && b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
+				if *a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent != *b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent {
+					delta.Add("Spec.DeploymentConfiguration.LinearConfiguration.StepPercent", a.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent, b.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent)
+				}
+			}
+		}
 		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.MaximumPercent, b.ko.Spec.DeploymentConfiguration.MaximumPercent) {
 			delta.Add("Spec.DeploymentConfiguration.MaximumPercent", a.ko.Spec.DeploymentConfiguration.MaximumPercent, b.ko.Spec.DeploymentConfiguration.MaximumPercent)
 		} else if a.ko.Spec.DeploymentConfiguration.MaximumPercent != nil && b.ko.Spec.DeploymentConfiguration.MaximumPercent != nil {
@@ -117,6 +160,13 @@ func newResourceDelta(
 		} else if a.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent != nil && b.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent != nil {
 			if *a.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent != *b.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent {
 				delta.Add("Spec.DeploymentConfiguration.MinimumHealthyPercent", a.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent, b.ko.Spec.DeploymentConfiguration.MinimumHealthyPercent)
+			}
+		}
+		if ackcompare.HasNilDifference(a.ko.Spec.DeploymentConfiguration.Strategy, b.ko.Spec.DeploymentConfiguration.Strategy) {
+			delta.Add("Spec.DeploymentConfiguration.Strategy", a.ko.Spec.DeploymentConfiguration.Strategy, b.ko.Spec.DeploymentConfiguration.Strategy)
+		} else if a.ko.Spec.DeploymentConfiguration.Strategy != nil && b.ko.Spec.DeploymentConfiguration.Strategy != nil {
+			if *a.ko.Spec.DeploymentConfiguration.Strategy != *b.ko.Spec.DeploymentConfiguration.Strategy {
+				delta.Add("Spec.DeploymentConfiguration.Strategy", a.ko.Spec.DeploymentConfiguration.Strategy, b.ko.Spec.DeploymentConfiguration.Strategy)
 			}
 		}
 	}
@@ -257,6 +307,24 @@ func newResourceDelta(
 	if ackcompare.HasNilDifference(a.ko.Spec.ServiceConnectConfiguration, b.ko.Spec.ServiceConnectConfiguration) {
 		delta.Add("Spec.ServiceConnectConfiguration", a.ko.Spec.ServiceConnectConfiguration, b.ko.Spec.ServiceConnectConfiguration)
 	} else if a.ko.Spec.ServiceConnectConfiguration != nil && b.ko.Spec.ServiceConnectConfiguration != nil {
+		if ackcompare.HasNilDifference(a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration) {
+			delta.Add("Spec.ServiceConnectConfiguration.AccessLogConfiguration", a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration)
+		} else if a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration != nil && b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration != nil {
+			if ackcompare.HasNilDifference(a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format) {
+				delta.Add("Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format", a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format)
+			} else if a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format != nil && b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format != nil {
+				if *a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format != *b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format {
+					delta.Add("Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format", a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format)
+				}
+			}
+			if ackcompare.HasNilDifference(a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters) {
+				delta.Add("Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters", a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters)
+			} else if a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != nil && b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != nil {
+				if *a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != *b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters {
+					delta.Add("Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters", a.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters, b.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters)
+				}
+			}
+		}
 		if ackcompare.HasNilDifference(a.ko.Spec.ServiceConnectConfiguration.Enabled, b.ko.Spec.ServiceConnectConfiguration.Enabled) {
 			delta.Add("Spec.ServiceConnectConfiguration.Enabled", a.ko.Spec.ServiceConnectConfiguration.Enabled, b.ko.Spec.ServiceConnectConfiguration.Enabled)
 		} else if a.ko.Spec.ServiceConnectConfiguration.Enabled != nil && b.ko.Spec.ServiceConnectConfiguration.Enabled != nil {

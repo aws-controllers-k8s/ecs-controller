@@ -20,6 +20,7 @@ from acktest.bootstrapping import Resources
 
 from e2e import bootstrap_directory
 
+
 def service_cleanup():
     logging.getLogger().setLevel(logging.INFO)
 

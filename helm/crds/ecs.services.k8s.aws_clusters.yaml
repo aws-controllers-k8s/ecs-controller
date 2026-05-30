@@ -158,7 +158,7 @@ spec:
                     supports Linux tasks with the ARM64 architecture on platform version 1.4.0
                     or later.
 
-                    A capacity provider strategy may contain a maximum of 6 capacity providers.
+                    A capacity provider strategy can contain a maximum of 20 capacity providers.
                   properties:
                     base:
                       format: int64
@@ -329,7 +329,7 @@ spec:
               activeServicesCount:
                 description: |-
                   The number of services that are running on the cluster in an ACTIVE state.
-                  You can view these services with PListServices (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html).
+                  You can view these services with ListServices (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html).
                 format: int64
                 type: integer
               attachments:

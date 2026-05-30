@@ -1,0 +1,22 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: CapacityProvider
+metadata:
+  name: $CAPACITY_PROVIDER_NAME
+spec:
+  name: $CAPACITY_PROVIDER_NAME
+  cluster: $CLUSTER_NAME
+  managedInstancesProvider:
+    infrastructureRoleARN: $INFRA_ROLE_ARN
+    instanceLaunchTemplate:
+      capacityOptionType: ON_DEMAND
+      instanceRequirements:
+        vCPUCount:
+          min: 2
+          max: 4
+        memoryMiB:
+          min: 4096
+          max: 8192
+      storageConfiguration:
+        storageSizeGiB: 30
+    infrastructureOptimization:
+      scaleInAfter: 15

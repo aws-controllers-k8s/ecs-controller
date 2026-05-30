@@ -304,6 +304,43 @@ spec:
                         a service, if the task reports as unhealthy then the task will be stopped
                         and the service scheduler will replace it.
 
+                        When a container health check fails for a task that is part of a service,
+                        the following process occurs:
+
+                        The task is marked as UNHEALTHY.
+
+                        The unhealthy task will be stopped, and during the stopping process, it will
+                        go through the following states:
+
+                           * DEACTIVATING - In this state, Amazon ECS performs additional steps before
+                           stopping the task. For example, for tasks that are part of services configured
+                           to use Elastic Load Balancing target groups, target groups will be deregistered
+                           in this state.
+
+                           * STOPPING - The task is in the process of being stopped.
+
+                           * DEPROVISIONING - Resources associated with the task are being cleaned
+                           up.
+
+                           * STOPPED - The task has been completely stopped.
+
+                        After the old task stops, a new task will be launched to ensure service operation,
+                        and the new task will go through the following lifecycle:
+
+                           * PROVISIONING - Resources required for the task are being provisioned.
+
+                           * PENDING - The task is waiting to be placed on a container instance.
+
+                           * ACTIVATING - In this state, Amazon ECS pulls container images, creates
+                           containers, configures task networking, registers load balancer target
+                           groups, and configures service discovery status.
+
+                           * RUNNING - The task is running and performing its work.
+
+                        For more detailed information about task lifecycle states, see Task lifecycle
+                        (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html)
+                        in the Amazon Elastic Container Service Developer Guide.
+
                         The following are notes about container health check support:
 
                            * If the Amazon ECS container agent becomes disconnected from the Amazon
@@ -325,6 +362,10 @@ spec:
 
                            * Container health checks aren't supported for tasks that are part of
                            a service that's configured to use a Classic Load Balancer.
+
+                        For an example of how to specify a task definition with multiple containers
+                        where container dependency is specified, see Container dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
+                        in the Amazon Elastic Container Service Developer Guide.
                       properties:
                         command:
                           items:
@@ -364,6 +405,30 @@ spec:
                             for a container defined in the task definition. For more detailed information
                             about these Linux capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
                             Linux manual page.
+
+                            The following describes how Docker processes the Linux capabilities specified
+                            in the add and drop request parameters. For information about the latest
+                            behavior, see Docker Compose: order of cap_drop and cap_add (https://forums.docker.com/t/docker-compose-order-of-cap-drop-and-cap-add/97136/1)
+                            in the Docker Community Forum.
+
+                               * When the container is a privleged container, the container capabilities
+                               are all of the default Docker capabilities. The capabilities specified
+                               in the add request parameter, and the drop request parameter are ignored.
+
+                               * When the add request parameter is set to ALL, the container capabilities
+                               are all of the default Docker capabilities, excluding those specified
+                               in the drop request parameter.
+
+                               * When the drop request parameter is set to ALL, the container capabilities
+                               are the capabilities specified in the add request parameter.
+
+                               * When the add request parameter and the drop request parameter are both
+                               empty, the capabilities the container capabilities are all of the default
+                               Docker capabilities.
+
+                               * The default is to first drop the capabilities specified in the drop
+                               request parameter, and then add the capabilities specified in the add
+                               request parameter.
                           properties:
                             add:
                               items:
@@ -558,8 +623,8 @@ spec:
                       items:
                         description: |-
                           The type and amount of a resource to assign to a container. The supported
-                          resource types are GPUs and Elastic Inference accelerators. For more information,
-                          see Working with GPUs on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-gpu.html)
+                          resource types are GPUs, Neuron devices, and Elastic Inference accelerators.
+                          For more information, see Working with GPUs on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-gpu.html)
                           or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
                           in the Amazon Elastic Container Service Developer Guide
                         properties:
@@ -689,38 +754,20 @@ spec:
                   Task-level CPU and memory parameters are ignored for Windows containers.
                   We recommend specifying container-level resources for Windows containers.
 
-                  If you're using the EC2 launch type, this field is optional. Supported values
-                  are between 128 CPU units (0.125 vCPUs) and 10240 CPU units (10 vCPUs). If
-                  you do not specify a value, the parameter is ignored.
+                  If you're using the EC2 launch type or external launch type, this field is
+                  optional. Supported values are between 128 CPU units (0.125 vCPUs) and 196608
+                  CPU units (192 vCPUs). If you do not specify a value, the parameter is ignored.
 
-                  If you're using the Fargate launch type, this field is required and you must
-                  use one of the following values, which determines your range of supported
-                  values for the memory parameter:
-
-                  The CPU units cannot be less than 1 vCPU when you use Windows containers
-                  on Fargate.
-
-                     * 256 (.25 vCPU) - Available memory values: 512 (0.5 GB), 1024 (1 GB),
-                     2048 (2 GB)
-
-                     * 512 (.5 vCPU) - Available memory values: 1024 (1 GB), 2048 (2 GB), 3072
-                     (3 GB), 4096 (4 GB)
-
-                     * 1024 (1 vCPU) - Available memory values: 2048 (2 GB), 3072 (3 GB), 4096
-                     (4 GB), 5120 (5 GB), 6144 (6 GB), 7168 (7 GB), 8192 (8 GB)
-
-                     * 2048 (2 vCPU) - Available memory values: 4096 (4 GB) and 16384 (16 GB)
-                     in increments of 1024 (1 GB)
-
-                     * 4096 (4 vCPU) - Available memory values: 8192 (8 GB) and 30720 (30 GB)
-                     in increments of 1024 (1 GB)
-
-                     * 8192 (8 vCPU) - Available memory values: 16 GB and 60 GB in 4 GB increments
-                     This option requires Linux platform 1.4.0 or later.
-
-                     * 16384 (16vCPU) - Available memory values: 32GB and 120 GB in 8 GB increments
-                     This option requires Linux platform 1.4.0 or later.
+                  This field is required for Fargate. For information about the valid values,
+                  see Task size (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size)
+                  in the Amazon Elastic Container Service Developer Guide.
                 type: string
+              enableFaultInjection:
+                description: |-
+                  Enables fault injection when you register your task definition and allows
+                  for fault injection requests to be accepted from the task's containers. The
+                  default value is false.
+                type: boolean
               ephemeralStorage:
                 description: |-
                   The amount of ephemeral storage to allocate for the task. This parameter
@@ -846,12 +893,12 @@ spec:
 
                   For Amazon ECS tasks on Fargate, the awsvpc network mode is required. For
                   Amazon ECS tasks on Amazon EC2 Linux instances, any network mode can be used.
-                  For Amazon ECS tasks on Amazon EC2 Windows instances, or awsvpc can be used.
-                  If the network mode is set to none, you cannot specify port mappings in your
-                  container definitions, and the tasks containers do not have external connectivity.
-                  The host and awsvpc network modes offer the highest networking performance
-                  for containers because they use the EC2 network stack instead of the virtualized
-                  network stack provided by the bridge mode.
+                  For Amazon ECS tasks on Amazon EC2 Windows instances, <default> or awsvpc
+                  can be used. If the network mode is set to none, you cannot specify port
+                  mappings in your container definitions, and the tasks containers do not have
+                  external connectivity. The host and awsvpc network modes offer the highest
+                  networking performance for containers because they use the EC2 network stack
+                  instead of the virtualized network stack provided by the bridge mode.
 
                   With the host and awsvpc network modes, exposed container ports are mapped
                   directly to the corresponding host port (for the host network mode) or the
@@ -884,7 +931,8 @@ spec:
                   If task is specified, all containers within the specified task share the
                   same process namespace.
 
-                  If no value is specified, the default is a private namespace for each container.
+                  If no value is specified, the The default is a private namespace for each
+                  container.
 
                   If the host PID mode is used, there's a heightened risk of undesired process
                   namespace exposure.
@@ -951,9 +999,8 @@ spec:
                   type: string
                 type: array
               runtimePlatform:
-                description: |-
-                  The operating system that your tasks definitions run on. A platform family
-                  is specified only for tasks using the Fargate launch type.
+                description: The operating system that your tasks definitions run
+                  on.
                 properties:
                   cpuArchitecture:
                     type: string
@@ -1058,9 +1105,10 @@ spec:
                     configuration may contain multiple volumes but only one volume configured
                     at launch is supported. Each volume defined in the volume configuration may
                     only specify a name and one of either configuredAtLaunch, dockerVolumeConfiguration,
-                    efsVolumeConfiguration, fsxWindowsFileServerVolumeConfiguration, or host.
-                    If an empty volume configuration is specified, by default Amazon ECS uses
-                    a host volume. For more information, see Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
+                    efsVolumeConfiguration, s3filesVolumeConfiguration, fsxWindowsFileServerVolumeConfiguration,
+                    or host. If an empty volume configuration is specified, by default Amazon
+                    ECS uses a host volume. For more information, see Using data volumes in tasks
+                    (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
                   properties:
                     configuredAtLaunch:
                       type: boolean
@@ -1151,6 +1199,26 @@ spec:
                       type: object
                     name:
                       type: string
+                    s3FilesVolumeConfiguration:
+                      description: |-
+                        This parameter is specified when you're using an Amazon S3 Files file system
+                        for task storage. For more information, see Amazon S3 Files volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/s3files-volumes.html)
+                        in the Amazon Elastic Container Service Developer Guide.
+
+                        Your task definition must include a Task IAM Role. See IAM role for attaching
+                        your file system to Amazon Web Services compute resources (https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-prereq-policies.html#s3-files-prereq-iam-compute-role)
+                        for required permissions.
+                      properties:
+                        accessPointARN:
+                          type: string
+                        fileSystemARN:
+                          type: string
+                        rootDirectory:
+                          type: string
+                        transitEncryptionPort:
+                          format: int64
+                          type: integer
+                      type: object
                   type: object
                 type: array
             required:
@@ -1236,6 +1304,11 @@ spec:
                   - type
                   type: object
                 type: array
+              deleteRequestedAt:
+                description: The Unix timestamp for the time when the task definition
+                  delete was requested.
+                format: date-time
+                type: string
               deregisteredAt:
                 description: The Unix timestamp for the time when the task definition
                   was deregistered.

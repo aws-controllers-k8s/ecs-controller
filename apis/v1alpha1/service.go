@@ -27,11 +27,14 @@ type ServiceSpec struct {
 
 	// The capacity provider strategy to use for the service.
 	//
+	// If you want to use Amazon ECS Managed Instances, you must use the capacityProviderStrategy
+	// request parameter and omit the launchType request parameter.
+	//
 	// If a capacityProviderStrategy is specified, the launchType parameter must
 	// be omitted. If no capacityProviderStrategy or launchType is specified, the
 	// defaultCapacityProviderStrategy for the cluster is used.
 	//
-	// A capacity provider strategy may contain a maximum of 6 capacity providers.
+	// A capacity provider strategy can contain a maximum of 20 capacity providers.
 	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
 	// The short name or full Amazon Resource Name (ARN) of the cluster that you
 	// run your service on. If you do not specify a cluster, the default cluster
@@ -55,7 +58,7 @@ type ServiceSpec struct {
 	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-using-tags.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
-	// When you use Amazon ECS managed tags, you need to set the propagateTags request
+	// When you use Amazon ECS managed tags, you must set the propagateTags request
 	// parameter.
 	EnableECSManagedTags *bool `json:"enableECSManagedTags,omitempty"`
 	// Determines whether the execute command functionality is turned on for the
@@ -64,20 +67,19 @@ type ServiceSpec struct {
 	EnableExecuteCommand *bool `json:"enableExecuteCommand,omitempty"`
 	// The period of time, in seconds, that the Amazon ECS service scheduler ignores
 	// unhealthy Elastic Load Balancing, VPC Lattice, and container health checks
-	// after a task has first started. If you don't specify a health check grace
-	// period value, the default value of 0 is used. If you don't use any of the
+	// after a task has first started. If you do not specify a health check grace
+	// period value, the default value of 0 is used. If you do not use any of the
 	// health checks, then healthCheckGracePeriodSeconds is unused.
 	//
-	// If your service's tasks take a while to start and respond to health checks,
-	// you can specify a health check grace period of up to 2,147,483,647 seconds
-	// (about 69 years). During that time, the Amazon ECS service scheduler ignores
-	// health check status. This grace period can prevent the service scheduler
-	// from marking tasks as unhealthy and stopping them before they have time to
-	// come up.
+	// If your service has more running tasks than desired, unhealthy tasks in the
+	// grace period might be stopped to reach the desired count.
 	HealthCheckGracePeriodSeconds *int64 `json:"healthCheckGracePeriodSeconds,omitempty"`
 	// The infrastructure that you run your service on. For more information, see
 	// Amazon ECS launch types (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html)
 	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// If you want to use Amazon ECS Managed Instances, you must use the capacityProviderStrategy
+	// request parameter and omit the launchType request parameter.
 	//
 	// The FARGATE launch type runs your tasks on Fargate On-Demand infrastructure.
 	//
@@ -100,11 +102,11 @@ type ServiceSpec struct {
 	// For more information, see Service load balancing (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
-	// If the service uses the rolling update (ECS) deployment controller and using
-	// either an Application Load Balancer or Network Load Balancer, you must specify
-	// one or more target group ARNs to attach to the service. The service-linked
-	// role is required for services that use multiple target groups. For more information,
-	// see Using service-linked roles for Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
+	// If the service uses the ECS deployment controller and using either an Application
+	// Load Balancer or Network Load Balancer, you must specify one or more target
+	// group ARNs to attach to the service. The service-linked role is required
+	// for services that use multiple target groups. For more information, see Using
+	// service-linked roles for Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	//
 	// If the service uses the CODE_DEPLOY deployment controller, the service is
@@ -310,6 +312,12 @@ type ServiceStatus struct {
 	// The principal that created the service.
 	// +kubebuilder:validation:Optional
 	CreatedBy *string `json:"createdBy,omitempty"`
+	// The ARN of the current service deployment.
+	// +kubebuilder:validation:Optional
+	CurrentServiceDeployment *string `json:"currentServiceDeployment,omitempty"`
+	// The list of the service revisions.
+	// +kubebuilder:validation:Optional
+	CurrentServiceRevisions []*ServiceCurrentRevisionSummary `json:"currentServiceRevisions,omitempty"`
 	// The current state of deployments for the service.
 	// +kubebuilder:validation:Optional
 	Deployments []*Deployment `json:"deployments,omitempty"`
@@ -327,6 +335,10 @@ type ServiceStatus struct {
 	// value as the service (for example, LINUX).
 	// +kubebuilder:validation:Optional
 	PlatformFamily *string `json:"platformFamily,omitempty"`
+	// Identifies whether an ECS Service is an Express Service managed by ECS, or
+	// managed by the customer. The valid values are ECS and CUSTOMER
+	// +kubebuilder:validation:Optional
+	ResourceManagementType *string `json:"resourceManagementType,omitempty"`
 	// The ARN of the IAM role that's associated with the service. It allows the
 	// Amazon ECS container agent to register container instances with an Elastic
 	// Load Balancing load balancer.
