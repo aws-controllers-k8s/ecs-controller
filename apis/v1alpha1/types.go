@@ -1191,15 +1191,7 @@ type DeploymentConfiguration struct {
 	//
 	// For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
 	// in the Amazon Elastic Container Service Developer Guide .
-	Alarms            *DeploymentAlarms `json:"alarms,omitempty"`
-	BakeTimeInMinutes *int64            `json:"bakeTimeInMinutes,omitempty"`
-	// Configuration for a canary deployment strategy that shifts a fixed percentage
-	// of traffic to the new service revision, waits for a specified bake time,
-	// then shifts the remaining traffic.
-	//
-	// This is only valid when you run CreateService or UpdateService with deploymentController
-	// set to ECS and a deploymentConfiguration with a strategy set to CANARY.
-	CanaryConfiguration *CanaryConfiguration `json:"canaryConfiguration,omitempty"`
+	Alarms *DeploymentAlarms `json:"alarms,omitempty"`
 	//
 	// The deployment circuit breaker can only be used for services using the rolling
 	// update (ECS) deployment type.
@@ -1214,15 +1206,8 @@ type DeploymentConfiguration struct {
 	// For more information about API failure reasons, see API failure reasons (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/api_failures_messages.html)
 	// in the Amazon Elastic Container Service Developer Guide.
 	DeploymentCircuitBreaker *DeploymentCircuitBreaker `json:"deploymentCircuitBreaker,omitempty"`
-	// Configuration for linear deployment strategy that shifts production traffic
-	// in equal percentage increments with configurable wait times between each
-	// step until 100% of traffic is shifted to the new service revision. This is
-	// only valid when you run CreateService or UpdateService with deploymentController
-	// set to ECS and a deploymentConfiguration with a strategy set to LINEAR.
-	LinearConfiguration   *LinearConfiguration `json:"linearConfiguration,omitempty"`
-	MaximumPercent        *int64               `json:"maximumPercent,omitempty"`
-	MinimumHealthyPercent *int64               `json:"minimumHealthyPercent,omitempty"`
-	Strategy              *string              `json:"strategy,omitempty"`
+	MaximumPercent           *int64                    `json:"maximumPercent,omitempty"`
+	MinimumHealthyPercent    *int64                    `json:"minimumHealthyPercent,omitempty"`
 }
 
 // The deployment controller to use for the service.
@@ -1942,15 +1927,9 @@ type LinuxParameters struct {
 // For more information, see Using service-linked roles (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type LoadBalancer struct {
-	// The advanced settings for a load balancer used in blue/green deployments.
-	// Specify the alternate target group, listener rules, and IAM role required
-	// for traffic shifting during blue/green deployments. For more information,
-	// see Required resources for Amazon ECS blue/green deployments (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/blue-green-deployment-implementation.html)
-	// in the Amazon Elastic Container Service Developer Guide.
-	AdvancedConfiguration *AdvancedConfiguration `json:"advancedConfiguration,omitempty"`
-	ContainerName         *string                `json:"containerName,omitempty"`
-	ContainerPort         *int64                 `json:"containerPort,omitempty"`
-	LoadBalancerName      *string                `json:"loadBalancerName,omitempty"`
+	ContainerName    *string `json:"containerName,omitempty"`
+	ContainerPort    *int64  `json:"containerPort,omitempty"`
+	LoadBalancerName *string `json:"loadBalancerName,omitempty"`
 	// Reference field for LoadBalancerName
 	LoadBalancerRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"loadBalancerRef,omitempty"`
 	TargetGroupARN  *string                                  `json:"targetGroupARN,omitempty"`
@@ -2414,21 +2393,6 @@ type ServiceConnecTTLSConfiguration struct {
 	RoleARN                    *string                                `json:"roleARN,omitempty"`
 }
 
-// Configuration for Service Connect access logging. Access logs provide detailed
-// information about requests made to your service, including request patterns,
-// response codes, and timing data for debugging and monitoring purposes.
-//
-// To enable access logs, you must also specify a logConfiguration in the serviceConnectConfiguration.
-type ServiceConnectAccessLogConfiguration struct {
-	// The format for Service Connect access log output. Choose TEXT for human-readable
-	// logs or JSON for structured data that integrates well with log analysis tools.
-	Format *string `json:"format,omitempty"`
-	// Controls whether query parameters are included in Service Connect access
-	// logs. Consider security and privacy implications when enabling this feature.
-	// By default, this parameter is DISABLED.
-	IncludeQueryParameters *string `json:"includeQueryParameters,omitempty"`
-}
-
 // Each alias ("endpoint") is a fully-qualified name and port number that other
 // tasks ("clients") can use to connect to this service.
 //
@@ -2444,15 +2408,6 @@ type ServiceConnectAccessLogConfiguration struct {
 type ServiceConnectClientAlias struct {
 	DNSName *string `json:"dnsName,omitempty"`
 	Port    *int64  `json:"port,omitempty"`
-	// The test traffic routing configuration for Amazon ECS blue/green deployments.
-	// This configuration allows you to define rules for routing specific traffic
-	// to the new service revision during the deployment process, allowing for safe
-	// testing before full production traffic shift.
-	//
-	// For more information, see Service Connect for Amazon ECS blue/green deployments
-	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-	// in the Amazon Elastic Container Service Developer Guide.
-	TestTrafficRules *ServiceConnectTestTrafficRules `json:"testTrafficRules,omitempty"`
 }
 
 // The Service Connect configuration of your Amazon ECS service. The configuration
@@ -2467,13 +2422,7 @@ type ServiceConnectClientAlias struct {
 // see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
 // in the Amazon Elastic Container Service Developer Guide.
 type ServiceConnectConfiguration struct {
-	// Configuration for Service Connect access logging. Access logs provide detailed
-	// information about requests made to your service, including request patterns,
-	// response codes, and timing data for debugging and monitoring purposes.
-	//
-	// To enable access logs, you must also specify a logConfiguration in the serviceConnectConfiguration.
-	AccessLogConfiguration *ServiceConnectAccessLogConfiguration `json:"accessLogConfiguration,omitempty"`
-	Enabled                *bool                                 `json:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty"`
 	// The log configuration for the container. This parameter maps to LogConfig
 	// in the docker container create command and the --log-driver option to docker
 	// run.
@@ -2558,29 +2507,6 @@ type ServiceConnectTestTrafficHeaderMatchRules struct {
 // in the Amazon Elastic Container Service Developer Guide.
 type ServiceConnectTestTrafficHeaderRules struct {
 	Name *string `json:"name,omitempty"`
-	// The header matching rules for test traffic routing in Amazon ECS blue/green
-	// deployments. These rules determine how incoming requests are matched based
-	// on HTTP headers to route test traffic to the new service revision.
-	Value *ServiceConnectTestTrafficHeaderMatchRules `json:"value,omitempty"`
-}
-
-// The test traffic routing configuration for Amazon ECS blue/green deployments.
-// This configuration allows you to define rules for routing specific traffic
-// to the new service revision during the deployment process, allowing for safe
-// testing before full production traffic shift.
-//
-// For more information, see Service Connect for Amazon ECS blue/green deployments
-// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-// in the Amazon Elastic Container Service Developer Guide.
-type ServiceConnectTestTrafficRules struct {
-	// The HTTP header rules used to identify and route test traffic during Amazon
-	// ECS blue/green deployments. These rules specify which HTTP headers to examine
-	// and what values to match for routing decisions.
-	//
-	// For more information, see Service Connect for Amazon ECS blue/green deployments
-	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-	// in the Amazon Elastic Container Service Developer Guide.
-	Header *ServiceConnectTestTrafficHeaderRules `json:"header,omitempty"`
 }
 
 // The summary of the current service revision configuration
@@ -2668,17 +2594,16 @@ type ServiceEvent struct {
 // Many of these parameters map 1:1 with the Amazon EBS CreateVolume API request
 // parameters.
 type ServiceManagedEBSVolumeConfiguration struct {
-	Encrypted                *bool                  `json:"encrypted,omitempty"`
-	FilesystemType           *string                `json:"filesystemType,omitempty"`
-	IOPS                     *int64                 `json:"iops,omitempty"`
-	KMSKeyID                 *string                `json:"kmsKeyID,omitempty"`
-	RoleARN                  *string                `json:"roleARN,omitempty"`
-	SizeInGiB                *int64                 `json:"sizeInGiB,omitempty"`
-	SnapshotID               *string                `json:"snapshotID,omitempty"`
-	TagSpecifications        []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
-	Throughput               *int64                 `json:"throughput,omitempty"`
-	VolumeInitializationRate *int64                 `json:"volumeInitializationRate,omitempty"`
-	VolumeType               *string                `json:"volumeType,omitempty"`
+	Encrypted         *bool                  `json:"encrypted,omitempty"`
+	FilesystemType    *string                `json:"filesystemType,omitempty"`
+	IOPS              *int64                 `json:"iops,omitempty"`
+	KMSKeyID          *string                `json:"kmsKeyID,omitempty"`
+	RoleARN           *string                `json:"roleARN,omitempty"`
+	SizeInGiB         *int64                 `json:"sizeInGiB,omitempty"`
+	SnapshotID        *string                `json:"snapshotID,omitempty"`
+	TagSpecifications []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
+	Throughput        *int64                 `json:"throughput,omitempty"`
+	VolumeType        *string                `json:"volumeType,omitempty"`
 }
 
 // The details for the service registry.
@@ -2773,12 +2698,10 @@ type ServiceVolumeConfiguration struct {
 
 // Details on a service within a cluster.
 type Service_SDK struct {
-	CapacityProviderStrategy []*CapacityProviderStrategyItem  `json:"capacityProviderStrategy,omitempty"`
-	ClusterARN               *string                          `json:"clusterARN,omitempty"`
-	CreatedAt                *metav1.Time                     `json:"createdAt,omitempty"`
-	CreatedBy                *string                          `json:"createdBy,omitempty"`
-	CurrentServiceDeployment *string                          `json:"currentServiceDeployment,omitempty"`
-	CurrentServiceRevisions  []*ServiceCurrentRevisionSummary `json:"currentServiceRevisions,omitempty"`
+	CapacityProviderStrategy []*CapacityProviderStrategyItem `json:"capacityProviderStrategy,omitempty"`
+	ClusterARN               *string                         `json:"clusterARN,omitempty"`
+	CreatedAt                *metav1.Time                    `json:"createdAt,omitempty"`
+	CreatedBy                *string                         `json:"createdBy,omitempty"`
 	// Optional deployment parameters that control how many tasks run during a deployment
 	// and the ordering of stopping and starting tasks.
 	DeploymentConfiguration *DeploymentConfiguration `json:"deploymentConfiguration,omitempty"`
@@ -2793,24 +2716,23 @@ type Service_SDK struct {
 	LaunchType                    *string               `json:"launchType,omitempty"`
 	LoadBalancers                 []*LoadBalancer       `json:"loadBalancers,omitempty"`
 	// The network configuration for a task or service.
-	NetworkConfiguration   *NetworkConfiguration  `json:"networkConfiguration,omitempty"`
-	PendingCount           *int64                 `json:"pendingCount,omitempty"`
-	PlacementConstraints   []*PlacementConstraint `json:"placementConstraints,omitempty"`
-	PlacementStrategy      []*PlacementStrategy   `json:"placementStrategy,omitempty"`
-	PlatformFamily         *string                `json:"platformFamily,omitempty"`
-	PlatformVersion        *string                `json:"platformVersion,omitempty"`
-	PropagateTags          *string                `json:"propagateTags,omitempty"`
-	ResourceManagementType *string                `json:"resourceManagementType,omitempty"`
-	RoleARN                *string                `json:"roleARN,omitempty"`
-	RunningCount           *int64                 `json:"runningCount,omitempty"`
-	SchedulingStrategy     *string                `json:"schedulingStrategy,omitempty"`
-	ServiceARN             *string                `json:"serviceARN,omitempty"`
-	ServiceName            *string                `json:"serviceName,omitempty"`
-	ServiceRegistries      []*ServiceRegistry     `json:"serviceRegistries,omitempty"`
-	Status                 *string                `json:"status,omitempty"`
-	Tags                   []*Tag                 `json:"tags,omitempty"`
-	TaskDefinition         *string                `json:"taskDefinition,omitempty"`
-	TaskSets               []*TaskSet             `json:"taskSets,omitempty"`
+	NetworkConfiguration *NetworkConfiguration  `json:"networkConfiguration,omitempty"`
+	PendingCount         *int64                 `json:"pendingCount,omitempty"`
+	PlacementConstraints []*PlacementConstraint `json:"placementConstraints,omitempty"`
+	PlacementStrategy    []*PlacementStrategy   `json:"placementStrategy,omitempty"`
+	PlatformFamily       *string                `json:"platformFamily,omitempty"`
+	PlatformVersion      *string                `json:"platformVersion,omitempty"`
+	PropagateTags        *string                `json:"propagateTags,omitempty"`
+	RoleARN              *string                `json:"roleARN,omitempty"`
+	RunningCount         *int64                 `json:"runningCount,omitempty"`
+	SchedulingStrategy   *string                `json:"schedulingStrategy,omitempty"`
+	ServiceARN           *string                `json:"serviceARN,omitempty"`
+	ServiceName          *string                `json:"serviceName,omitempty"`
+	ServiceRegistries    []*ServiceRegistry     `json:"serviceRegistries,omitempty"`
+	Status               *string                `json:"status,omitempty"`
+	Tags                 []*Tag                 `json:"tags,omitempty"`
+	TaskDefinition       *string                `json:"taskDefinition,omitempty"`
+	TaskSets             []*TaskSet             `json:"taskSets,omitempty"`
 }
 
 // The details for the execute command session.
@@ -2957,9 +2879,7 @@ type TaskDefinition_SDK struct {
 	Compatibilities      []*string              `json:"compatibilities,omitempty"`
 	ContainerDefinitions []*ContainerDefinition `json:"containerDefinitions,omitempty"`
 	CPU                  *string                `json:"cpu,omitempty"`
-	DeleteRequestedAt    *metav1.Time           `json:"deleteRequestedAt,omitempty"`
 	DeregisteredAt       *metav1.Time           `json:"deregisteredAt,omitempty"`
-	EnableFaultInjection *bool                  `json:"enableFaultInjection,omitempty"`
 	// The amount of ephemeral storage to allocate for the task. This parameter
 	// is used to expand the total amount of ephemeral storage available, beyond
 	// the default amount, for tasks hosted on Fargate. For more information, see
@@ -3223,14 +3143,6 @@ type Volume struct {
 	// Details on a container instance bind mount host volume.
 	Host *HostVolumeProperties `json:"host,omitempty"`
 	Name *string               `json:"name,omitempty"`
-	// This parameter is specified when you're using an Amazon S3 Files file system
-	// for task storage. For more information, see Amazon S3 Files volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/s3files-volumes.html)
-	// in the Amazon Elastic Container Service Developer Guide.
-	//
-	// Your task definition must include a Task IAM Role. See IAM role for attaching
-	// your file system to Amazon Web Services compute resources (https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-prereq-policies.html#s3-files-prereq-iam-compute-role)
-	// for required permissions.
-	S3FilesVolumeConfiguration *S3FilesVolumeConfiguration `json:"s3FilesVolumeConfiguration,omitempty"`
 }
 
 // Details on a data volume from another container in the same task definition.

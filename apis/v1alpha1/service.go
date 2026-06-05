@@ -312,12 +312,6 @@ type ServiceStatus struct {
 	// The principal that created the service.
 	// +kubebuilder:validation:Optional
 	CreatedBy *string `json:"createdBy,omitempty"`
-	// The ARN of the current service deployment.
-	// +kubebuilder:validation:Optional
-	CurrentServiceDeployment *string `json:"currentServiceDeployment,omitempty"`
-	// The list of the service revisions.
-	// +kubebuilder:validation:Optional
-	CurrentServiceRevisions []*ServiceCurrentRevisionSummary `json:"currentServiceRevisions,omitempty"`
 	// The current state of deployments for the service.
 	// +kubebuilder:validation:Optional
 	Deployments []*Deployment `json:"deployments,omitempty"`
@@ -335,10 +329,6 @@ type ServiceStatus struct {
 	// value as the service (for example, LINUX).
 	// +kubebuilder:validation:Optional
 	PlatformFamily *string `json:"platformFamily,omitempty"`
-	// Identifies whether an ECS Service is an Express Service managed by ECS, or
-	// managed by the customer. The valid values are ECS and CUSTOMER
-	// +kubebuilder:validation:Optional
-	ResourceManagementType *string `json:"resourceManagementType,omitempty"`
 	// The ARN of the IAM role that's associated with the service. It allows the
 	// Amazon ECS container agent to register container instances with an Elastic
 	// Load Balancing load balancer.

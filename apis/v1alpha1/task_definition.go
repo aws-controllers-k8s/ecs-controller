@@ -49,10 +49,6 @@ type TaskDefinitionSpec struct {
 	// see Task size (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size)
 	// in the Amazon Elastic Container Service Developer Guide.
 	CPU *string `json:"cpu,omitempty"`
-	// Enables fault injection when you register your task definition and allows
-	// for fault injection requests to be accepted from the task's containers. The
-	// default value is false.
-	EnableFaultInjection *bool `json:"enableFaultInjection,omitempty"`
 	// The amount of ephemeral storage to allocate for the task. This parameter
 	// is used to expand the total amount of ephemeral storage available, beyond
 	// the default amount, for tasks hosted on Fargate. For more information, see
@@ -276,9 +272,6 @@ type TaskDefinitionStatus struct {
 	// in the Amazon Elastic Container Service Developer Guide.
 	// +kubebuilder:validation:Optional
 	Compatibilities []*string `json:"compatibilities,omitempty"`
-	// The Unix timestamp for the time when the task definition delete was requested.
-	// +kubebuilder:validation:Optional
-	DeleteRequestedAt *metav1.Time `json:"deleteRequestedAt,omitempty"`
 	// The Unix timestamp for the time when the task definition was deregistered.
 	// +kubebuilder:validation:Optional
 	DeregisteredAt *metav1.Time `json:"deregisteredAt,omitempty"`

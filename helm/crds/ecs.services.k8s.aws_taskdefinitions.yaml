@@ -762,12 +762,6 @@ spec:
                   see Task size (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size)
                   in the Amazon Elastic Container Service Developer Guide.
                 type: string
-              enableFaultInjection:
-                description: |-
-                  Enables fault injection when you register your task definition and allows
-                  for fault injection requests to be accepted from the task's containers. The
-                  default value is false.
-                type: boolean
               ephemeralStorage:
                 description: |-
                   The amount of ephemeral storage to allocate for the task. This parameter
@@ -1199,26 +1193,6 @@ spec:
                       type: object
                     name:
                       type: string
-                    s3FilesVolumeConfiguration:
-                      description: |-
-                        This parameter is specified when you're using an Amazon S3 Files file system
-                        for task storage. For more information, see Amazon S3 Files volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/s3files-volumes.html)
-                        in the Amazon Elastic Container Service Developer Guide.
-
-                        Your task definition must include a Task IAM Role. See IAM role for attaching
-                        your file system to Amazon Web Services compute resources (https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-prereq-policies.html#s3-files-prereq-iam-compute-role)
-                        for required permissions.
-                      properties:
-                        accessPointARN:
-                          type: string
-                        fileSystemARN:
-                          type: string
-                        rootDirectory:
-                          type: string
-                        transitEncryptionPort:
-                          format: int64
-                          type: integer
-                      type: object
                   type: object
                 type: array
             required:
@@ -1304,11 +1278,6 @@ spec:
                   - type
                   type: object
                 type: array
-              deleteRequestedAt:
-                description: The Unix timestamp for the time when the task definition
-                  delete was requested.
-                format: date-time
-                type: string
               deregisteredAt:
                 description: The Unix timestamp for the time when the task definition
                   was deregistered.

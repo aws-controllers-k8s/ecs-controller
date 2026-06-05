@@ -56,13 +56,6 @@ func newResourceDelta(
 			delta.Add("Spec.CPU", a.ko.Spec.CPU, b.ko.Spec.CPU)
 		}
 	}
-	if ackcompare.HasNilDifference(a.ko.Spec.EnableFaultInjection, b.ko.Spec.EnableFaultInjection) {
-		delta.Add("Spec.EnableFaultInjection", a.ko.Spec.EnableFaultInjection, b.ko.Spec.EnableFaultInjection)
-	} else if a.ko.Spec.EnableFaultInjection != nil && b.ko.Spec.EnableFaultInjection != nil {
-		if *a.ko.Spec.EnableFaultInjection != *b.ko.Spec.EnableFaultInjection {
-			delta.Add("Spec.EnableFaultInjection", a.ko.Spec.EnableFaultInjection, b.ko.Spec.EnableFaultInjection)
-		}
-	}
 	if ackcompare.HasNilDifference(a.ko.Spec.EphemeralStorage, b.ko.Spec.EphemeralStorage) {
 		delta.Add("Spec.EphemeralStorage", a.ko.Spec.EphemeralStorage, b.ko.Spec.EphemeralStorage)
 	} else if a.ko.Spec.EphemeralStorage != nil && b.ko.Spec.EphemeralStorage != nil {

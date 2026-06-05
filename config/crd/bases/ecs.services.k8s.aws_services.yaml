@@ -172,24 +172,6 @@ spec:
                       rollback:
                         type: boolean
                     type: object
-                  bakeTimeInMinutes:
-                    format: int64
-                    type: integer
-                  canaryConfiguration:
-                    description: |-
-                      Configuration for a canary deployment strategy that shifts a fixed percentage
-                      of traffic to the new service revision, waits for a specified bake time,
-                      then shifts the remaining traffic.
-
-                      This is only valid when you run CreateService or UpdateService with deploymentController
-                      set to ECS and a deploymentConfiguration with a strategy set to CANARY.
-                    properties:
-                      canaryBakeTimeInMinutes:
-                        format: int64
-                        type: integer
-                      canaryPercent:
-                        type: number
-                    type: object
                   deploymentCircuitBreaker:
                     description: |-
                       The deployment circuit breaker can only be used for services using the rolling
@@ -210,28 +192,12 @@ spec:
                       rollback:
                         type: boolean
                     type: object
-                  linearConfiguration:
-                    description: |-
-                      Configuration for linear deployment strategy that shifts production traffic
-                      in equal percentage increments with configurable wait times between each
-                      step until 100% of traffic is shifted to the new service revision. This is
-                      only valid when you run CreateService or UpdateService with deploymentController
-                      set to ECS and a deploymentConfiguration with a strategy set to LINEAR.
-                    properties:
-                      stepBakeTimeInMinutes:
-                        format: int64
-                        type: integer
-                      stepPercent:
-                        type: number
-                    type: object
                   maximumPercent:
                     format: int64
                     type: integer
                   minimumHealthyPercent:
                     format: int64
                     type: integer
-                  strategy:
-                    type: string
                 type: object
               deploymentController:
                 description: |-
@@ -368,23 +334,6 @@ spec:
                     For more information, see Using service-linked roles (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
                     in the Amazon Elastic Container Service Developer Guide.
                   properties:
-                    advancedConfiguration:
-                      description: |-
-                        The advanced settings for a load balancer used in blue/green deployments.
-                        Specify the alternate target group, listener rules, and IAM role required
-                        for traffic shifting during blue/green deployments. For more information,
-                        see Required resources for Amazon ECS blue/green deployments (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/blue-green-deployment-implementation.html)
-                        in the Amazon Elastic Container Service Developer Guide.
-                      properties:
-                        alternateTargetGroupARN:
-                          type: string
-                        productionListenerRule:
-                          type: string
-                        roleARN:
-                          type: string
-                        testListenerRule:
-                          type: string
-                      type: object
                     containerName:
                       type: string
                     containerPort:
@@ -633,26 +582,6 @@ spec:
                   see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
                   in the Amazon Elastic Container Service Developer Guide.
                 properties:
-                  accessLogConfiguration:
-                    description: |-
-                      Configuration for Service Connect access logging. Access logs provide detailed
-                      information about requests made to your service, including request patterns,
-                      response codes, and timing data for debugging and monitoring purposes.
-
-                      To enable access logs, you must also specify a logConfiguration in the serviceConnectConfiguration.
-                    properties:
-                      format:
-                        description: |-
-                          The format for Service Connect access log output. Choose TEXT for human-readable
-                          logs or JSON for structured data that integrates well with log analysis tools.
-                        type: string
-                      includeQueryParameters:
-                        description: |-
-                          Controls whether query parameters are included in Service Connect access
-                          logs. Consider security and privacy implications when enabling this feature.
-                          By default, this parameter is DISABLED.
-                        type: string
-                    type: object
                   enabled:
                     type: boolean
                   logConfiguration:
@@ -748,40 +677,6 @@ spec:
                               port:
                                 format: int64
                                 type: integer
-                              testTrafficRules:
-                                description: |-
-                                  The test traffic routing configuration for Amazon ECS blue/green deployments.
-                                  This configuration allows you to define rules for routing specific traffic
-                                  to the new service revision during the deployment process, allowing for safe
-                                  testing before full production traffic shift.
-
-                                  For more information, see Service Connect for Amazon ECS blue/green deployments
-                                  (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-                                  in the Amazon Elastic Container Service Developer Guide.
-                                properties:
-                                  header:
-                                    description: |-
-                                      The HTTP header rules used to identify and route test traffic during Amazon
-                                      ECS blue/green deployments. These rules specify which HTTP headers to examine
-                                      and what values to match for routing decisions.
-
-                                      For more information, see Service Connect for Amazon ECS blue/green deployments
-                                      (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-                                      in the Amazon Elastic Container Service Developer Guide.
-                                    properties:
-                                      name:
-                                        type: string
-                                      value:
-                                        description: |-
-                                          The header matching rules for test traffic routing in Amazon ECS blue/green
-                                          deployments. These rules determine how incoming requests are matched based
-                                          on HTTP headers to route test traffic to the new service revision.
-                                        properties:
-                                          exact:
-                                            type: string
-                                        type: object
-                                    type: object
-                                type: object
                             type: object
                           type: array
                         discoveryName:
@@ -1032,9 +927,6 @@ spec:
                         throughput:
                           format: int64
                           type: integer
-                        volumeInitializationRate:
-                          format: int64
-                          type: integer
                         volumeType:
                           type: string
                       type: object
@@ -1128,27 +1020,6 @@ spec:
               createdBy:
                 description: The principal that created the service.
                 type: string
-              currentServiceDeployment:
-                description: The ARN of the current service deployment.
-                type: string
-              currentServiceRevisions:
-                description: The list of the service revisions.
-                items:
-                  description: The summary of the current service revision configuration
-                  properties:
-                    arn:
-                      type: string
-                    pendingTaskCount:
-                      format: int64
-                      type: integer
-                    requestedTaskCount:
-                      format: int64
-                      type: integer
-                    runningTaskCount:
-                      format: int64
-                      type: integer
-                  type: object
-                type: array
               deployments:
                 description: The current state of deployments for the service.
                 items:
@@ -1303,26 +1174,6 @@ spec:
                         see Service Connect (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
                         in the Amazon Elastic Container Service Developer Guide.
                       properties:
-                        accessLogConfiguration:
-                          description: |-
-                            Configuration for Service Connect access logging. Access logs provide detailed
-                            information about requests made to your service, including request patterns,
-                            response codes, and timing data for debugging and monitoring purposes.
-
-                            To enable access logs, you must also specify a logConfiguration in the serviceConnectConfiguration.
-                          properties:
-                            format:
-                              description: |-
-                                The format for Service Connect access log output. Choose TEXT for human-readable
-                                logs or JSON for structured data that integrates well with log analysis tools.
-                              type: string
-                            includeQueryParameters:
-                              description: |-
-                                Controls whether query parameters are included in Service Connect access
-                                logs. Consider security and privacy implications when enabling this feature.
-                                By default, this parameter is DISABLED.
-                              type: string
-                          type: object
                         enabled:
                           type: boolean
                         logConfiguration:
@@ -1418,40 +1269,6 @@ spec:
                                     port:
                                       format: int64
                                       type: integer
-                                    testTrafficRules:
-                                      description: |-
-                                        The test traffic routing configuration for Amazon ECS blue/green deployments.
-                                        This configuration allows you to define rules for routing specific traffic
-                                        to the new service revision during the deployment process, allowing for safe
-                                        testing before full production traffic shift.
-
-                                        For more information, see Service Connect for Amazon ECS blue/green deployments
-                                        (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-                                        in the Amazon Elastic Container Service Developer Guide.
-                                      properties:
-                                        header:
-                                          description: |-
-                                            The HTTP header rules used to identify and route test traffic during Amazon
-                                            ECS blue/green deployments. These rules specify which HTTP headers to examine
-                                            and what values to match for routing decisions.
-
-                                            For more information, see Service Connect for Amazon ECS blue/green deployments
-                                            (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
-                                            in the Amazon Elastic Container Service Developer Guide.
-                                          properties:
-                                            name:
-                                              type: string
-                                            value:
-                                              description: |-
-                                                The header matching rules for test traffic routing in Amazon ECS blue/green
-                                                deployments. These rules determine how incoming requests are matched based
-                                                on HTTP headers to route test traffic to the new service revision.
-                                              properties:
-                                                exact:
-                                                  type: string
-                                              type: object
-                                          type: object
-                                      type: object
                                   type: object
                                 type: array
                               discoveryName:
@@ -1604,9 +1421,6 @@ spec:
                               throughput:
                                 format: int64
                                 type: integer
-                              volumeInitializationRate:
-                                format: int64
-                                type: integer
                               volumeType:
                                 type: string
                             type: object
@@ -1644,11 +1458,6 @@ spec:
 
                   All tasks that run as part of this service must use the same platformFamily
                   value as the service (for example, LINUX).
-                type: string
-              resourceManagementType:
-                description: |-
-                  Identifies whether an ECS Service is an Express Service managed by ECS, or
-                  managed by the customer. The valid values are ECS and CUSTOMER
                 type: string
               roleARN:
                 description: |-
@@ -1752,23 +1561,6 @@ spec:
                           For more information, see Using service-linked roles (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html)
                           in the Amazon Elastic Container Service Developer Guide.
                         properties:
-                          advancedConfiguration:
-                            description: |-
-                              The advanced settings for a load balancer used in blue/green deployments.
-                              Specify the alternate target group, listener rules, and IAM role required
-                              for traffic shifting during blue/green deployments. For more information,
-                              see Required resources for Amazon ECS blue/green deployments (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/blue-green-deployment-implementation.html)
-                              in the Amazon Elastic Container Service Developer Guide.
-                            properties:
-                              alternateTargetGroupARN:
-                                type: string
-                              productionListenerRule:
-                                type: string
-                              roleARN:
-                                type: string
-                              testListenerRule:
-                                type: string
-                            type: object
                           containerName:
                             type: string
                           containerPort:

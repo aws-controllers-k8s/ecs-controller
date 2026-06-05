@@ -141,387 +141,302 @@ func (rm *resourceManager) sdkFind(
 		} else {
 			ko.Status.CreatedBy = nil
 		}
-		if elem.CurrentServiceDeployment != nil {
-			ko.Status.CurrentServiceDeployment = elem.CurrentServiceDeployment
-		} else {
-			ko.Status.CurrentServiceDeployment = nil
-		}
-		if elem.CurrentServiceRevisions != nil {
-			f5 := []*svcapitypes.ServiceCurrentRevisionSummary{}
-			for _, f5iter := range elem.CurrentServiceRevisions {
-				f5elem := &svcapitypes.ServiceCurrentRevisionSummary{}
-				if f5iter.Arn != nil {
-					f5elem.ARN = f5iter.Arn
-				}
-				pendingTaskCountCopy := int64(f5iter.PendingTaskCount)
-				f5elem.PendingTaskCount = &pendingTaskCountCopy
-				requestedTaskCountCopy := int64(f5iter.RequestedTaskCount)
-				f5elem.RequestedTaskCount = &requestedTaskCountCopy
-				runningTaskCountCopy := int64(f5iter.RunningTaskCount)
-				f5elem.RunningTaskCount = &runningTaskCountCopy
-				f5 = append(f5, f5elem)
-			}
-			ko.Status.CurrentServiceRevisions = f5
-		} else {
-			ko.Status.CurrentServiceRevisions = nil
-		}
 		if elem.DeploymentConfiguration != nil {
-			f6 := &svcapitypes.DeploymentConfiguration{}
+			f4 := &svcapitypes.DeploymentConfiguration{}
 			if elem.DeploymentConfiguration.Alarms != nil {
-				f6f0 := &svcapitypes.DeploymentAlarms{}
+				f4f0 := &svcapitypes.DeploymentAlarms{}
 				if elem.DeploymentConfiguration.Alarms.AlarmNames != nil {
-					f6f0.AlarmNames = aws.StringSlice(elem.DeploymentConfiguration.Alarms.AlarmNames)
+					f4f0.AlarmNames = aws.StringSlice(elem.DeploymentConfiguration.Alarms.AlarmNames)
 				}
-				f6f0.Enable = &elem.DeploymentConfiguration.Alarms.Enable
-				f6f0.Rollback = &elem.DeploymentConfiguration.Alarms.Rollback
-				f6.Alarms = f6f0
-			}
-			if elem.DeploymentConfiguration.BakeTimeInMinutes != nil {
-				bakeTimeInMinutesCopy := int64(*elem.DeploymentConfiguration.BakeTimeInMinutes)
-				f6.BakeTimeInMinutes = &bakeTimeInMinutesCopy
-			}
-			if elem.DeploymentConfiguration.CanaryConfiguration != nil {
-				f6f2 := &svcapitypes.CanaryConfiguration{}
-				if elem.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
-					canaryBakeTimeInMinutesCopy := int64(*elem.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes)
-					f6f2.CanaryBakeTimeInMinutes = &canaryBakeTimeInMinutesCopy
-				}
-				if elem.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
-					f6f2.CanaryPercent = elem.DeploymentConfiguration.CanaryConfiguration.CanaryPercent
-				}
-				f6.CanaryConfiguration = f6f2
+				f4f0.Enable = &elem.DeploymentConfiguration.Alarms.Enable
+				f4f0.Rollback = &elem.DeploymentConfiguration.Alarms.Rollback
+				f4.Alarms = f4f0
 			}
 			if elem.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
-				f6f3 := &svcapitypes.DeploymentCircuitBreaker{}
-				f6f3.Enable = &elem.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
-				f6f3.Rollback = &elem.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
-				f6.DeploymentCircuitBreaker = f6f3
-			}
-			if elem.DeploymentConfiguration.LinearConfiguration != nil {
-				f6f4 := &svcapitypes.LinearConfiguration{}
-				if elem.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
-					stepBakeTimeInMinutesCopy := int64(*elem.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes)
-					f6f4.StepBakeTimeInMinutes = &stepBakeTimeInMinutesCopy
-				}
-				if elem.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
-					f6f4.StepPercent = elem.DeploymentConfiguration.LinearConfiguration.StepPercent
-				}
-				f6.LinearConfiguration = f6f4
+				f4f1 := &svcapitypes.DeploymentCircuitBreaker{}
+				f4f1.Enable = &elem.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
+				f4f1.Rollback = &elem.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
+				f4.DeploymentCircuitBreaker = f4f1
 			}
 			if elem.DeploymentConfiguration.MaximumPercent != nil {
 				maximumPercentCopy := int64(*elem.DeploymentConfiguration.MaximumPercent)
-				f6.MaximumPercent = &maximumPercentCopy
+				f4.MaximumPercent = &maximumPercentCopy
 			}
 			if elem.DeploymentConfiguration.MinimumHealthyPercent != nil {
 				minimumHealthyPercentCopy := int64(*elem.DeploymentConfiguration.MinimumHealthyPercent)
-				f6.MinimumHealthyPercent = &minimumHealthyPercentCopy
+				f4.MinimumHealthyPercent = &minimumHealthyPercentCopy
 			}
-			if elem.DeploymentConfiguration.Strategy != "" {
-				f6.Strategy = aws.String(string(elem.DeploymentConfiguration.Strategy))
-			}
-			ko.Spec.DeploymentConfiguration = f6
+			ko.Spec.DeploymentConfiguration = f4
 		} else {
 			ko.Spec.DeploymentConfiguration = nil
 		}
 		if elem.DeploymentController != nil {
-			f7 := &svcapitypes.DeploymentController{}
+			f5 := &svcapitypes.DeploymentController{}
 			if elem.DeploymentController.Type != "" {
-				f7.Type = aws.String(string(elem.DeploymentController.Type))
+				f5.Type = aws.String(string(elem.DeploymentController.Type))
 			}
-			ko.Spec.DeploymentController = f7
+			ko.Spec.DeploymentController = f5
 		} else {
 			ko.Spec.DeploymentController = nil
 		}
 		if elem.Deployments != nil {
-			f8 := []*svcapitypes.Deployment{}
-			for _, f8iter := range elem.Deployments {
-				f8elem := &svcapitypes.Deployment{}
-				if f8iter.CapacityProviderStrategy != nil {
-					f8elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-					for _, f8elemf0iter := range f8iter.CapacityProviderStrategy {
-						f8elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-						baseCopy := int64(f8elemf0iter.Base)
-						f8elemf0elem.Base = &baseCopy
-						if f8elemf0iter.CapacityProvider != nil {
-							f8elemf0elem.CapacityProvider = f8elemf0iter.CapacityProvider
+			f6 := []*svcapitypes.Deployment{}
+			for _, f6iter := range elem.Deployments {
+				f6elem := &svcapitypes.Deployment{}
+				if f6iter.CapacityProviderStrategy != nil {
+					f6elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+					for _, f6elemf0iter := range f6iter.CapacityProviderStrategy {
+						f6elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+						baseCopy := int64(f6elemf0iter.Base)
+						f6elemf0elem.Base = &baseCopy
+						if f6elemf0iter.CapacityProvider != nil {
+							f6elemf0elem.CapacityProvider = f6elemf0iter.CapacityProvider
 						}
-						weightCopy := int64(f8elemf0iter.Weight)
-						f8elemf0elem.Weight = &weightCopy
-						f8elemf0 = append(f8elemf0, f8elemf0elem)
+						weightCopy := int64(f6elemf0iter.Weight)
+						f6elemf0elem.Weight = &weightCopy
+						f6elemf0 = append(f6elemf0, f6elemf0elem)
 					}
-					f8elem.CapacityProviderStrategy = f8elemf0
+					f6elem.CapacityProviderStrategy = f6elemf0
 				}
-				if f8iter.CreatedAt != nil {
-					f8elem.CreatedAt = &metav1.Time{*f8iter.CreatedAt}
+				if f6iter.CreatedAt != nil {
+					f6elem.CreatedAt = &metav1.Time{*f6iter.CreatedAt}
 				}
-				desiredCountCopy := int64(f8iter.DesiredCount)
-				f8elem.DesiredCount = &desiredCountCopy
-				failedTasksCopy := int64(f8iter.FailedTasks)
-				f8elem.FailedTasks = &failedTasksCopy
-				if f8iter.Id != nil {
-					f8elem.ID = f8iter.Id
+				desiredCountCopy := int64(f6iter.DesiredCount)
+				f6elem.DesiredCount = &desiredCountCopy
+				failedTasksCopy := int64(f6iter.FailedTasks)
+				f6elem.FailedTasks = &failedTasksCopy
+				if f6iter.Id != nil {
+					f6elem.ID = f6iter.Id
 				}
-				if f8iter.LaunchType != "" {
-					f8elem.LaunchType = aws.String(string(f8iter.LaunchType))
+				if f6iter.LaunchType != "" {
+					f6elem.LaunchType = aws.String(string(f6iter.LaunchType))
 				}
-				if f8iter.NetworkConfiguration != nil {
-					f8elemf6 := &svcapitypes.NetworkConfiguration{}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-						f8elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
-						if f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-							f8elemf6f0.AssignPublicIP = aws.String(string(f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+				if f6iter.NetworkConfiguration != nil {
+					f6elemf6 := &svcapitypes.NetworkConfiguration{}
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+						f6elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
+						if f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+							f6elemf6f0.AssignPublicIP = aws.String(string(f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 						}
-						if f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-							f8elemf6f0.SecurityGroups = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+						if f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+							f6elemf6f0.SecurityGroups = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 						}
-						if f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-							f8elemf6f0.Subnets = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+						if f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+							f6elemf6f0.Subnets = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 						}
-						f8elemf6.AWSVPCConfiguration = f8elemf6f0
+						f6elemf6.AWSVPCConfiguration = f6elemf6f0
 					}
-					f8elem.NetworkConfiguration = f8elemf6
+					f6elem.NetworkConfiguration = f6elemf6
 				}
-				pendingCountCopy := int64(f8iter.PendingCount)
-				f8elem.PendingCount = &pendingCountCopy
-				if f8iter.PlatformFamily != nil {
-					f8elem.PlatformFamily = f8iter.PlatformFamily
+				pendingCountCopy := int64(f6iter.PendingCount)
+				f6elem.PendingCount = &pendingCountCopy
+				if f6iter.PlatformFamily != nil {
+					f6elem.PlatformFamily = f6iter.PlatformFamily
 				}
-				if f8iter.PlatformVersion != nil {
-					f8elem.PlatformVersion = f8iter.PlatformVersion
+				if f6iter.PlatformVersion != nil {
+					f6elem.PlatformVersion = f6iter.PlatformVersion
 				}
-				if f8iter.RolloutState != "" {
-					f8elem.RolloutState = aws.String(string(f8iter.RolloutState))
+				if f6iter.RolloutState != "" {
+					f6elem.RolloutState = aws.String(string(f6iter.RolloutState))
 				}
-				if f8iter.RolloutStateReason != nil {
-					f8elem.RolloutStateReason = f8iter.RolloutStateReason
+				if f6iter.RolloutStateReason != nil {
+					f6elem.RolloutStateReason = f6iter.RolloutStateReason
 				}
-				runningCountCopy := int64(f8iter.RunningCount)
-				f8elem.RunningCount = &runningCountCopy
-				if f8iter.ServiceConnectConfiguration != nil {
-					f8elemf13 := &svcapitypes.ServiceConnectConfiguration{}
-					if f8iter.ServiceConnectConfiguration.AccessLogConfiguration != nil {
-						f8elemf13f0 := &svcapitypes.ServiceConnectAccessLogConfiguration{}
-						if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format != "" {
-							f8elemf13f0.Format = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format))
+				runningCountCopy := int64(f6iter.RunningCount)
+				f6elem.RunningCount = &runningCountCopy
+				if f6iter.ServiceConnectConfiguration != nil {
+					f6elemf13 := &svcapitypes.ServiceConnectConfiguration{}
+					f6elemf13.Enabled = &f6iter.ServiceConnectConfiguration.Enabled
+					if f6iter.ServiceConnectConfiguration.LogConfiguration != nil {
+						f6elemf13f1 := &svcapitypes.LogConfiguration{}
+						if f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
+							f6elemf13f1.LogDriver = aws.String(string(f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
 						}
-						if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != "" {
-							f8elemf13f0.IncludeQueryParameters = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters))
+						if f6iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
+							f6elemf13f1.Options = aws.StringMap(f6iter.ServiceConnectConfiguration.LogConfiguration.Options)
 						}
-						f8elemf13.AccessLogConfiguration = f8elemf13f0
-					}
-					f8elemf13.Enabled = &f8iter.ServiceConnectConfiguration.Enabled
-					if f8iter.ServiceConnectConfiguration.LogConfiguration != nil {
-						f8elemf13f2 := &svcapitypes.LogConfiguration{}
-						if f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
-							f8elemf13f2.LogDriver = aws.String(string(f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
-						}
-						if f8iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-							f8elemf13f2.Options = aws.StringMap(f8iter.ServiceConnectConfiguration.LogConfiguration.Options)
-						}
-						if f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-							f8elemf13f2f2 := []*svcapitypes.Secret{}
-							for _, f8elemf13f2f2iter := range f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-								f8elemf13f2f2elem := &svcapitypes.Secret{}
-								if f8elemf13f2f2iter.Name != nil {
-									f8elemf13f2f2elem.Name = f8elemf13f2f2iter.Name
+						if f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
+							f6elemf13f1f2 := []*svcapitypes.Secret{}
+							for _, f6elemf13f1f2iter := range f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+								f6elemf13f1f2elem := &svcapitypes.Secret{}
+								if f6elemf13f1f2iter.Name != nil {
+									f6elemf13f1f2elem.Name = f6elemf13f1f2iter.Name
 								}
-								if f8elemf13f2f2iter.ValueFrom != nil {
-									f8elemf13f2f2elem.ValueFrom = f8elemf13f2f2iter.ValueFrom
+								if f6elemf13f1f2iter.ValueFrom != nil {
+									f6elemf13f1f2elem.ValueFrom = f6elemf13f1f2iter.ValueFrom
 								}
-								f8elemf13f2f2 = append(f8elemf13f2f2, f8elemf13f2f2elem)
+								f6elemf13f1f2 = append(f6elemf13f1f2, f6elemf13f1f2elem)
 							}
-							f8elemf13f2.SecretOptions = f8elemf13f2f2
+							f6elemf13f1.SecretOptions = f6elemf13f1f2
 						}
-						f8elemf13.LogConfiguration = f8elemf13f2
+						f6elemf13.LogConfiguration = f6elemf13f1
 					}
-					if f8iter.ServiceConnectConfiguration.Namespace != nil {
-						f8elemf13.Namespace = f8iter.ServiceConnectConfiguration.Namespace
+					if f6iter.ServiceConnectConfiguration.Namespace != nil {
+						f6elemf13.Namespace = f6iter.ServiceConnectConfiguration.Namespace
 					}
-					if f8iter.ServiceConnectConfiguration.Services != nil {
-						f8elemf13f4 := []*svcapitypes.ServiceConnectService{}
-						for _, f8elemf13f4iter := range f8iter.ServiceConnectConfiguration.Services {
-							f8elemf13f4elem := &svcapitypes.ServiceConnectService{}
-							if f8elemf13f4iter.ClientAliases != nil {
-								f8elemf13f4elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
-								for _, f8elemf13f4elemf0iter := range f8elemf13f4iter.ClientAliases {
-									f8elemf13f4elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
-									if f8elemf13f4elemf0iter.DnsName != nil {
-										f8elemf13f4elemf0elem.DNSName = f8elemf13f4elemf0iter.DnsName
+					if f6iter.ServiceConnectConfiguration.Services != nil {
+						f6elemf13f3 := []*svcapitypes.ServiceConnectService{}
+						for _, f6elemf13f3iter := range f6iter.ServiceConnectConfiguration.Services {
+							f6elemf13f3elem := &svcapitypes.ServiceConnectService{}
+							if f6elemf13f3iter.ClientAliases != nil {
+								f6elemf13f3elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
+								for _, f6elemf13f3elemf0iter := range f6elemf13f3iter.ClientAliases {
+									f6elemf13f3elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
+									if f6elemf13f3elemf0iter.DnsName != nil {
+										f6elemf13f3elemf0elem.DNSName = f6elemf13f3elemf0iter.DnsName
 									}
-									if f8elemf13f4elemf0iter.Port != nil {
-										portCopy := int64(*f8elemf13f4elemf0iter.Port)
-										f8elemf13f4elemf0elem.Port = &portCopy
+									if f6elemf13f3elemf0iter.Port != nil {
+										portCopy := int64(*f6elemf13f3elemf0iter.Port)
+										f6elemf13f3elemf0elem.Port = &portCopy
 									}
-									if f8elemf13f4elemf0iter.TestTrafficRules != nil {
-										f8elemf13f4elemf0elemf2 := &svcapitypes.ServiceConnectTestTrafficRules{}
-										if f8elemf13f4elemf0iter.TestTrafficRules.Header != nil {
-											f8elemf13f4elemf0elemf2f0 := &svcapitypes.ServiceConnectTestTrafficHeaderRules{}
-											if f8elemf13f4elemf0iter.TestTrafficRules.Header.Name != nil {
-												f8elemf13f4elemf0elemf2f0.Name = f8elemf13f4elemf0iter.TestTrafficRules.Header.Name
+									f6elemf13f3elemf0 = append(f6elemf13f3elemf0, f6elemf13f3elemf0elem)
+								}
+								f6elemf13f3elem.ClientAliases = f6elemf13f3elemf0
+							}
+							if f6elemf13f3iter.DiscoveryName != nil {
+								f6elemf13f3elem.DiscoveryName = f6elemf13f3iter.DiscoveryName
+							}
+							if f6elemf13f3iter.IngressPortOverride != nil {
+								ingressPortOverrideCopy := int64(*f6elemf13f3iter.IngressPortOverride)
+								f6elemf13f3elem.IngressPortOverride = &ingressPortOverrideCopy
+							}
+							if f6elemf13f3iter.PortName != nil {
+								f6elemf13f3elem.PortName = f6elemf13f3iter.PortName
+							}
+							if f6elemf13f3iter.Timeout != nil {
+								f6elemf13f3elemf4 := &svcapitypes.TimeoutConfiguration{}
+								if f6elemf13f3iter.Timeout.IdleTimeoutSeconds != nil {
+									idleTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.IdleTimeoutSeconds)
+									f6elemf13f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+								}
+								if f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+									perRequestTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds)
+									f6elemf13f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+								}
+								f6elemf13f3elem.Timeout = f6elemf13f3elemf4
+							}
+							if f6elemf13f3iter.Tls != nil {
+								f6elemf13f3elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
+								if f6elemf13f3iter.Tls.IssuerCertificateAuthority != nil {
+									f6elemf13f3elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
+									if f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
+										f6elemf13f3elemf5f0.AWSPCAAuthorityARN = f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
+									}
+									f6elemf13f3elemf5.IssuerCertificateAuthority = f6elemf13f3elemf5f0
+								}
+								if f6elemf13f3iter.Tls.KmsKey != nil {
+									f6elemf13f3elemf5.KMSKey = f6elemf13f3iter.Tls.KmsKey
+								}
+								if f6elemf13f3iter.Tls.RoleArn != nil {
+									f6elemf13f3elemf5.RoleARN = f6elemf13f3iter.Tls.RoleArn
+								}
+								f6elemf13f3elem.TLS = f6elemf13f3elemf5
+							}
+							f6elemf13f3 = append(f6elemf13f3, f6elemf13f3elem)
+						}
+						f6elemf13.Services = f6elemf13f3
+					}
+					f6elem.ServiceConnectConfiguration = f6elemf13
+				}
+				if f6iter.ServiceConnectResources != nil {
+					f6elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
+					for _, f6elemf14iter := range f6iter.ServiceConnectResources {
+						f6elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
+						if f6elemf14iter.DiscoveryArn != nil {
+							f6elemf14elem.DiscoveryARN = f6elemf14iter.DiscoveryArn
+						}
+						if f6elemf14iter.DiscoveryName != nil {
+							f6elemf14elem.DiscoveryName = f6elemf14iter.DiscoveryName
+						}
+						f6elemf14 = append(f6elemf14, f6elemf14elem)
+					}
+					f6elem.ServiceConnectResources = f6elemf14
+				}
+				if f6iter.Status != nil {
+					f6elem.Status = f6iter.Status
+				}
+				if f6iter.TaskDefinition != nil {
+					f6elem.TaskDefinition = f6iter.TaskDefinition
+				}
+				if f6iter.UpdatedAt != nil {
+					f6elem.UpdatedAt = &metav1.Time{*f6iter.UpdatedAt}
+				}
+				if f6iter.VolumeConfigurations != nil {
+					f6elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
+					for _, f6elemf18iter := range f6iter.VolumeConfigurations {
+						f6elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
+						if f6elemf18iter.ManagedEBSVolume != nil {
+							f6elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
+							if f6elemf18iter.ManagedEBSVolume.Encrypted != nil {
+								f6elemf18elemf0.Encrypted = f6elemf18iter.ManagedEBSVolume.Encrypted
+							}
+							if f6elemf18iter.ManagedEBSVolume.FilesystemType != "" {
+								f6elemf18elemf0.FilesystemType = aws.String(string(f6elemf18iter.ManagedEBSVolume.FilesystemType))
+							}
+							if f6elemf18iter.ManagedEBSVolume.Iops != nil {
+								iopsCopy := int64(*f6elemf18iter.ManagedEBSVolume.Iops)
+								f6elemf18elemf0.IOPS = &iopsCopy
+							}
+							if f6elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
+								f6elemf18elemf0.KMSKeyID = f6elemf18iter.ManagedEBSVolume.KmsKeyId
+							}
+							if f6elemf18iter.ManagedEBSVolume.RoleArn != nil {
+								f6elemf18elemf0.RoleARN = f6elemf18iter.ManagedEBSVolume.RoleArn
+							}
+							if f6elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
+								sizeInGiBCopy := int64(*f6elemf18iter.ManagedEBSVolume.SizeInGiB)
+								f6elemf18elemf0.SizeInGiB = &sizeInGiBCopy
+							}
+							if f6elemf18iter.ManagedEBSVolume.SnapshotId != nil {
+								f6elemf18elemf0.SnapshotID = f6elemf18iter.ManagedEBSVolume.SnapshotId
+							}
+							if f6elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
+								f6elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
+								for _, f6elemf18elemf0f7iter := range f6elemf18iter.ManagedEBSVolume.TagSpecifications {
+									f6elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
+									if f6elemf18elemf0f7iter.PropagateTags != "" {
+										f6elemf18elemf0f7elem.PropagateTags = aws.String(string(f6elemf18elemf0f7iter.PropagateTags))
+									}
+									if f6elemf18elemf0f7iter.ResourceType != "" {
+										f6elemf18elemf0f7elem.ResourceType = aws.String(string(f6elemf18elemf0f7iter.ResourceType))
+									}
+									if f6elemf18elemf0f7iter.Tags != nil {
+										f6elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
+										for _, f6elemf18elemf0f7elemf2iter := range f6elemf18elemf0f7iter.Tags {
+											f6elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
+											if f6elemf18elemf0f7elemf2iter.Key != nil {
+												f6elemf18elemf0f7elemf2elem.Key = f6elemf18elemf0f7elemf2iter.Key
 											}
-											if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value != nil {
-												f8elemf13f4elemf0elemf2f0f1 := &svcapitypes.ServiceConnectTestTrafficHeaderMatchRules{}
-												if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact != nil {
-													f8elemf13f4elemf0elemf2f0f1.Exact = f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact
-												}
-												f8elemf13f4elemf0elemf2f0.Value = f8elemf13f4elemf0elemf2f0f1
+											if f6elemf18elemf0f7elemf2iter.Value != nil {
+												f6elemf18elemf0f7elemf2elem.Value = f6elemf18elemf0f7elemf2iter.Value
 											}
-											f8elemf13f4elemf0elemf2.Header = f8elemf13f4elemf0elemf2f0
+											f6elemf18elemf0f7elemf2 = append(f6elemf18elemf0f7elemf2, f6elemf18elemf0f7elemf2elem)
 										}
-										f8elemf13f4elemf0elem.TestTrafficRules = f8elemf13f4elemf0elemf2
+										f6elemf18elemf0f7elem.Tags = f6elemf18elemf0f7elemf2
 									}
-									f8elemf13f4elemf0 = append(f8elemf13f4elemf0, f8elemf13f4elemf0elem)
+									f6elemf18elemf0f7 = append(f6elemf18elemf0f7, f6elemf18elemf0f7elem)
 								}
-								f8elemf13f4elem.ClientAliases = f8elemf13f4elemf0
+								f6elemf18elemf0.TagSpecifications = f6elemf18elemf0f7
 							}
-							if f8elemf13f4iter.DiscoveryName != nil {
-								f8elemf13f4elem.DiscoveryName = f8elemf13f4iter.DiscoveryName
+							if f6elemf18iter.ManagedEBSVolume.Throughput != nil {
+								throughputCopy := int64(*f6elemf18iter.ManagedEBSVolume.Throughput)
+								f6elemf18elemf0.Throughput = &throughputCopy
 							}
-							if f8elemf13f4iter.IngressPortOverride != nil {
-								ingressPortOverrideCopy := int64(*f8elemf13f4iter.IngressPortOverride)
-								f8elemf13f4elem.IngressPortOverride = &ingressPortOverrideCopy
+							if f6elemf18iter.ManagedEBSVolume.VolumeType != nil {
+								f6elemf18elemf0.VolumeType = f6elemf18iter.ManagedEBSVolume.VolumeType
 							}
-							if f8elemf13f4iter.PortName != nil {
-								f8elemf13f4elem.PortName = f8elemf13f4iter.PortName
-							}
-							if f8elemf13f4iter.Timeout != nil {
-								f8elemf13f4elemf4 := &svcapitypes.TimeoutConfiguration{}
-								if f8elemf13f4iter.Timeout.IdleTimeoutSeconds != nil {
-									idleTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.IdleTimeoutSeconds)
-									f8elemf13f4elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
-								}
-								if f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds != nil {
-									perRequestTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds)
-									f8elemf13f4elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
-								}
-								f8elemf13f4elem.Timeout = f8elemf13f4elemf4
-							}
-							if f8elemf13f4iter.Tls != nil {
-								f8elemf13f4elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
-								if f8elemf13f4iter.Tls.IssuerCertificateAuthority != nil {
-									f8elemf13f4elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
-									if f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
-										f8elemf13f4elemf5f0.AWSPCAAuthorityARN = f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
-									}
-									f8elemf13f4elemf5.IssuerCertificateAuthority = f8elemf13f4elemf5f0
-								}
-								if f8elemf13f4iter.Tls.KmsKey != nil {
-									f8elemf13f4elemf5.KMSKey = f8elemf13f4iter.Tls.KmsKey
-								}
-								if f8elemf13f4iter.Tls.RoleArn != nil {
-									f8elemf13f4elemf5.RoleARN = f8elemf13f4iter.Tls.RoleArn
-								}
-								f8elemf13f4elem.TLS = f8elemf13f4elemf5
-							}
-							f8elemf13f4 = append(f8elemf13f4, f8elemf13f4elem)
+							f6elemf18elem.ManagedEBSVolume = f6elemf18elemf0
 						}
-						f8elemf13.Services = f8elemf13f4
+						if f6elemf18iter.Name != nil {
+							f6elemf18elem.Name = f6elemf18iter.Name
+						}
+						f6elemf18 = append(f6elemf18, f6elemf18elem)
 					}
-					f8elem.ServiceConnectConfiguration = f8elemf13
+					f6elem.VolumeConfigurations = f6elemf18
 				}
-				if f8iter.ServiceConnectResources != nil {
-					f8elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
-					for _, f8elemf14iter := range f8iter.ServiceConnectResources {
-						f8elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
-						if f8elemf14iter.DiscoveryArn != nil {
-							f8elemf14elem.DiscoveryARN = f8elemf14iter.DiscoveryArn
-						}
-						if f8elemf14iter.DiscoveryName != nil {
-							f8elemf14elem.DiscoveryName = f8elemf14iter.DiscoveryName
-						}
-						f8elemf14 = append(f8elemf14, f8elemf14elem)
-					}
-					f8elem.ServiceConnectResources = f8elemf14
-				}
-				if f8iter.Status != nil {
-					f8elem.Status = f8iter.Status
-				}
-				if f8iter.TaskDefinition != nil {
-					f8elem.TaskDefinition = f8iter.TaskDefinition
-				}
-				if f8iter.UpdatedAt != nil {
-					f8elem.UpdatedAt = &metav1.Time{*f8iter.UpdatedAt}
-				}
-				if f8iter.VolumeConfigurations != nil {
-					f8elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
-					for _, f8elemf18iter := range f8iter.VolumeConfigurations {
-						f8elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
-						if f8elemf18iter.ManagedEBSVolume != nil {
-							f8elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
-							if f8elemf18iter.ManagedEBSVolume.Encrypted != nil {
-								f8elemf18elemf0.Encrypted = f8elemf18iter.ManagedEBSVolume.Encrypted
-							}
-							if f8elemf18iter.ManagedEBSVolume.FilesystemType != "" {
-								f8elemf18elemf0.FilesystemType = aws.String(string(f8elemf18iter.ManagedEBSVolume.FilesystemType))
-							}
-							if f8elemf18iter.ManagedEBSVolume.Iops != nil {
-								iopsCopy := int64(*f8elemf18iter.ManagedEBSVolume.Iops)
-								f8elemf18elemf0.IOPS = &iopsCopy
-							}
-							if f8elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
-								f8elemf18elemf0.KMSKeyID = f8elemf18iter.ManagedEBSVolume.KmsKeyId
-							}
-							if f8elemf18iter.ManagedEBSVolume.RoleArn != nil {
-								f8elemf18elemf0.RoleARN = f8elemf18iter.ManagedEBSVolume.RoleArn
-							}
-							if f8elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
-								sizeInGiBCopy := int64(*f8elemf18iter.ManagedEBSVolume.SizeInGiB)
-								f8elemf18elemf0.SizeInGiB = &sizeInGiBCopy
-							}
-							if f8elemf18iter.ManagedEBSVolume.SnapshotId != nil {
-								f8elemf18elemf0.SnapshotID = f8elemf18iter.ManagedEBSVolume.SnapshotId
-							}
-							if f8elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
-								f8elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
-								for _, f8elemf18elemf0f7iter := range f8elemf18iter.ManagedEBSVolume.TagSpecifications {
-									f8elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
-									if f8elemf18elemf0f7iter.PropagateTags != "" {
-										f8elemf18elemf0f7elem.PropagateTags = aws.String(string(f8elemf18elemf0f7iter.PropagateTags))
-									}
-									if f8elemf18elemf0f7iter.ResourceType != "" {
-										f8elemf18elemf0f7elem.ResourceType = aws.String(string(f8elemf18elemf0f7iter.ResourceType))
-									}
-									if f8elemf18elemf0f7iter.Tags != nil {
-										f8elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
-										for _, f8elemf18elemf0f7elemf2iter := range f8elemf18elemf0f7iter.Tags {
-											f8elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
-											if f8elemf18elemf0f7elemf2iter.Key != nil {
-												f8elemf18elemf0f7elemf2elem.Key = f8elemf18elemf0f7elemf2iter.Key
-											}
-											if f8elemf18elemf0f7elemf2iter.Value != nil {
-												f8elemf18elemf0f7elemf2elem.Value = f8elemf18elemf0f7elemf2iter.Value
-											}
-											f8elemf18elemf0f7elemf2 = append(f8elemf18elemf0f7elemf2, f8elemf18elemf0f7elemf2elem)
-										}
-										f8elemf18elemf0f7elem.Tags = f8elemf18elemf0f7elemf2
-									}
-									f8elemf18elemf0f7 = append(f8elemf18elemf0f7, f8elemf18elemf0f7elem)
-								}
-								f8elemf18elemf0.TagSpecifications = f8elemf18elemf0f7
-							}
-							if f8elemf18iter.ManagedEBSVolume.Throughput != nil {
-								throughputCopy := int64(*f8elemf18iter.ManagedEBSVolume.Throughput)
-								f8elemf18elemf0.Throughput = &throughputCopy
-							}
-							if f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate != nil {
-								volumeInitializationRateCopy := int64(*f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate)
-								f8elemf18elemf0.VolumeInitializationRate = &volumeInitializationRateCopy
-							}
-							if f8elemf18iter.ManagedEBSVolume.VolumeType != nil {
-								f8elemf18elemf0.VolumeType = f8elemf18iter.ManagedEBSVolume.VolumeType
-							}
-							f8elemf18elem.ManagedEBSVolume = f8elemf18elemf0
-						}
-						if f8elemf18iter.Name != nil {
-							f8elemf18elem.Name = f8elemf18iter.Name
-						}
-						f8elemf18 = append(f8elemf18, f8elemf18elem)
-					}
-					f8elem.VolumeConfigurations = f8elemf18
-				}
-				f8 = append(f8, f8elem)
+				f6 = append(f6, f6elem)
 			}
-			ko.Status.Deployments = f8
+			ko.Status.Deployments = f6
 		} else {
 			ko.Status.Deployments = nil
 		}
@@ -530,21 +445,21 @@ func (rm *resourceManager) sdkFind(
 		ko.Spec.EnableECSManagedTags = &elem.EnableECSManagedTags
 		ko.Spec.EnableExecuteCommand = &elem.EnableExecuteCommand
 		if elem.Events != nil {
-			f12 := []*svcapitypes.ServiceEvent{}
-			for _, f12iter := range elem.Events {
-				f12elem := &svcapitypes.ServiceEvent{}
-				if f12iter.CreatedAt != nil {
-					f12elem.CreatedAt = &metav1.Time{*f12iter.CreatedAt}
+			f10 := []*svcapitypes.ServiceEvent{}
+			for _, f10iter := range elem.Events {
+				f10elem := &svcapitypes.ServiceEvent{}
+				if f10iter.CreatedAt != nil {
+					f10elem.CreatedAt = &metav1.Time{*f10iter.CreatedAt}
 				}
-				if f12iter.Id != nil {
-					f12elem.ID = f12iter.Id
+				if f10iter.Id != nil {
+					f10elem.ID = f10iter.Id
 				}
-				if f12iter.Message != nil {
-					f12elem.Message = f12iter.Message
+				if f10iter.Message != nil {
+					f10elem.Message = f10iter.Message
 				}
-				f12 = append(f12, f12elem)
+				f10 = append(f10, f10elem)
 			}
-			ko.Status.Events = f12
+			ko.Status.Events = f10
 		} else {
 			ko.Status.Events = nil
 		}
@@ -560,94 +475,78 @@ func (rm *resourceManager) sdkFind(
 			ko.Spec.LaunchType = nil
 		}
 		if elem.LoadBalancers != nil {
-			f15 := []*svcapitypes.LoadBalancer{}
-			for _, f15iter := range elem.LoadBalancers {
-				f15elem := &svcapitypes.LoadBalancer{}
-				if f15iter.AdvancedConfiguration != nil {
-					f15elemf0 := &svcapitypes.AdvancedConfiguration{}
-					if f15iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-						f15elemf0.AlternateTargetGroupARN = f15iter.AdvancedConfiguration.AlternateTargetGroupArn
-					}
-					if f15iter.AdvancedConfiguration.ProductionListenerRule != nil {
-						f15elemf0.ProductionListenerRule = f15iter.AdvancedConfiguration.ProductionListenerRule
-					}
-					if f15iter.AdvancedConfiguration.RoleArn != nil {
-						f15elemf0.RoleARN = f15iter.AdvancedConfiguration.RoleArn
-					}
-					if f15iter.AdvancedConfiguration.TestListenerRule != nil {
-						f15elemf0.TestListenerRule = f15iter.AdvancedConfiguration.TestListenerRule
-					}
-					f15elem.AdvancedConfiguration = f15elemf0
+			f13 := []*svcapitypes.LoadBalancer{}
+			for _, f13iter := range elem.LoadBalancers {
+				f13elem := &svcapitypes.LoadBalancer{}
+				if f13iter.ContainerName != nil {
+					f13elem.ContainerName = f13iter.ContainerName
 				}
-				if f15iter.ContainerName != nil {
-					f15elem.ContainerName = f15iter.ContainerName
+				if f13iter.ContainerPort != nil {
+					containerPortCopy := int64(*f13iter.ContainerPort)
+					f13elem.ContainerPort = &containerPortCopy
 				}
-				if f15iter.ContainerPort != nil {
-					containerPortCopy := int64(*f15iter.ContainerPort)
-					f15elem.ContainerPort = &containerPortCopy
+				if f13iter.LoadBalancerName != nil {
+					f13elem.LoadBalancerName = f13iter.LoadBalancerName
 				}
-				if f15iter.LoadBalancerName != nil {
-					f15elem.LoadBalancerName = f15iter.LoadBalancerName
+				if f13iter.TargetGroupArn != nil {
+					f13elem.TargetGroupARN = f13iter.TargetGroupArn
 				}
-				if f15iter.TargetGroupArn != nil {
-					f15elem.TargetGroupARN = f15iter.TargetGroupArn
-				}
-				f15 = append(f15, f15elem)
+				f13 = append(f13, f13elem)
 			}
-			ko.Spec.LoadBalancers = f15
+			ko.Spec.LoadBalancers = f13
 		} else {
 			ko.Spec.LoadBalancers = nil
 		}
 		if elem.NetworkConfiguration != nil {
-			f16 := &svcapitypes.NetworkConfiguration{}
+			f14 := &svcapitypes.NetworkConfiguration{}
 			if elem.NetworkConfiguration.AwsvpcConfiguration != nil {
-				f16f0 := &svcapitypes.AWSVPCConfiguration{}
+				f14f0 := &svcapitypes.AWSVPCConfiguration{}
 				if elem.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-					f16f0.AssignPublicIP = aws.String(string(elem.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+					f14f0.AssignPublicIP = aws.String(string(elem.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 				}
 				if elem.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-					f16f0.SecurityGroups = aws.StringSlice(elem.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+					f14f0.SecurityGroups = aws.StringSlice(elem.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 				}
 				if elem.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-					f16f0.Subnets = aws.StringSlice(elem.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+					f14f0.Subnets = aws.StringSlice(elem.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 				}
-				f16.AWSVPCConfiguration = f16f0
+				f14.AWSVPCConfiguration = f14f0
 			}
-			ko.Spec.NetworkConfiguration = f16
+			ko.Spec.NetworkConfiguration = f14
 		} else {
 			ko.Spec.NetworkConfiguration = nil
 		}
 		pendingCountCopy := int64(elem.PendingCount)
 		ko.Status.PendingCount = &pendingCountCopy
 		if elem.PlacementConstraints != nil {
-			f18 := []*svcapitypes.PlacementConstraint{}
-			for _, f18iter := range elem.PlacementConstraints {
-				f18elem := &svcapitypes.PlacementConstraint{}
-				if f18iter.Expression != nil {
-					f18elem.Expression = f18iter.Expression
+			f16 := []*svcapitypes.PlacementConstraint{}
+			for _, f16iter := range elem.PlacementConstraints {
+				f16elem := &svcapitypes.PlacementConstraint{}
+				if f16iter.Expression != nil {
+					f16elem.Expression = f16iter.Expression
 				}
-				if f18iter.Type != "" {
-					f18elem.Type = aws.String(string(f18iter.Type))
+				if f16iter.Type != "" {
+					f16elem.Type = aws.String(string(f16iter.Type))
 				}
-				f18 = append(f18, f18elem)
+				f16 = append(f16, f16elem)
 			}
-			ko.Spec.PlacementConstraints = f18
+			ko.Spec.PlacementConstraints = f16
 		} else {
 			ko.Spec.PlacementConstraints = nil
 		}
 		if elem.PlacementStrategy != nil {
-			f19 := []*svcapitypes.PlacementStrategy{}
-			for _, f19iter := range elem.PlacementStrategy {
-				f19elem := &svcapitypes.PlacementStrategy{}
-				if f19iter.Field != nil {
-					f19elem.Field = f19iter.Field
+			f17 := []*svcapitypes.PlacementStrategy{}
+			for _, f17iter := range elem.PlacementStrategy {
+				f17elem := &svcapitypes.PlacementStrategy{}
+				if f17iter.Field != nil {
+					f17elem.Field = f17iter.Field
 				}
-				if f19iter.Type != "" {
-					f19elem.Type = aws.String(string(f19iter.Type))
+				if f17iter.Type != "" {
+					f17elem.Type = aws.String(string(f17iter.Type))
 				}
-				f19 = append(f19, f19elem)
+				f17 = append(f17, f17elem)
 			}
-			ko.Spec.PlacementStrategy = f19
+			ko.Spec.PlacementStrategy = f17
 		} else {
 			ko.Spec.PlacementStrategy = nil
 		}
@@ -665,11 +564,6 @@ func (rm *resourceManager) sdkFind(
 			ko.Spec.PropagateTags = aws.String(string(elem.PropagateTags))
 		} else {
 			ko.Spec.PropagateTags = nil
-		}
-		if elem.ResourceManagementType != "" {
-			ko.Status.ResourceManagementType = aws.String(string(elem.ResourceManagementType))
-		} else {
-			ko.Status.ResourceManagementType = nil
 		}
 		if elem.RoleArn != nil {
 			ko.Status.RoleARN = elem.RoleArn
@@ -701,26 +595,26 @@ func (rm *resourceManager) sdkFind(
 			ko.Spec.Name = nil
 		}
 		if elem.ServiceRegistries != nil {
-			f29 := []*svcapitypes.ServiceRegistry{}
-			for _, f29iter := range elem.ServiceRegistries {
-				f29elem := &svcapitypes.ServiceRegistry{}
-				if f29iter.ContainerName != nil {
-					f29elem.ContainerName = f29iter.ContainerName
+			f26 := []*svcapitypes.ServiceRegistry{}
+			for _, f26iter := range elem.ServiceRegistries {
+				f26elem := &svcapitypes.ServiceRegistry{}
+				if f26iter.ContainerName != nil {
+					f26elem.ContainerName = f26iter.ContainerName
 				}
-				if f29iter.ContainerPort != nil {
-					containerPortCopy := int64(*f29iter.ContainerPort)
-					f29elem.ContainerPort = &containerPortCopy
+				if f26iter.ContainerPort != nil {
+					containerPortCopy := int64(*f26iter.ContainerPort)
+					f26elem.ContainerPort = &containerPortCopy
 				}
-				if f29iter.Port != nil {
-					portCopy := int64(*f29iter.Port)
-					f29elem.Port = &portCopy
+				if f26iter.Port != nil {
+					portCopy := int64(*f26iter.Port)
+					f26elem.Port = &portCopy
 				}
-				if f29iter.RegistryArn != nil {
-					f29elem.RegistryARN = f29iter.RegistryArn
+				if f26iter.RegistryArn != nil {
+					f26elem.RegistryARN = f26iter.RegistryArn
 				}
-				f29 = append(f29, f29elem)
+				f26 = append(f26, f26elem)
 			}
-			ko.Spec.ServiceRegistries = f29
+			ko.Spec.ServiceRegistries = f26
 		} else {
 			ko.Spec.ServiceRegistries = nil
 		}
@@ -730,18 +624,18 @@ func (rm *resourceManager) sdkFind(
 			ko.Status.Status = nil
 		}
 		if elem.Tags != nil {
-			f31 := []*svcapitypes.Tag{}
-			for _, f31iter := range elem.Tags {
-				f31elem := &svcapitypes.Tag{}
-				if f31iter.Key != nil {
-					f31elem.Key = f31iter.Key
+			f28 := []*svcapitypes.Tag{}
+			for _, f28iter := range elem.Tags {
+				f28elem := &svcapitypes.Tag{}
+				if f28iter.Key != nil {
+					f28elem.Key = f28iter.Key
 				}
-				if f31iter.Value != nil {
-					f31elem.Value = f31iter.Value
+				if f28iter.Value != nil {
+					f28elem.Value = f28iter.Value
 				}
-				f31 = append(f31, f31elem)
+				f28 = append(f28, f28elem)
 			}
-			ko.Spec.Tags = f31
+			ko.Spec.Tags = f28
 		} else {
 			ko.Spec.Tags = nil
 		}
@@ -751,176 +645,160 @@ func (rm *resourceManager) sdkFind(
 			ko.Spec.TaskDefinition = nil
 		}
 		if elem.TaskSets != nil {
-			f33 := []*svcapitypes.TaskSet{}
-			for _, f33iter := range elem.TaskSets {
-				f33elem := &svcapitypes.TaskSet{}
-				if f33iter.CapacityProviderStrategy != nil {
-					f33elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-					for _, f33elemf0iter := range f33iter.CapacityProviderStrategy {
-						f33elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-						baseCopy := int64(f33elemf0iter.Base)
-						f33elemf0elem.Base = &baseCopy
-						if f33elemf0iter.CapacityProvider != nil {
-							f33elemf0elem.CapacityProvider = f33elemf0iter.CapacityProvider
+			f30 := []*svcapitypes.TaskSet{}
+			for _, f30iter := range elem.TaskSets {
+				f30elem := &svcapitypes.TaskSet{}
+				if f30iter.CapacityProviderStrategy != nil {
+					f30elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+					for _, f30elemf0iter := range f30iter.CapacityProviderStrategy {
+						f30elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+						baseCopy := int64(f30elemf0iter.Base)
+						f30elemf0elem.Base = &baseCopy
+						if f30elemf0iter.CapacityProvider != nil {
+							f30elemf0elem.CapacityProvider = f30elemf0iter.CapacityProvider
 						}
-						weightCopy := int64(f33elemf0iter.Weight)
-						f33elemf0elem.Weight = &weightCopy
-						f33elemf0 = append(f33elemf0, f33elemf0elem)
+						weightCopy := int64(f30elemf0iter.Weight)
+						f30elemf0elem.Weight = &weightCopy
+						f30elemf0 = append(f30elemf0, f30elemf0elem)
 					}
-					f33elem.CapacityProviderStrategy = f33elemf0
+					f30elem.CapacityProviderStrategy = f30elemf0
 				}
-				if f33iter.ClusterArn != nil {
-					f33elem.ClusterARN = f33iter.ClusterArn
+				if f30iter.ClusterArn != nil {
+					f30elem.ClusterARN = f30iter.ClusterArn
 				}
-				computedDesiredCountCopy := int64(f33iter.ComputedDesiredCount)
-				f33elem.ComputedDesiredCount = &computedDesiredCountCopy
-				if f33iter.CreatedAt != nil {
-					f33elem.CreatedAt = &metav1.Time{*f33iter.CreatedAt}
+				computedDesiredCountCopy := int64(f30iter.ComputedDesiredCount)
+				f30elem.ComputedDesiredCount = &computedDesiredCountCopy
+				if f30iter.CreatedAt != nil {
+					f30elem.CreatedAt = &metav1.Time{*f30iter.CreatedAt}
 				}
-				if f33iter.ExternalId != nil {
-					f33elem.ExternalID = f33iter.ExternalId
+				if f30iter.ExternalId != nil {
+					f30elem.ExternalID = f30iter.ExternalId
 				}
-				if f33iter.Id != nil {
-					f33elem.ID = f33iter.Id
+				if f30iter.Id != nil {
+					f30elem.ID = f30iter.Id
 				}
-				if f33iter.LaunchType != "" {
-					f33elem.LaunchType = aws.String(string(f33iter.LaunchType))
+				if f30iter.LaunchType != "" {
+					f30elem.LaunchType = aws.String(string(f30iter.LaunchType))
 				}
-				if f33iter.LoadBalancers != nil {
-					f33elemf7 := []*svcapitypes.LoadBalancer{}
-					for _, f33elemf7iter := range f33iter.LoadBalancers {
-						f33elemf7elem := &svcapitypes.LoadBalancer{}
-						if f33elemf7iter.AdvancedConfiguration != nil {
-							f33elemf7elemf0 := &svcapitypes.AdvancedConfiguration{}
-							if f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-								f33elemf7elemf0.AlternateTargetGroupARN = f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn
-							}
-							if f33elemf7iter.AdvancedConfiguration.ProductionListenerRule != nil {
-								f33elemf7elemf0.ProductionListenerRule = f33elemf7iter.AdvancedConfiguration.ProductionListenerRule
-							}
-							if f33elemf7iter.AdvancedConfiguration.RoleArn != nil {
-								f33elemf7elemf0.RoleARN = f33elemf7iter.AdvancedConfiguration.RoleArn
-							}
-							if f33elemf7iter.AdvancedConfiguration.TestListenerRule != nil {
-								f33elemf7elemf0.TestListenerRule = f33elemf7iter.AdvancedConfiguration.TestListenerRule
-							}
-							f33elemf7elem.AdvancedConfiguration = f33elemf7elemf0
+				if f30iter.LoadBalancers != nil {
+					f30elemf7 := []*svcapitypes.LoadBalancer{}
+					for _, f30elemf7iter := range f30iter.LoadBalancers {
+						f30elemf7elem := &svcapitypes.LoadBalancer{}
+						if f30elemf7iter.ContainerName != nil {
+							f30elemf7elem.ContainerName = f30elemf7iter.ContainerName
 						}
-						if f33elemf7iter.ContainerName != nil {
-							f33elemf7elem.ContainerName = f33elemf7iter.ContainerName
+						if f30elemf7iter.ContainerPort != nil {
+							containerPortCopy := int64(*f30elemf7iter.ContainerPort)
+							f30elemf7elem.ContainerPort = &containerPortCopy
 						}
-						if f33elemf7iter.ContainerPort != nil {
-							containerPortCopy := int64(*f33elemf7iter.ContainerPort)
-							f33elemf7elem.ContainerPort = &containerPortCopy
+						if f30elemf7iter.LoadBalancerName != nil {
+							f30elemf7elem.LoadBalancerName = f30elemf7iter.LoadBalancerName
 						}
-						if f33elemf7iter.LoadBalancerName != nil {
-							f33elemf7elem.LoadBalancerName = f33elemf7iter.LoadBalancerName
+						if f30elemf7iter.TargetGroupArn != nil {
+							f30elemf7elem.TargetGroupARN = f30elemf7iter.TargetGroupArn
 						}
-						if f33elemf7iter.TargetGroupArn != nil {
-							f33elemf7elem.TargetGroupARN = f33elemf7iter.TargetGroupArn
-						}
-						f33elemf7 = append(f33elemf7, f33elemf7elem)
+						f30elemf7 = append(f30elemf7, f30elemf7elem)
 					}
-					f33elem.LoadBalancers = f33elemf7
+					f30elem.LoadBalancers = f30elemf7
 				}
-				if f33iter.NetworkConfiguration != nil {
-					f33elemf8 := &svcapitypes.NetworkConfiguration{}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-						f33elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
-						if f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-							f33elemf8f0.AssignPublicIP = aws.String(string(f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+				if f30iter.NetworkConfiguration != nil {
+					f30elemf8 := &svcapitypes.NetworkConfiguration{}
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+						f30elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
+						if f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+							f30elemf8f0.AssignPublicIP = aws.String(string(f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 						}
-						if f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-							f33elemf8f0.SecurityGroups = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+						if f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+							f30elemf8f0.SecurityGroups = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 						}
-						if f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-							f33elemf8f0.Subnets = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+						if f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+							f30elemf8f0.Subnets = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 						}
-						f33elemf8.AWSVPCConfiguration = f33elemf8f0
+						f30elemf8.AWSVPCConfiguration = f30elemf8f0
 					}
-					f33elem.NetworkConfiguration = f33elemf8
+					f30elem.NetworkConfiguration = f30elemf8
 				}
-				pendingCountCopy := int64(f33iter.PendingCount)
-				f33elem.PendingCount = &pendingCountCopy
-				if f33iter.PlatformFamily != nil {
-					f33elem.PlatformFamily = f33iter.PlatformFamily
+				pendingCountCopy := int64(f30iter.PendingCount)
+				f30elem.PendingCount = &pendingCountCopy
+				if f30iter.PlatformFamily != nil {
+					f30elem.PlatformFamily = f30iter.PlatformFamily
 				}
-				if f33iter.PlatformVersion != nil {
-					f33elem.PlatformVersion = f33iter.PlatformVersion
+				if f30iter.PlatformVersion != nil {
+					f30elem.PlatformVersion = f30iter.PlatformVersion
 				}
-				runningCountCopy := int64(f33iter.RunningCount)
-				f33elem.RunningCount = &runningCountCopy
-				if f33iter.Scale != nil {
-					f33elemf13 := &svcapitypes.Scale{}
-					if f33iter.Scale.Unit != "" {
-						f33elemf13.Unit = aws.String(string(f33iter.Scale.Unit))
+				runningCountCopy := int64(f30iter.RunningCount)
+				f30elem.RunningCount = &runningCountCopy
+				if f30iter.Scale != nil {
+					f30elemf13 := &svcapitypes.Scale{}
+					if f30iter.Scale.Unit != "" {
+						f30elemf13.Unit = aws.String(string(f30iter.Scale.Unit))
 					}
-					f33elemf13.Value = &f33iter.Scale.Value
-					f33elem.Scale = f33elemf13
+					f30elemf13.Value = &f30iter.Scale.Value
+					f30elem.Scale = f30elemf13
 				}
-				if f33iter.ServiceArn != nil {
-					f33elem.ServiceARN = f33iter.ServiceArn
+				if f30iter.ServiceArn != nil {
+					f30elem.ServiceARN = f30iter.ServiceArn
 				}
-				if f33iter.ServiceRegistries != nil {
-					f33elemf15 := []*svcapitypes.ServiceRegistry{}
-					for _, f33elemf15iter := range f33iter.ServiceRegistries {
-						f33elemf15elem := &svcapitypes.ServiceRegistry{}
-						if f33elemf15iter.ContainerName != nil {
-							f33elemf15elem.ContainerName = f33elemf15iter.ContainerName
+				if f30iter.ServiceRegistries != nil {
+					f30elemf15 := []*svcapitypes.ServiceRegistry{}
+					for _, f30elemf15iter := range f30iter.ServiceRegistries {
+						f30elemf15elem := &svcapitypes.ServiceRegistry{}
+						if f30elemf15iter.ContainerName != nil {
+							f30elemf15elem.ContainerName = f30elemf15iter.ContainerName
 						}
-						if f33elemf15iter.ContainerPort != nil {
-							containerPortCopy := int64(*f33elemf15iter.ContainerPort)
-							f33elemf15elem.ContainerPort = &containerPortCopy
+						if f30elemf15iter.ContainerPort != nil {
+							containerPortCopy := int64(*f30elemf15iter.ContainerPort)
+							f30elemf15elem.ContainerPort = &containerPortCopy
 						}
-						if f33elemf15iter.Port != nil {
-							portCopy := int64(*f33elemf15iter.Port)
-							f33elemf15elem.Port = &portCopy
+						if f30elemf15iter.Port != nil {
+							portCopy := int64(*f30elemf15iter.Port)
+							f30elemf15elem.Port = &portCopy
 						}
-						if f33elemf15iter.RegistryArn != nil {
-							f33elemf15elem.RegistryARN = f33elemf15iter.RegistryArn
+						if f30elemf15iter.RegistryArn != nil {
+							f30elemf15elem.RegistryARN = f30elemf15iter.RegistryArn
 						}
-						f33elemf15 = append(f33elemf15, f33elemf15elem)
+						f30elemf15 = append(f30elemf15, f30elemf15elem)
 					}
-					f33elem.ServiceRegistries = f33elemf15
+					f30elem.ServiceRegistries = f30elemf15
 				}
-				if f33iter.StabilityStatus != "" {
-					f33elem.StabilityStatus = aws.String(string(f33iter.StabilityStatus))
+				if f30iter.StabilityStatus != "" {
+					f30elem.StabilityStatus = aws.String(string(f30iter.StabilityStatus))
 				}
-				if f33iter.StabilityStatusAt != nil {
-					f33elem.StabilityStatusAt = &metav1.Time{*f33iter.StabilityStatusAt}
+				if f30iter.StabilityStatusAt != nil {
+					f30elem.StabilityStatusAt = &metav1.Time{*f30iter.StabilityStatusAt}
 				}
-				if f33iter.StartedBy != nil {
-					f33elem.StartedBy = f33iter.StartedBy
+				if f30iter.StartedBy != nil {
+					f30elem.StartedBy = f30iter.StartedBy
 				}
-				if f33iter.Status != nil {
-					f33elem.Status = f33iter.Status
+				if f30iter.Status != nil {
+					f30elem.Status = f30iter.Status
 				}
-				if f33iter.Tags != nil {
-					f33elemf20 := []*svcapitypes.Tag{}
-					for _, f33elemf20iter := range f33iter.Tags {
-						f33elemf20elem := &svcapitypes.Tag{}
-						if f33elemf20iter.Key != nil {
-							f33elemf20elem.Key = f33elemf20iter.Key
+				if f30iter.Tags != nil {
+					f30elemf20 := []*svcapitypes.Tag{}
+					for _, f30elemf20iter := range f30iter.Tags {
+						f30elemf20elem := &svcapitypes.Tag{}
+						if f30elemf20iter.Key != nil {
+							f30elemf20elem.Key = f30elemf20iter.Key
 						}
-						if f33elemf20iter.Value != nil {
-							f33elemf20elem.Value = f33elemf20iter.Value
+						if f30elemf20iter.Value != nil {
+							f30elemf20elem.Value = f30elemf20iter.Value
 						}
-						f33elemf20 = append(f33elemf20, f33elemf20elem)
+						f30elemf20 = append(f30elemf20, f30elemf20elem)
 					}
-					f33elem.Tags = f33elemf20
+					f30elem.Tags = f30elemf20
 				}
-				if f33iter.TaskDefinition != nil {
-					f33elem.TaskDefinition = f33iter.TaskDefinition
+				if f30iter.TaskDefinition != nil {
+					f30elem.TaskDefinition = f30iter.TaskDefinition
 				}
-				if f33iter.TaskSetArn != nil {
-					f33elem.TaskSetARN = f33iter.TaskSetArn
+				if f30iter.TaskSetArn != nil {
+					f30elem.TaskSetARN = f30iter.TaskSetArn
 				}
-				if f33iter.UpdatedAt != nil {
-					f33elem.UpdatedAt = &metav1.Time{*f33iter.UpdatedAt}
+				if f30iter.UpdatedAt != nil {
+					f30elem.UpdatedAt = &metav1.Time{*f30iter.UpdatedAt}
 				}
-				f33 = append(f33, f33elem)
+				f30 = append(f30, f30elem)
 			}
-			ko.Status.TaskSets = f33
+			ko.Status.TaskSets = f30
 		} else {
 			ko.Status.TaskSets = nil
 		}
@@ -1018,387 +896,302 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.CreatedBy = nil
 	}
-	if resp.Service.CurrentServiceDeployment != nil {
-		ko.Status.CurrentServiceDeployment = resp.Service.CurrentServiceDeployment
-	} else {
-		ko.Status.CurrentServiceDeployment = nil
-	}
-	if resp.Service.CurrentServiceRevisions != nil {
-		f5 := []*svcapitypes.ServiceCurrentRevisionSummary{}
-		for _, f5iter := range resp.Service.CurrentServiceRevisions {
-			f5elem := &svcapitypes.ServiceCurrentRevisionSummary{}
-			if f5iter.Arn != nil {
-				f5elem.ARN = f5iter.Arn
-			}
-			pendingTaskCountCopy := int64(f5iter.PendingTaskCount)
-			f5elem.PendingTaskCount = &pendingTaskCountCopy
-			requestedTaskCountCopy := int64(f5iter.RequestedTaskCount)
-			f5elem.RequestedTaskCount = &requestedTaskCountCopy
-			runningTaskCountCopy := int64(f5iter.RunningTaskCount)
-			f5elem.RunningTaskCount = &runningTaskCountCopy
-			f5 = append(f5, f5elem)
-		}
-		ko.Status.CurrentServiceRevisions = f5
-	} else {
-		ko.Status.CurrentServiceRevisions = nil
-	}
 	if resp.Service.DeploymentConfiguration != nil {
-		f6 := &svcapitypes.DeploymentConfiguration{}
+		f4 := &svcapitypes.DeploymentConfiguration{}
 		if resp.Service.DeploymentConfiguration.Alarms != nil {
-			f6f0 := &svcapitypes.DeploymentAlarms{}
+			f4f0 := &svcapitypes.DeploymentAlarms{}
 			if resp.Service.DeploymentConfiguration.Alarms.AlarmNames != nil {
-				f6f0.AlarmNames = aws.StringSlice(resp.Service.DeploymentConfiguration.Alarms.AlarmNames)
+				f4f0.AlarmNames = aws.StringSlice(resp.Service.DeploymentConfiguration.Alarms.AlarmNames)
 			}
-			f6f0.Enable = &resp.Service.DeploymentConfiguration.Alarms.Enable
-			f6f0.Rollback = &resp.Service.DeploymentConfiguration.Alarms.Rollback
-			f6.Alarms = f6f0
-		}
-		if resp.Service.DeploymentConfiguration.BakeTimeInMinutes != nil {
-			bakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.BakeTimeInMinutes)
-			f6.BakeTimeInMinutes = &bakeTimeInMinutesCopy
-		}
-		if resp.Service.DeploymentConfiguration.CanaryConfiguration != nil {
-			f6f2 := &svcapitypes.CanaryConfiguration{}
-			if resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
-				canaryBakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes)
-				f6f2.CanaryBakeTimeInMinutes = &canaryBakeTimeInMinutesCopy
-			}
-			if resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
-				f6f2.CanaryPercent = resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryPercent
-			}
-			f6.CanaryConfiguration = f6f2
+			f4f0.Enable = &resp.Service.DeploymentConfiguration.Alarms.Enable
+			f4f0.Rollback = &resp.Service.DeploymentConfiguration.Alarms.Rollback
+			f4.Alarms = f4f0
 		}
 		if resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
-			f6f3 := &svcapitypes.DeploymentCircuitBreaker{}
-			f6f3.Enable = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
-			f6f3.Rollback = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
-			f6.DeploymentCircuitBreaker = f6f3
-		}
-		if resp.Service.DeploymentConfiguration.LinearConfiguration != nil {
-			f6f4 := &svcapitypes.LinearConfiguration{}
-			if resp.Service.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
-				stepBakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes)
-				f6f4.StepBakeTimeInMinutes = &stepBakeTimeInMinutesCopy
-			}
-			if resp.Service.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
-				f6f4.StepPercent = resp.Service.DeploymentConfiguration.LinearConfiguration.StepPercent
-			}
-			f6.LinearConfiguration = f6f4
+			f4f1 := &svcapitypes.DeploymentCircuitBreaker{}
+			f4f1.Enable = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
+			f4f1.Rollback = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
+			f4.DeploymentCircuitBreaker = f4f1
 		}
 		if resp.Service.DeploymentConfiguration.MaximumPercent != nil {
 			maximumPercentCopy := int64(*resp.Service.DeploymentConfiguration.MaximumPercent)
-			f6.MaximumPercent = &maximumPercentCopy
+			f4.MaximumPercent = &maximumPercentCopy
 		}
 		if resp.Service.DeploymentConfiguration.MinimumHealthyPercent != nil {
 			minimumHealthyPercentCopy := int64(*resp.Service.DeploymentConfiguration.MinimumHealthyPercent)
-			f6.MinimumHealthyPercent = &minimumHealthyPercentCopy
+			f4.MinimumHealthyPercent = &minimumHealthyPercentCopy
 		}
-		if resp.Service.DeploymentConfiguration.Strategy != "" {
-			f6.Strategy = aws.String(string(resp.Service.DeploymentConfiguration.Strategy))
-		}
-		ko.Spec.DeploymentConfiguration = f6
+		ko.Spec.DeploymentConfiguration = f4
 	} else {
 		ko.Spec.DeploymentConfiguration = nil
 	}
 	if resp.Service.DeploymentController != nil {
-		f7 := &svcapitypes.DeploymentController{}
+		f5 := &svcapitypes.DeploymentController{}
 		if resp.Service.DeploymentController.Type != "" {
-			f7.Type = aws.String(string(resp.Service.DeploymentController.Type))
+			f5.Type = aws.String(string(resp.Service.DeploymentController.Type))
 		}
-		ko.Spec.DeploymentController = f7
+		ko.Spec.DeploymentController = f5
 	} else {
 		ko.Spec.DeploymentController = nil
 	}
 	if resp.Service.Deployments != nil {
-		f8 := []*svcapitypes.Deployment{}
-		for _, f8iter := range resp.Service.Deployments {
-			f8elem := &svcapitypes.Deployment{}
-			if f8iter.CapacityProviderStrategy != nil {
-				f8elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-				for _, f8elemf0iter := range f8iter.CapacityProviderStrategy {
-					f8elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-					baseCopy := int64(f8elemf0iter.Base)
-					f8elemf0elem.Base = &baseCopy
-					if f8elemf0iter.CapacityProvider != nil {
-						f8elemf0elem.CapacityProvider = f8elemf0iter.CapacityProvider
+		f6 := []*svcapitypes.Deployment{}
+		for _, f6iter := range resp.Service.Deployments {
+			f6elem := &svcapitypes.Deployment{}
+			if f6iter.CapacityProviderStrategy != nil {
+				f6elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+				for _, f6elemf0iter := range f6iter.CapacityProviderStrategy {
+					f6elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+					baseCopy := int64(f6elemf0iter.Base)
+					f6elemf0elem.Base = &baseCopy
+					if f6elemf0iter.CapacityProvider != nil {
+						f6elemf0elem.CapacityProvider = f6elemf0iter.CapacityProvider
 					}
-					weightCopy := int64(f8elemf0iter.Weight)
-					f8elemf0elem.Weight = &weightCopy
-					f8elemf0 = append(f8elemf0, f8elemf0elem)
+					weightCopy := int64(f6elemf0iter.Weight)
+					f6elemf0elem.Weight = &weightCopy
+					f6elemf0 = append(f6elemf0, f6elemf0elem)
 				}
-				f8elem.CapacityProviderStrategy = f8elemf0
+				f6elem.CapacityProviderStrategy = f6elemf0
 			}
-			if f8iter.CreatedAt != nil {
-				f8elem.CreatedAt = &metav1.Time{*f8iter.CreatedAt}
+			if f6iter.CreatedAt != nil {
+				f6elem.CreatedAt = &metav1.Time{*f6iter.CreatedAt}
 			}
-			desiredCountCopy := int64(f8iter.DesiredCount)
-			f8elem.DesiredCount = &desiredCountCopy
-			failedTasksCopy := int64(f8iter.FailedTasks)
-			f8elem.FailedTasks = &failedTasksCopy
-			if f8iter.Id != nil {
-				f8elem.ID = f8iter.Id
+			desiredCountCopy := int64(f6iter.DesiredCount)
+			f6elem.DesiredCount = &desiredCountCopy
+			failedTasksCopy := int64(f6iter.FailedTasks)
+			f6elem.FailedTasks = &failedTasksCopy
+			if f6iter.Id != nil {
+				f6elem.ID = f6iter.Id
 			}
-			if f8iter.LaunchType != "" {
-				f8elem.LaunchType = aws.String(string(f8iter.LaunchType))
+			if f6iter.LaunchType != "" {
+				f6elem.LaunchType = aws.String(string(f6iter.LaunchType))
 			}
-			if f8iter.NetworkConfiguration != nil {
-				f8elemf6 := &svcapitypes.NetworkConfiguration{}
-				if f8iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-					f8elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-						f8elemf6f0.AssignPublicIP = aws.String(string(f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+			if f6iter.NetworkConfiguration != nil {
+				f6elemf6 := &svcapitypes.NetworkConfiguration{}
+				if f6iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+					f6elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+						f6elemf6f0.AssignPublicIP = aws.String(string(f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 					}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-						f8elemf6f0.SecurityGroups = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+						f6elemf6f0.SecurityGroups = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 					}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-						f8elemf6f0.Subnets = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+						f6elemf6f0.Subnets = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 					}
-					f8elemf6.AWSVPCConfiguration = f8elemf6f0
+					f6elemf6.AWSVPCConfiguration = f6elemf6f0
 				}
-				f8elem.NetworkConfiguration = f8elemf6
+				f6elem.NetworkConfiguration = f6elemf6
 			}
-			pendingCountCopy := int64(f8iter.PendingCount)
-			f8elem.PendingCount = &pendingCountCopy
-			if f8iter.PlatformFamily != nil {
-				f8elem.PlatformFamily = f8iter.PlatformFamily
+			pendingCountCopy := int64(f6iter.PendingCount)
+			f6elem.PendingCount = &pendingCountCopy
+			if f6iter.PlatformFamily != nil {
+				f6elem.PlatformFamily = f6iter.PlatformFamily
 			}
-			if f8iter.PlatformVersion != nil {
-				f8elem.PlatformVersion = f8iter.PlatformVersion
+			if f6iter.PlatformVersion != nil {
+				f6elem.PlatformVersion = f6iter.PlatformVersion
 			}
-			if f8iter.RolloutState != "" {
-				f8elem.RolloutState = aws.String(string(f8iter.RolloutState))
+			if f6iter.RolloutState != "" {
+				f6elem.RolloutState = aws.String(string(f6iter.RolloutState))
 			}
-			if f8iter.RolloutStateReason != nil {
-				f8elem.RolloutStateReason = f8iter.RolloutStateReason
+			if f6iter.RolloutStateReason != nil {
+				f6elem.RolloutStateReason = f6iter.RolloutStateReason
 			}
-			runningCountCopy := int64(f8iter.RunningCount)
-			f8elem.RunningCount = &runningCountCopy
-			if f8iter.ServiceConnectConfiguration != nil {
-				f8elemf13 := &svcapitypes.ServiceConnectConfiguration{}
-				if f8iter.ServiceConnectConfiguration.AccessLogConfiguration != nil {
-					f8elemf13f0 := &svcapitypes.ServiceConnectAccessLogConfiguration{}
-					if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format != "" {
-						f8elemf13f0.Format = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format))
+			runningCountCopy := int64(f6iter.RunningCount)
+			f6elem.RunningCount = &runningCountCopy
+			if f6iter.ServiceConnectConfiguration != nil {
+				f6elemf13 := &svcapitypes.ServiceConnectConfiguration{}
+				f6elemf13.Enabled = &f6iter.ServiceConnectConfiguration.Enabled
+				if f6iter.ServiceConnectConfiguration.LogConfiguration != nil {
+					f6elemf13f1 := &svcapitypes.LogConfiguration{}
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
+						f6elemf13f1.LogDriver = aws.String(string(f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
 					}
-					if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != "" {
-						f8elemf13f0.IncludeQueryParameters = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters))
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
+						f6elemf13f1.Options = aws.StringMap(f6iter.ServiceConnectConfiguration.LogConfiguration.Options)
 					}
-					f8elemf13.AccessLogConfiguration = f8elemf13f0
-				}
-				f8elemf13.Enabled = &f8iter.ServiceConnectConfiguration.Enabled
-				if f8iter.ServiceConnectConfiguration.LogConfiguration != nil {
-					f8elemf13f2 := &svcapitypes.LogConfiguration{}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
-						f8elemf13f2.LogDriver = aws.String(string(f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
-					}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-						f8elemf13f2.Options = aws.StringMap(f8iter.ServiceConnectConfiguration.LogConfiguration.Options)
-					}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-						f8elemf13f2f2 := []*svcapitypes.Secret{}
-						for _, f8elemf13f2f2iter := range f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-							f8elemf13f2f2elem := &svcapitypes.Secret{}
-							if f8elemf13f2f2iter.Name != nil {
-								f8elemf13f2f2elem.Name = f8elemf13f2f2iter.Name
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
+						f6elemf13f1f2 := []*svcapitypes.Secret{}
+						for _, f6elemf13f1f2iter := range f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+							f6elemf13f1f2elem := &svcapitypes.Secret{}
+							if f6elemf13f1f2iter.Name != nil {
+								f6elemf13f1f2elem.Name = f6elemf13f1f2iter.Name
 							}
-							if f8elemf13f2f2iter.ValueFrom != nil {
-								f8elemf13f2f2elem.ValueFrom = f8elemf13f2f2iter.ValueFrom
+							if f6elemf13f1f2iter.ValueFrom != nil {
+								f6elemf13f1f2elem.ValueFrom = f6elemf13f1f2iter.ValueFrom
 							}
-							f8elemf13f2f2 = append(f8elemf13f2f2, f8elemf13f2f2elem)
+							f6elemf13f1f2 = append(f6elemf13f1f2, f6elemf13f1f2elem)
 						}
-						f8elemf13f2.SecretOptions = f8elemf13f2f2
+						f6elemf13f1.SecretOptions = f6elemf13f1f2
 					}
-					f8elemf13.LogConfiguration = f8elemf13f2
+					f6elemf13.LogConfiguration = f6elemf13f1
 				}
-				if f8iter.ServiceConnectConfiguration.Namespace != nil {
-					f8elemf13.Namespace = f8iter.ServiceConnectConfiguration.Namespace
+				if f6iter.ServiceConnectConfiguration.Namespace != nil {
+					f6elemf13.Namespace = f6iter.ServiceConnectConfiguration.Namespace
 				}
-				if f8iter.ServiceConnectConfiguration.Services != nil {
-					f8elemf13f4 := []*svcapitypes.ServiceConnectService{}
-					for _, f8elemf13f4iter := range f8iter.ServiceConnectConfiguration.Services {
-						f8elemf13f4elem := &svcapitypes.ServiceConnectService{}
-						if f8elemf13f4iter.ClientAliases != nil {
-							f8elemf13f4elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
-							for _, f8elemf13f4elemf0iter := range f8elemf13f4iter.ClientAliases {
-								f8elemf13f4elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
-								if f8elemf13f4elemf0iter.DnsName != nil {
-									f8elemf13f4elemf0elem.DNSName = f8elemf13f4elemf0iter.DnsName
+				if f6iter.ServiceConnectConfiguration.Services != nil {
+					f6elemf13f3 := []*svcapitypes.ServiceConnectService{}
+					for _, f6elemf13f3iter := range f6iter.ServiceConnectConfiguration.Services {
+						f6elemf13f3elem := &svcapitypes.ServiceConnectService{}
+						if f6elemf13f3iter.ClientAliases != nil {
+							f6elemf13f3elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
+							for _, f6elemf13f3elemf0iter := range f6elemf13f3iter.ClientAliases {
+								f6elemf13f3elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
+								if f6elemf13f3elemf0iter.DnsName != nil {
+									f6elemf13f3elemf0elem.DNSName = f6elemf13f3elemf0iter.DnsName
 								}
-								if f8elemf13f4elemf0iter.Port != nil {
-									portCopy := int64(*f8elemf13f4elemf0iter.Port)
-									f8elemf13f4elemf0elem.Port = &portCopy
+								if f6elemf13f3elemf0iter.Port != nil {
+									portCopy := int64(*f6elemf13f3elemf0iter.Port)
+									f6elemf13f3elemf0elem.Port = &portCopy
 								}
-								if f8elemf13f4elemf0iter.TestTrafficRules != nil {
-									f8elemf13f4elemf0elemf2 := &svcapitypes.ServiceConnectTestTrafficRules{}
-									if f8elemf13f4elemf0iter.TestTrafficRules.Header != nil {
-										f8elemf13f4elemf0elemf2f0 := &svcapitypes.ServiceConnectTestTrafficHeaderRules{}
-										if f8elemf13f4elemf0iter.TestTrafficRules.Header.Name != nil {
-											f8elemf13f4elemf0elemf2f0.Name = f8elemf13f4elemf0iter.TestTrafficRules.Header.Name
+								f6elemf13f3elemf0 = append(f6elemf13f3elemf0, f6elemf13f3elemf0elem)
+							}
+							f6elemf13f3elem.ClientAliases = f6elemf13f3elemf0
+						}
+						if f6elemf13f3iter.DiscoveryName != nil {
+							f6elemf13f3elem.DiscoveryName = f6elemf13f3iter.DiscoveryName
+						}
+						if f6elemf13f3iter.IngressPortOverride != nil {
+							ingressPortOverrideCopy := int64(*f6elemf13f3iter.IngressPortOverride)
+							f6elemf13f3elem.IngressPortOverride = &ingressPortOverrideCopy
+						}
+						if f6elemf13f3iter.PortName != nil {
+							f6elemf13f3elem.PortName = f6elemf13f3iter.PortName
+						}
+						if f6elemf13f3iter.Timeout != nil {
+							f6elemf13f3elemf4 := &svcapitypes.TimeoutConfiguration{}
+							if f6elemf13f3iter.Timeout.IdleTimeoutSeconds != nil {
+								idleTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.IdleTimeoutSeconds)
+								f6elemf13f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+							}
+							if f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+								perRequestTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds)
+								f6elemf13f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+							}
+							f6elemf13f3elem.Timeout = f6elemf13f3elemf4
+						}
+						if f6elemf13f3iter.Tls != nil {
+							f6elemf13f3elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
+							if f6elemf13f3iter.Tls.IssuerCertificateAuthority != nil {
+								f6elemf13f3elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
+								if f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
+									f6elemf13f3elemf5f0.AWSPCAAuthorityARN = f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
+								}
+								f6elemf13f3elemf5.IssuerCertificateAuthority = f6elemf13f3elemf5f0
+							}
+							if f6elemf13f3iter.Tls.KmsKey != nil {
+								f6elemf13f3elemf5.KMSKey = f6elemf13f3iter.Tls.KmsKey
+							}
+							if f6elemf13f3iter.Tls.RoleArn != nil {
+								f6elemf13f3elemf5.RoleARN = f6elemf13f3iter.Tls.RoleArn
+							}
+							f6elemf13f3elem.TLS = f6elemf13f3elemf5
+						}
+						f6elemf13f3 = append(f6elemf13f3, f6elemf13f3elem)
+					}
+					f6elemf13.Services = f6elemf13f3
+				}
+				f6elem.ServiceConnectConfiguration = f6elemf13
+			}
+			if f6iter.ServiceConnectResources != nil {
+				f6elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
+				for _, f6elemf14iter := range f6iter.ServiceConnectResources {
+					f6elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
+					if f6elemf14iter.DiscoveryArn != nil {
+						f6elemf14elem.DiscoveryARN = f6elemf14iter.DiscoveryArn
+					}
+					if f6elemf14iter.DiscoveryName != nil {
+						f6elemf14elem.DiscoveryName = f6elemf14iter.DiscoveryName
+					}
+					f6elemf14 = append(f6elemf14, f6elemf14elem)
+				}
+				f6elem.ServiceConnectResources = f6elemf14
+			}
+			if f6iter.Status != nil {
+				f6elem.Status = f6iter.Status
+			}
+			if f6iter.TaskDefinition != nil {
+				f6elem.TaskDefinition = f6iter.TaskDefinition
+			}
+			if f6iter.UpdatedAt != nil {
+				f6elem.UpdatedAt = &metav1.Time{*f6iter.UpdatedAt}
+			}
+			if f6iter.VolumeConfigurations != nil {
+				f6elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
+				for _, f6elemf18iter := range f6iter.VolumeConfigurations {
+					f6elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
+					if f6elemf18iter.ManagedEBSVolume != nil {
+						f6elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
+						if f6elemf18iter.ManagedEBSVolume.Encrypted != nil {
+							f6elemf18elemf0.Encrypted = f6elemf18iter.ManagedEBSVolume.Encrypted
+						}
+						if f6elemf18iter.ManagedEBSVolume.FilesystemType != "" {
+							f6elemf18elemf0.FilesystemType = aws.String(string(f6elemf18iter.ManagedEBSVolume.FilesystemType))
+						}
+						if f6elemf18iter.ManagedEBSVolume.Iops != nil {
+							iopsCopy := int64(*f6elemf18iter.ManagedEBSVolume.Iops)
+							f6elemf18elemf0.IOPS = &iopsCopy
+						}
+						if f6elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
+							f6elemf18elemf0.KMSKeyID = f6elemf18iter.ManagedEBSVolume.KmsKeyId
+						}
+						if f6elemf18iter.ManagedEBSVolume.RoleArn != nil {
+							f6elemf18elemf0.RoleARN = f6elemf18iter.ManagedEBSVolume.RoleArn
+						}
+						if f6elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
+							sizeInGiBCopy := int64(*f6elemf18iter.ManagedEBSVolume.SizeInGiB)
+							f6elemf18elemf0.SizeInGiB = &sizeInGiBCopy
+						}
+						if f6elemf18iter.ManagedEBSVolume.SnapshotId != nil {
+							f6elemf18elemf0.SnapshotID = f6elemf18iter.ManagedEBSVolume.SnapshotId
+						}
+						if f6elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
+							f6elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
+							for _, f6elemf18elemf0f7iter := range f6elemf18iter.ManagedEBSVolume.TagSpecifications {
+								f6elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
+								if f6elemf18elemf0f7iter.PropagateTags != "" {
+									f6elemf18elemf0f7elem.PropagateTags = aws.String(string(f6elemf18elemf0f7iter.PropagateTags))
+								}
+								if f6elemf18elemf0f7iter.ResourceType != "" {
+									f6elemf18elemf0f7elem.ResourceType = aws.String(string(f6elemf18elemf0f7iter.ResourceType))
+								}
+								if f6elemf18elemf0f7iter.Tags != nil {
+									f6elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
+									for _, f6elemf18elemf0f7elemf2iter := range f6elemf18elemf0f7iter.Tags {
+										f6elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
+										if f6elemf18elemf0f7elemf2iter.Key != nil {
+											f6elemf18elemf0f7elemf2elem.Key = f6elemf18elemf0f7elemf2iter.Key
 										}
-										if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value != nil {
-											f8elemf13f4elemf0elemf2f0f1 := &svcapitypes.ServiceConnectTestTrafficHeaderMatchRules{}
-											if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact != nil {
-												f8elemf13f4elemf0elemf2f0f1.Exact = f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact
-											}
-											f8elemf13f4elemf0elemf2f0.Value = f8elemf13f4elemf0elemf2f0f1
+										if f6elemf18elemf0f7elemf2iter.Value != nil {
+											f6elemf18elemf0f7elemf2elem.Value = f6elemf18elemf0f7elemf2iter.Value
 										}
-										f8elemf13f4elemf0elemf2.Header = f8elemf13f4elemf0elemf2f0
+										f6elemf18elemf0f7elemf2 = append(f6elemf18elemf0f7elemf2, f6elemf18elemf0f7elemf2elem)
 									}
-									f8elemf13f4elemf0elem.TestTrafficRules = f8elemf13f4elemf0elemf2
+									f6elemf18elemf0f7elem.Tags = f6elemf18elemf0f7elemf2
 								}
-								f8elemf13f4elemf0 = append(f8elemf13f4elemf0, f8elemf13f4elemf0elem)
+								f6elemf18elemf0f7 = append(f6elemf18elemf0f7, f6elemf18elemf0f7elem)
 							}
-							f8elemf13f4elem.ClientAliases = f8elemf13f4elemf0
+							f6elemf18elemf0.TagSpecifications = f6elemf18elemf0f7
 						}
-						if f8elemf13f4iter.DiscoveryName != nil {
-							f8elemf13f4elem.DiscoveryName = f8elemf13f4iter.DiscoveryName
+						if f6elemf18iter.ManagedEBSVolume.Throughput != nil {
+							throughputCopy := int64(*f6elemf18iter.ManagedEBSVolume.Throughput)
+							f6elemf18elemf0.Throughput = &throughputCopy
 						}
-						if f8elemf13f4iter.IngressPortOverride != nil {
-							ingressPortOverrideCopy := int64(*f8elemf13f4iter.IngressPortOverride)
-							f8elemf13f4elem.IngressPortOverride = &ingressPortOverrideCopy
+						if f6elemf18iter.ManagedEBSVolume.VolumeType != nil {
+							f6elemf18elemf0.VolumeType = f6elemf18iter.ManagedEBSVolume.VolumeType
 						}
-						if f8elemf13f4iter.PortName != nil {
-							f8elemf13f4elem.PortName = f8elemf13f4iter.PortName
-						}
-						if f8elemf13f4iter.Timeout != nil {
-							f8elemf13f4elemf4 := &svcapitypes.TimeoutConfiguration{}
-							if f8elemf13f4iter.Timeout.IdleTimeoutSeconds != nil {
-								idleTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.IdleTimeoutSeconds)
-								f8elemf13f4elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
-							}
-							if f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds != nil {
-								perRequestTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds)
-								f8elemf13f4elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
-							}
-							f8elemf13f4elem.Timeout = f8elemf13f4elemf4
-						}
-						if f8elemf13f4iter.Tls != nil {
-							f8elemf13f4elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
-							if f8elemf13f4iter.Tls.IssuerCertificateAuthority != nil {
-								f8elemf13f4elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
-								if f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
-									f8elemf13f4elemf5f0.AWSPCAAuthorityARN = f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
-								}
-								f8elemf13f4elemf5.IssuerCertificateAuthority = f8elemf13f4elemf5f0
-							}
-							if f8elemf13f4iter.Tls.KmsKey != nil {
-								f8elemf13f4elemf5.KMSKey = f8elemf13f4iter.Tls.KmsKey
-							}
-							if f8elemf13f4iter.Tls.RoleArn != nil {
-								f8elemf13f4elemf5.RoleARN = f8elemf13f4iter.Tls.RoleArn
-							}
-							f8elemf13f4elem.TLS = f8elemf13f4elemf5
-						}
-						f8elemf13f4 = append(f8elemf13f4, f8elemf13f4elem)
+						f6elemf18elem.ManagedEBSVolume = f6elemf18elemf0
 					}
-					f8elemf13.Services = f8elemf13f4
+					if f6elemf18iter.Name != nil {
+						f6elemf18elem.Name = f6elemf18iter.Name
+					}
+					f6elemf18 = append(f6elemf18, f6elemf18elem)
 				}
-				f8elem.ServiceConnectConfiguration = f8elemf13
+				f6elem.VolumeConfigurations = f6elemf18
 			}
-			if f8iter.ServiceConnectResources != nil {
-				f8elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
-				for _, f8elemf14iter := range f8iter.ServiceConnectResources {
-					f8elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
-					if f8elemf14iter.DiscoveryArn != nil {
-						f8elemf14elem.DiscoveryARN = f8elemf14iter.DiscoveryArn
-					}
-					if f8elemf14iter.DiscoveryName != nil {
-						f8elemf14elem.DiscoveryName = f8elemf14iter.DiscoveryName
-					}
-					f8elemf14 = append(f8elemf14, f8elemf14elem)
-				}
-				f8elem.ServiceConnectResources = f8elemf14
-			}
-			if f8iter.Status != nil {
-				f8elem.Status = f8iter.Status
-			}
-			if f8iter.TaskDefinition != nil {
-				f8elem.TaskDefinition = f8iter.TaskDefinition
-			}
-			if f8iter.UpdatedAt != nil {
-				f8elem.UpdatedAt = &metav1.Time{*f8iter.UpdatedAt}
-			}
-			if f8iter.VolumeConfigurations != nil {
-				f8elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
-				for _, f8elemf18iter := range f8iter.VolumeConfigurations {
-					f8elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
-					if f8elemf18iter.ManagedEBSVolume != nil {
-						f8elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
-						if f8elemf18iter.ManagedEBSVolume.Encrypted != nil {
-							f8elemf18elemf0.Encrypted = f8elemf18iter.ManagedEBSVolume.Encrypted
-						}
-						if f8elemf18iter.ManagedEBSVolume.FilesystemType != "" {
-							f8elemf18elemf0.FilesystemType = aws.String(string(f8elemf18iter.ManagedEBSVolume.FilesystemType))
-						}
-						if f8elemf18iter.ManagedEBSVolume.Iops != nil {
-							iopsCopy := int64(*f8elemf18iter.ManagedEBSVolume.Iops)
-							f8elemf18elemf0.IOPS = &iopsCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
-							f8elemf18elemf0.KMSKeyID = f8elemf18iter.ManagedEBSVolume.KmsKeyId
-						}
-						if f8elemf18iter.ManagedEBSVolume.RoleArn != nil {
-							f8elemf18elemf0.RoleARN = f8elemf18iter.ManagedEBSVolume.RoleArn
-						}
-						if f8elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
-							sizeInGiBCopy := int64(*f8elemf18iter.ManagedEBSVolume.SizeInGiB)
-							f8elemf18elemf0.SizeInGiB = &sizeInGiBCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.SnapshotId != nil {
-							f8elemf18elemf0.SnapshotID = f8elemf18iter.ManagedEBSVolume.SnapshotId
-						}
-						if f8elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
-							f8elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
-							for _, f8elemf18elemf0f7iter := range f8elemf18iter.ManagedEBSVolume.TagSpecifications {
-								f8elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
-								if f8elemf18elemf0f7iter.PropagateTags != "" {
-									f8elemf18elemf0f7elem.PropagateTags = aws.String(string(f8elemf18elemf0f7iter.PropagateTags))
-								}
-								if f8elemf18elemf0f7iter.ResourceType != "" {
-									f8elemf18elemf0f7elem.ResourceType = aws.String(string(f8elemf18elemf0f7iter.ResourceType))
-								}
-								if f8elemf18elemf0f7iter.Tags != nil {
-									f8elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
-									for _, f8elemf18elemf0f7elemf2iter := range f8elemf18elemf0f7iter.Tags {
-										f8elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
-										if f8elemf18elemf0f7elemf2iter.Key != nil {
-											f8elemf18elemf0f7elemf2elem.Key = f8elemf18elemf0f7elemf2iter.Key
-										}
-										if f8elemf18elemf0f7elemf2iter.Value != nil {
-											f8elemf18elemf0f7elemf2elem.Value = f8elemf18elemf0f7elemf2iter.Value
-										}
-										f8elemf18elemf0f7elemf2 = append(f8elemf18elemf0f7elemf2, f8elemf18elemf0f7elemf2elem)
-									}
-									f8elemf18elemf0f7elem.Tags = f8elemf18elemf0f7elemf2
-								}
-								f8elemf18elemf0f7 = append(f8elemf18elemf0f7, f8elemf18elemf0f7elem)
-							}
-							f8elemf18elemf0.TagSpecifications = f8elemf18elemf0f7
-						}
-						if f8elemf18iter.ManagedEBSVolume.Throughput != nil {
-							throughputCopy := int64(*f8elemf18iter.ManagedEBSVolume.Throughput)
-							f8elemf18elemf0.Throughput = &throughputCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate != nil {
-							volumeInitializationRateCopy := int64(*f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate)
-							f8elemf18elemf0.VolumeInitializationRate = &volumeInitializationRateCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.VolumeType != nil {
-							f8elemf18elemf0.VolumeType = f8elemf18iter.ManagedEBSVolume.VolumeType
-						}
-						f8elemf18elem.ManagedEBSVolume = f8elemf18elemf0
-					}
-					if f8elemf18iter.Name != nil {
-						f8elemf18elem.Name = f8elemf18iter.Name
-					}
-					f8elemf18 = append(f8elemf18, f8elemf18elem)
-				}
-				f8elem.VolumeConfigurations = f8elemf18
-			}
-			f8 = append(f8, f8elem)
+			f6 = append(f6, f6elem)
 		}
-		ko.Status.Deployments = f8
+		ko.Status.Deployments = f6
 	} else {
 		ko.Status.Deployments = nil
 	}
@@ -1407,21 +1200,21 @@ func (rm *resourceManager) sdkCreate(
 	ko.Spec.EnableECSManagedTags = &resp.Service.EnableECSManagedTags
 	ko.Spec.EnableExecuteCommand = &resp.Service.EnableExecuteCommand
 	if resp.Service.Events != nil {
-		f12 := []*svcapitypes.ServiceEvent{}
-		for _, f12iter := range resp.Service.Events {
-			f12elem := &svcapitypes.ServiceEvent{}
-			if f12iter.CreatedAt != nil {
-				f12elem.CreatedAt = &metav1.Time{*f12iter.CreatedAt}
+		f10 := []*svcapitypes.ServiceEvent{}
+		for _, f10iter := range resp.Service.Events {
+			f10elem := &svcapitypes.ServiceEvent{}
+			if f10iter.CreatedAt != nil {
+				f10elem.CreatedAt = &metav1.Time{*f10iter.CreatedAt}
 			}
-			if f12iter.Id != nil {
-				f12elem.ID = f12iter.Id
+			if f10iter.Id != nil {
+				f10elem.ID = f10iter.Id
 			}
-			if f12iter.Message != nil {
-				f12elem.Message = f12iter.Message
+			if f10iter.Message != nil {
+				f10elem.Message = f10iter.Message
 			}
-			f12 = append(f12, f12elem)
+			f10 = append(f10, f10elem)
 		}
-		ko.Status.Events = f12
+		ko.Status.Events = f10
 	} else {
 		ko.Status.Events = nil
 	}
@@ -1437,94 +1230,78 @@ func (rm *resourceManager) sdkCreate(
 		ko.Spec.LaunchType = nil
 	}
 	if resp.Service.LoadBalancers != nil {
-		f15 := []*svcapitypes.LoadBalancer{}
-		for _, f15iter := range resp.Service.LoadBalancers {
-			f15elem := &svcapitypes.LoadBalancer{}
-			if f15iter.AdvancedConfiguration != nil {
-				f15elemf0 := &svcapitypes.AdvancedConfiguration{}
-				if f15iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-					f15elemf0.AlternateTargetGroupARN = f15iter.AdvancedConfiguration.AlternateTargetGroupArn
-				}
-				if f15iter.AdvancedConfiguration.ProductionListenerRule != nil {
-					f15elemf0.ProductionListenerRule = f15iter.AdvancedConfiguration.ProductionListenerRule
-				}
-				if f15iter.AdvancedConfiguration.RoleArn != nil {
-					f15elemf0.RoleARN = f15iter.AdvancedConfiguration.RoleArn
-				}
-				if f15iter.AdvancedConfiguration.TestListenerRule != nil {
-					f15elemf0.TestListenerRule = f15iter.AdvancedConfiguration.TestListenerRule
-				}
-				f15elem.AdvancedConfiguration = f15elemf0
+		f13 := []*svcapitypes.LoadBalancer{}
+		for _, f13iter := range resp.Service.LoadBalancers {
+			f13elem := &svcapitypes.LoadBalancer{}
+			if f13iter.ContainerName != nil {
+				f13elem.ContainerName = f13iter.ContainerName
 			}
-			if f15iter.ContainerName != nil {
-				f15elem.ContainerName = f15iter.ContainerName
+			if f13iter.ContainerPort != nil {
+				containerPortCopy := int64(*f13iter.ContainerPort)
+				f13elem.ContainerPort = &containerPortCopy
 			}
-			if f15iter.ContainerPort != nil {
-				containerPortCopy := int64(*f15iter.ContainerPort)
-				f15elem.ContainerPort = &containerPortCopy
+			if f13iter.LoadBalancerName != nil {
+				f13elem.LoadBalancerName = f13iter.LoadBalancerName
 			}
-			if f15iter.LoadBalancerName != nil {
-				f15elem.LoadBalancerName = f15iter.LoadBalancerName
+			if f13iter.TargetGroupArn != nil {
+				f13elem.TargetGroupARN = f13iter.TargetGroupArn
 			}
-			if f15iter.TargetGroupArn != nil {
-				f15elem.TargetGroupARN = f15iter.TargetGroupArn
-			}
-			f15 = append(f15, f15elem)
+			f13 = append(f13, f13elem)
 		}
-		ko.Spec.LoadBalancers = f15
+		ko.Spec.LoadBalancers = f13
 	} else {
 		ko.Spec.LoadBalancers = nil
 	}
 	if resp.Service.NetworkConfiguration != nil {
-		f16 := &svcapitypes.NetworkConfiguration{}
+		f14 := &svcapitypes.NetworkConfiguration{}
 		if resp.Service.NetworkConfiguration.AwsvpcConfiguration != nil {
-			f16f0 := &svcapitypes.AWSVPCConfiguration{}
+			f14f0 := &svcapitypes.AWSVPCConfiguration{}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-				f16f0.AssignPublicIP = aws.String(string(resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+				f14f0.AssignPublicIP = aws.String(string(resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 			}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-				f16f0.SecurityGroups = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+				f14f0.SecurityGroups = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 			}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-				f16f0.Subnets = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+				f14f0.Subnets = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 			}
-			f16.AWSVPCConfiguration = f16f0
+			f14.AWSVPCConfiguration = f14f0
 		}
-		ko.Spec.NetworkConfiguration = f16
+		ko.Spec.NetworkConfiguration = f14
 	} else {
 		ko.Spec.NetworkConfiguration = nil
 	}
 	pendingCountCopy := int64(resp.Service.PendingCount)
 	ko.Status.PendingCount = &pendingCountCopy
 	if resp.Service.PlacementConstraints != nil {
-		f18 := []*svcapitypes.PlacementConstraint{}
-		for _, f18iter := range resp.Service.PlacementConstraints {
-			f18elem := &svcapitypes.PlacementConstraint{}
-			if f18iter.Expression != nil {
-				f18elem.Expression = f18iter.Expression
+		f16 := []*svcapitypes.PlacementConstraint{}
+		for _, f16iter := range resp.Service.PlacementConstraints {
+			f16elem := &svcapitypes.PlacementConstraint{}
+			if f16iter.Expression != nil {
+				f16elem.Expression = f16iter.Expression
 			}
-			if f18iter.Type != "" {
-				f18elem.Type = aws.String(string(f18iter.Type))
+			if f16iter.Type != "" {
+				f16elem.Type = aws.String(string(f16iter.Type))
 			}
-			f18 = append(f18, f18elem)
+			f16 = append(f16, f16elem)
 		}
-		ko.Spec.PlacementConstraints = f18
+		ko.Spec.PlacementConstraints = f16
 	} else {
 		ko.Spec.PlacementConstraints = nil
 	}
 	if resp.Service.PlacementStrategy != nil {
-		f19 := []*svcapitypes.PlacementStrategy{}
-		for _, f19iter := range resp.Service.PlacementStrategy {
-			f19elem := &svcapitypes.PlacementStrategy{}
-			if f19iter.Field != nil {
-				f19elem.Field = f19iter.Field
+		f17 := []*svcapitypes.PlacementStrategy{}
+		for _, f17iter := range resp.Service.PlacementStrategy {
+			f17elem := &svcapitypes.PlacementStrategy{}
+			if f17iter.Field != nil {
+				f17elem.Field = f17iter.Field
 			}
-			if f19iter.Type != "" {
-				f19elem.Type = aws.String(string(f19iter.Type))
+			if f17iter.Type != "" {
+				f17elem.Type = aws.String(string(f17iter.Type))
 			}
-			f19 = append(f19, f19elem)
+			f17 = append(f17, f17elem)
 		}
-		ko.Spec.PlacementStrategy = f19
+		ko.Spec.PlacementStrategy = f17
 	} else {
 		ko.Spec.PlacementStrategy = nil
 	}
@@ -1542,11 +1319,6 @@ func (rm *resourceManager) sdkCreate(
 		ko.Spec.PropagateTags = aws.String(string(resp.Service.PropagateTags))
 	} else {
 		ko.Spec.PropagateTags = nil
-	}
-	if resp.Service.ResourceManagementType != "" {
-		ko.Status.ResourceManagementType = aws.String(string(resp.Service.ResourceManagementType))
-	} else {
-		ko.Status.ResourceManagementType = nil
 	}
 	if resp.Service.RoleArn != nil {
 		ko.Status.RoleARN = resp.Service.RoleArn
@@ -1573,26 +1345,26 @@ func (rm *resourceManager) sdkCreate(
 		ko.Spec.Name = nil
 	}
 	if resp.Service.ServiceRegistries != nil {
-		f29 := []*svcapitypes.ServiceRegistry{}
-		for _, f29iter := range resp.Service.ServiceRegistries {
-			f29elem := &svcapitypes.ServiceRegistry{}
-			if f29iter.ContainerName != nil {
-				f29elem.ContainerName = f29iter.ContainerName
+		f26 := []*svcapitypes.ServiceRegistry{}
+		for _, f26iter := range resp.Service.ServiceRegistries {
+			f26elem := &svcapitypes.ServiceRegistry{}
+			if f26iter.ContainerName != nil {
+				f26elem.ContainerName = f26iter.ContainerName
 			}
-			if f29iter.ContainerPort != nil {
-				containerPortCopy := int64(*f29iter.ContainerPort)
-				f29elem.ContainerPort = &containerPortCopy
+			if f26iter.ContainerPort != nil {
+				containerPortCopy := int64(*f26iter.ContainerPort)
+				f26elem.ContainerPort = &containerPortCopy
 			}
-			if f29iter.Port != nil {
-				portCopy := int64(*f29iter.Port)
-				f29elem.Port = &portCopy
+			if f26iter.Port != nil {
+				portCopy := int64(*f26iter.Port)
+				f26elem.Port = &portCopy
 			}
-			if f29iter.RegistryArn != nil {
-				f29elem.RegistryARN = f29iter.RegistryArn
+			if f26iter.RegistryArn != nil {
+				f26elem.RegistryARN = f26iter.RegistryArn
 			}
-			f29 = append(f29, f29elem)
+			f26 = append(f26, f26elem)
 		}
-		ko.Spec.ServiceRegistries = f29
+		ko.Spec.ServiceRegistries = f26
 	} else {
 		ko.Spec.ServiceRegistries = nil
 	}
@@ -1602,18 +1374,18 @@ func (rm *resourceManager) sdkCreate(
 		ko.Status.Status = nil
 	}
 	if resp.Service.Tags != nil {
-		f31 := []*svcapitypes.Tag{}
-		for _, f31iter := range resp.Service.Tags {
-			f31elem := &svcapitypes.Tag{}
-			if f31iter.Key != nil {
-				f31elem.Key = f31iter.Key
+		f28 := []*svcapitypes.Tag{}
+		for _, f28iter := range resp.Service.Tags {
+			f28elem := &svcapitypes.Tag{}
+			if f28iter.Key != nil {
+				f28elem.Key = f28iter.Key
 			}
-			if f31iter.Value != nil {
-				f31elem.Value = f31iter.Value
+			if f28iter.Value != nil {
+				f28elem.Value = f28iter.Value
 			}
-			f31 = append(f31, f31elem)
+			f28 = append(f28, f28elem)
 		}
-		ko.Spec.Tags = f31
+		ko.Spec.Tags = f28
 	} else {
 		ko.Spec.Tags = nil
 	}
@@ -1623,176 +1395,160 @@ func (rm *resourceManager) sdkCreate(
 		ko.Spec.TaskDefinition = nil
 	}
 	if resp.Service.TaskSets != nil {
-		f33 := []*svcapitypes.TaskSet{}
-		for _, f33iter := range resp.Service.TaskSets {
-			f33elem := &svcapitypes.TaskSet{}
-			if f33iter.CapacityProviderStrategy != nil {
-				f33elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-				for _, f33elemf0iter := range f33iter.CapacityProviderStrategy {
-					f33elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-					baseCopy := int64(f33elemf0iter.Base)
-					f33elemf0elem.Base = &baseCopy
-					if f33elemf0iter.CapacityProvider != nil {
-						f33elemf0elem.CapacityProvider = f33elemf0iter.CapacityProvider
+		f30 := []*svcapitypes.TaskSet{}
+		for _, f30iter := range resp.Service.TaskSets {
+			f30elem := &svcapitypes.TaskSet{}
+			if f30iter.CapacityProviderStrategy != nil {
+				f30elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+				for _, f30elemf0iter := range f30iter.CapacityProviderStrategy {
+					f30elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+					baseCopy := int64(f30elemf0iter.Base)
+					f30elemf0elem.Base = &baseCopy
+					if f30elemf0iter.CapacityProvider != nil {
+						f30elemf0elem.CapacityProvider = f30elemf0iter.CapacityProvider
 					}
-					weightCopy := int64(f33elemf0iter.Weight)
-					f33elemf0elem.Weight = &weightCopy
-					f33elemf0 = append(f33elemf0, f33elemf0elem)
+					weightCopy := int64(f30elemf0iter.Weight)
+					f30elemf0elem.Weight = &weightCopy
+					f30elemf0 = append(f30elemf0, f30elemf0elem)
 				}
-				f33elem.CapacityProviderStrategy = f33elemf0
+				f30elem.CapacityProviderStrategy = f30elemf0
 			}
-			if f33iter.ClusterArn != nil {
-				f33elem.ClusterARN = f33iter.ClusterArn
+			if f30iter.ClusterArn != nil {
+				f30elem.ClusterARN = f30iter.ClusterArn
 			}
-			computedDesiredCountCopy := int64(f33iter.ComputedDesiredCount)
-			f33elem.ComputedDesiredCount = &computedDesiredCountCopy
-			if f33iter.CreatedAt != nil {
-				f33elem.CreatedAt = &metav1.Time{*f33iter.CreatedAt}
+			computedDesiredCountCopy := int64(f30iter.ComputedDesiredCount)
+			f30elem.ComputedDesiredCount = &computedDesiredCountCopy
+			if f30iter.CreatedAt != nil {
+				f30elem.CreatedAt = &metav1.Time{*f30iter.CreatedAt}
 			}
-			if f33iter.ExternalId != nil {
-				f33elem.ExternalID = f33iter.ExternalId
+			if f30iter.ExternalId != nil {
+				f30elem.ExternalID = f30iter.ExternalId
 			}
-			if f33iter.Id != nil {
-				f33elem.ID = f33iter.Id
+			if f30iter.Id != nil {
+				f30elem.ID = f30iter.Id
 			}
-			if f33iter.LaunchType != "" {
-				f33elem.LaunchType = aws.String(string(f33iter.LaunchType))
+			if f30iter.LaunchType != "" {
+				f30elem.LaunchType = aws.String(string(f30iter.LaunchType))
 			}
-			if f33iter.LoadBalancers != nil {
-				f33elemf7 := []*svcapitypes.LoadBalancer{}
-				for _, f33elemf7iter := range f33iter.LoadBalancers {
-					f33elemf7elem := &svcapitypes.LoadBalancer{}
-					if f33elemf7iter.AdvancedConfiguration != nil {
-						f33elemf7elemf0 := &svcapitypes.AdvancedConfiguration{}
-						if f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-							f33elemf7elemf0.AlternateTargetGroupARN = f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn
-						}
-						if f33elemf7iter.AdvancedConfiguration.ProductionListenerRule != nil {
-							f33elemf7elemf0.ProductionListenerRule = f33elemf7iter.AdvancedConfiguration.ProductionListenerRule
-						}
-						if f33elemf7iter.AdvancedConfiguration.RoleArn != nil {
-							f33elemf7elemf0.RoleARN = f33elemf7iter.AdvancedConfiguration.RoleArn
-						}
-						if f33elemf7iter.AdvancedConfiguration.TestListenerRule != nil {
-							f33elemf7elemf0.TestListenerRule = f33elemf7iter.AdvancedConfiguration.TestListenerRule
-						}
-						f33elemf7elem.AdvancedConfiguration = f33elemf7elemf0
+			if f30iter.LoadBalancers != nil {
+				f30elemf7 := []*svcapitypes.LoadBalancer{}
+				for _, f30elemf7iter := range f30iter.LoadBalancers {
+					f30elemf7elem := &svcapitypes.LoadBalancer{}
+					if f30elemf7iter.ContainerName != nil {
+						f30elemf7elem.ContainerName = f30elemf7iter.ContainerName
 					}
-					if f33elemf7iter.ContainerName != nil {
-						f33elemf7elem.ContainerName = f33elemf7iter.ContainerName
+					if f30elemf7iter.ContainerPort != nil {
+						containerPortCopy := int64(*f30elemf7iter.ContainerPort)
+						f30elemf7elem.ContainerPort = &containerPortCopy
 					}
-					if f33elemf7iter.ContainerPort != nil {
-						containerPortCopy := int64(*f33elemf7iter.ContainerPort)
-						f33elemf7elem.ContainerPort = &containerPortCopy
+					if f30elemf7iter.LoadBalancerName != nil {
+						f30elemf7elem.LoadBalancerName = f30elemf7iter.LoadBalancerName
 					}
-					if f33elemf7iter.LoadBalancerName != nil {
-						f33elemf7elem.LoadBalancerName = f33elemf7iter.LoadBalancerName
+					if f30elemf7iter.TargetGroupArn != nil {
+						f30elemf7elem.TargetGroupARN = f30elemf7iter.TargetGroupArn
 					}
-					if f33elemf7iter.TargetGroupArn != nil {
-						f33elemf7elem.TargetGroupARN = f33elemf7iter.TargetGroupArn
-					}
-					f33elemf7 = append(f33elemf7, f33elemf7elem)
+					f30elemf7 = append(f30elemf7, f30elemf7elem)
 				}
-				f33elem.LoadBalancers = f33elemf7
+				f30elem.LoadBalancers = f30elemf7
 			}
-			if f33iter.NetworkConfiguration != nil {
-				f33elemf8 := &svcapitypes.NetworkConfiguration{}
-				if f33iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-					f33elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-						f33elemf8f0.AssignPublicIP = aws.String(string(f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+			if f30iter.NetworkConfiguration != nil {
+				f30elemf8 := &svcapitypes.NetworkConfiguration{}
+				if f30iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+					f30elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+						f30elemf8f0.AssignPublicIP = aws.String(string(f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 					}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-						f33elemf8f0.SecurityGroups = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+						f30elemf8f0.SecurityGroups = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 					}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-						f33elemf8f0.Subnets = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+						f30elemf8f0.Subnets = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 					}
-					f33elemf8.AWSVPCConfiguration = f33elemf8f0
+					f30elemf8.AWSVPCConfiguration = f30elemf8f0
 				}
-				f33elem.NetworkConfiguration = f33elemf8
+				f30elem.NetworkConfiguration = f30elemf8
 			}
-			pendingCountCopy := int64(f33iter.PendingCount)
-			f33elem.PendingCount = &pendingCountCopy
-			if f33iter.PlatformFamily != nil {
-				f33elem.PlatformFamily = f33iter.PlatformFamily
+			pendingCountCopy := int64(f30iter.PendingCount)
+			f30elem.PendingCount = &pendingCountCopy
+			if f30iter.PlatformFamily != nil {
+				f30elem.PlatformFamily = f30iter.PlatformFamily
 			}
-			if f33iter.PlatformVersion != nil {
-				f33elem.PlatformVersion = f33iter.PlatformVersion
+			if f30iter.PlatformVersion != nil {
+				f30elem.PlatformVersion = f30iter.PlatformVersion
 			}
-			runningCountCopy := int64(f33iter.RunningCount)
-			f33elem.RunningCount = &runningCountCopy
-			if f33iter.Scale != nil {
-				f33elemf13 := &svcapitypes.Scale{}
-				if f33iter.Scale.Unit != "" {
-					f33elemf13.Unit = aws.String(string(f33iter.Scale.Unit))
+			runningCountCopy := int64(f30iter.RunningCount)
+			f30elem.RunningCount = &runningCountCopy
+			if f30iter.Scale != nil {
+				f30elemf13 := &svcapitypes.Scale{}
+				if f30iter.Scale.Unit != "" {
+					f30elemf13.Unit = aws.String(string(f30iter.Scale.Unit))
 				}
-				f33elemf13.Value = &f33iter.Scale.Value
-				f33elem.Scale = f33elemf13
+				f30elemf13.Value = &f30iter.Scale.Value
+				f30elem.Scale = f30elemf13
 			}
-			if f33iter.ServiceArn != nil {
-				f33elem.ServiceARN = f33iter.ServiceArn
+			if f30iter.ServiceArn != nil {
+				f30elem.ServiceARN = f30iter.ServiceArn
 			}
-			if f33iter.ServiceRegistries != nil {
-				f33elemf15 := []*svcapitypes.ServiceRegistry{}
-				for _, f33elemf15iter := range f33iter.ServiceRegistries {
-					f33elemf15elem := &svcapitypes.ServiceRegistry{}
-					if f33elemf15iter.ContainerName != nil {
-						f33elemf15elem.ContainerName = f33elemf15iter.ContainerName
+			if f30iter.ServiceRegistries != nil {
+				f30elemf15 := []*svcapitypes.ServiceRegistry{}
+				for _, f30elemf15iter := range f30iter.ServiceRegistries {
+					f30elemf15elem := &svcapitypes.ServiceRegistry{}
+					if f30elemf15iter.ContainerName != nil {
+						f30elemf15elem.ContainerName = f30elemf15iter.ContainerName
 					}
-					if f33elemf15iter.ContainerPort != nil {
-						containerPortCopy := int64(*f33elemf15iter.ContainerPort)
-						f33elemf15elem.ContainerPort = &containerPortCopy
+					if f30elemf15iter.ContainerPort != nil {
+						containerPortCopy := int64(*f30elemf15iter.ContainerPort)
+						f30elemf15elem.ContainerPort = &containerPortCopy
 					}
-					if f33elemf15iter.Port != nil {
-						portCopy := int64(*f33elemf15iter.Port)
-						f33elemf15elem.Port = &portCopy
+					if f30elemf15iter.Port != nil {
+						portCopy := int64(*f30elemf15iter.Port)
+						f30elemf15elem.Port = &portCopy
 					}
-					if f33elemf15iter.RegistryArn != nil {
-						f33elemf15elem.RegistryARN = f33elemf15iter.RegistryArn
+					if f30elemf15iter.RegistryArn != nil {
+						f30elemf15elem.RegistryARN = f30elemf15iter.RegistryArn
 					}
-					f33elemf15 = append(f33elemf15, f33elemf15elem)
+					f30elemf15 = append(f30elemf15, f30elemf15elem)
 				}
-				f33elem.ServiceRegistries = f33elemf15
+				f30elem.ServiceRegistries = f30elemf15
 			}
-			if f33iter.StabilityStatus != "" {
-				f33elem.StabilityStatus = aws.String(string(f33iter.StabilityStatus))
+			if f30iter.StabilityStatus != "" {
+				f30elem.StabilityStatus = aws.String(string(f30iter.StabilityStatus))
 			}
-			if f33iter.StabilityStatusAt != nil {
-				f33elem.StabilityStatusAt = &metav1.Time{*f33iter.StabilityStatusAt}
+			if f30iter.StabilityStatusAt != nil {
+				f30elem.StabilityStatusAt = &metav1.Time{*f30iter.StabilityStatusAt}
 			}
-			if f33iter.StartedBy != nil {
-				f33elem.StartedBy = f33iter.StartedBy
+			if f30iter.StartedBy != nil {
+				f30elem.StartedBy = f30iter.StartedBy
 			}
-			if f33iter.Status != nil {
-				f33elem.Status = f33iter.Status
+			if f30iter.Status != nil {
+				f30elem.Status = f30iter.Status
 			}
-			if f33iter.Tags != nil {
-				f33elemf20 := []*svcapitypes.Tag{}
-				for _, f33elemf20iter := range f33iter.Tags {
-					f33elemf20elem := &svcapitypes.Tag{}
-					if f33elemf20iter.Key != nil {
-						f33elemf20elem.Key = f33elemf20iter.Key
+			if f30iter.Tags != nil {
+				f30elemf20 := []*svcapitypes.Tag{}
+				for _, f30elemf20iter := range f30iter.Tags {
+					f30elemf20elem := &svcapitypes.Tag{}
+					if f30elemf20iter.Key != nil {
+						f30elemf20elem.Key = f30elemf20iter.Key
 					}
-					if f33elemf20iter.Value != nil {
-						f33elemf20elem.Value = f33elemf20iter.Value
+					if f30elemf20iter.Value != nil {
+						f30elemf20elem.Value = f30elemf20iter.Value
 					}
-					f33elemf20 = append(f33elemf20, f33elemf20elem)
+					f30elemf20 = append(f30elemf20, f30elemf20elem)
 				}
-				f33elem.Tags = f33elemf20
+				f30elem.Tags = f30elemf20
 			}
-			if f33iter.TaskDefinition != nil {
-				f33elem.TaskDefinition = f33iter.TaskDefinition
+			if f30iter.TaskDefinition != nil {
+				f30elem.TaskDefinition = f30iter.TaskDefinition
 			}
-			if f33iter.TaskSetArn != nil {
-				f33elem.TaskSetARN = f33iter.TaskSetArn
+			if f30iter.TaskSetArn != nil {
+				f30elem.TaskSetARN = f30iter.TaskSetArn
 			}
-			if f33iter.UpdatedAt != nil {
-				f33elem.UpdatedAt = &metav1.Time{*f33iter.UpdatedAt}
+			if f30iter.UpdatedAt != nil {
+				f30elem.UpdatedAt = &metav1.Time{*f30iter.UpdatedAt}
 			}
-			f33 = append(f33, f33elem)
+			f30 = append(f30, f30elem)
 		}
-		ko.Status.TaskSets = f33
+		ko.Status.TaskSets = f30
 	} else {
 		ko.Status.TaskSets = nil
 	}
@@ -1854,53 +1610,15 @@ func (rm *resourceManager) newCreateRequestPayload(
 			}
 			f2.Alarms = f2f0
 		}
-		if r.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes != nil {
-			bakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes
-			if bakeTimeInMinutesCopy0 > math.MaxInt32 || bakeTimeInMinutesCopy0 < math.MinInt32 {
-				return nil, fmt.Errorf("error: field bakeTimeInMinutes is of type int32")
-			}
-			bakeTimeInMinutesCopy := int32(bakeTimeInMinutesCopy0)
-			f2.BakeTimeInMinutes = &bakeTimeInMinutesCopy
-		}
-		if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration != nil {
-			f2f2 := &svcsdktypes.CanaryConfiguration{}
-			if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
-				canaryBakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes
-				if canaryBakeTimeInMinutesCopy0 > math.MaxInt32 || canaryBakeTimeInMinutesCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field canaryBakeTimeInMinutes is of type int32")
-				}
-				canaryBakeTimeInMinutesCopy := int32(canaryBakeTimeInMinutesCopy0)
-				f2f2.CanaryBakeTimeInMinutes = &canaryBakeTimeInMinutesCopy
-			}
-			if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
-				f2f2.CanaryPercent = r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent
-			}
-			f2.CanaryConfiguration = f2f2
-		}
 		if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
-			f2f3 := &svcsdktypes.DeploymentCircuitBreaker{}
+			f2f1 := &svcsdktypes.DeploymentCircuitBreaker{}
 			if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable != nil {
-				f2f3.Enable = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
+				f2f1.Enable = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
 			}
 			if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback != nil {
-				f2f3.Rollback = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
+				f2f1.Rollback = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
 			}
-			f2.DeploymentCircuitBreaker = f2f3
-		}
-		if r.ko.Spec.DeploymentConfiguration.LinearConfiguration != nil {
-			f2f4 := &svcsdktypes.LinearConfiguration{}
-			if r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
-				stepBakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes
-				if stepBakeTimeInMinutesCopy0 > math.MaxInt32 || stepBakeTimeInMinutesCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field stepBakeTimeInMinutes is of type int32")
-				}
-				stepBakeTimeInMinutesCopy := int32(stepBakeTimeInMinutesCopy0)
-				f2f4.StepBakeTimeInMinutes = &stepBakeTimeInMinutesCopy
-			}
-			if r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
-				f2f4.StepPercent = r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent
-			}
-			f2.LinearConfiguration = f2f4
+			f2.DeploymentCircuitBreaker = f2f1
 		}
 		if r.ko.Spec.DeploymentConfiguration.MaximumPercent != nil {
 			maximumPercentCopy0 := *r.ko.Spec.DeploymentConfiguration.MaximumPercent
@@ -1917,9 +1635,6 @@ func (rm *resourceManager) newCreateRequestPayload(
 			}
 			minimumHealthyPercentCopy := int32(minimumHealthyPercentCopy0)
 			f2.MinimumHealthyPercent = &minimumHealthyPercentCopy
-		}
-		if r.ko.Spec.DeploymentConfiguration.Strategy != nil {
-			f2.Strategy = svcsdktypes.DeploymentStrategy(*r.ko.Spec.DeploymentConfiguration.Strategy)
 		}
 		res.DeploymentConfiguration = f2
 	}
@@ -1959,22 +1674,6 @@ func (rm *resourceManager) newCreateRequestPayload(
 		f9 := []svcsdktypes.LoadBalancer{}
 		for _, f9iter := range r.ko.Spec.LoadBalancers {
 			f9elem := &svcsdktypes.LoadBalancer{}
-			if f9iter.AdvancedConfiguration != nil {
-				f9elemf0 := &svcsdktypes.AdvancedConfiguration{}
-				if f9iter.AdvancedConfiguration.AlternateTargetGroupARN != nil {
-					f9elemf0.AlternateTargetGroupArn = f9iter.AdvancedConfiguration.AlternateTargetGroupARN
-				}
-				if f9iter.AdvancedConfiguration.ProductionListenerRule != nil {
-					f9elemf0.ProductionListenerRule = f9iter.AdvancedConfiguration.ProductionListenerRule
-				}
-				if f9iter.AdvancedConfiguration.RoleARN != nil {
-					f9elemf0.RoleArn = f9iter.AdvancedConfiguration.RoleARN
-				}
-				if f9iter.AdvancedConfiguration.TestListenerRule != nil {
-					f9elemf0.TestListenerRule = f9iter.AdvancedConfiguration.TestListenerRule
-				}
-				f9elem.AdvancedConfiguration = f9elemf0
-			}
 			if f9iter.ContainerName != nil {
 				f9elem.ContainerName = f9iter.ContainerName
 			}
@@ -2055,141 +1754,113 @@ func (rm *resourceManager) newCreateRequestPayload(
 	}
 	if r.ko.Spec.ServiceConnectConfiguration != nil {
 		f17 := &svcsdktypes.ServiceConnectConfiguration{}
-		if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration != nil {
-			f17f0 := &svcsdktypes.ServiceConnectAccessLogConfiguration{}
-			if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format != nil {
-				f17f0.Format = svcsdktypes.ServiceConnectAccessLoggingFormat(*r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format)
-			}
-			if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != nil {
-				f17f0.IncludeQueryParameters = svcsdktypes.ServiceConnectIncludeQueryParameters(*r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters)
-			}
-			f17.AccessLogConfiguration = f17f0
-		}
 		if r.ko.Spec.ServiceConnectConfiguration.Enabled != nil {
 			f17.Enabled = *r.ko.Spec.ServiceConnectConfiguration.Enabled
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration != nil {
-			f17f2 := &svcsdktypes.LogConfiguration{}
+			f17f1 := &svcsdktypes.LogConfiguration{}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver != nil {
-				f17f2.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
+				f17f1.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-				f17f2.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
+				f17f1.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-				f17f2f2 := []svcsdktypes.Secret{}
-				for _, f17f2f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-					f17f2f2elem := &svcsdktypes.Secret{}
-					if f17f2f2iter.Name != nil {
-						f17f2f2elem.Name = f17f2f2iter.Name
+				f17f1f2 := []svcsdktypes.Secret{}
+				for _, f17f1f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+					f17f1f2elem := &svcsdktypes.Secret{}
+					if f17f1f2iter.Name != nil {
+						f17f1f2elem.Name = f17f1f2iter.Name
 					}
-					if f17f2f2iter.ValueFrom != nil {
-						f17f2f2elem.ValueFrom = f17f2f2iter.ValueFrom
+					if f17f1f2iter.ValueFrom != nil {
+						f17f1f2elem.ValueFrom = f17f1f2iter.ValueFrom
 					}
-					f17f2f2 = append(f17f2f2, *f17f2f2elem)
+					f17f1f2 = append(f17f1f2, *f17f1f2elem)
 				}
-				f17f2.SecretOptions = f17f2f2
+				f17f1.SecretOptions = f17f1f2
 			}
-			f17.LogConfiguration = f17f2
+			f17.LogConfiguration = f17f1
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Namespace != nil {
 			f17.Namespace = r.ko.Spec.ServiceConnectConfiguration.Namespace
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Services != nil {
-			f17f4 := []svcsdktypes.ServiceConnectService{}
-			for _, f17f4iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
-				f17f4elem := &svcsdktypes.ServiceConnectService{}
-				if f17f4iter.ClientAliases != nil {
-					f17f4elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
-					for _, f17f4elemf0iter := range f17f4iter.ClientAliases {
-						f17f4elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
-						if f17f4elemf0iter.DNSName != nil {
-							f17f4elemf0elem.DnsName = f17f4elemf0iter.DNSName
+			f17f3 := []svcsdktypes.ServiceConnectService{}
+			for _, f17f3iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
+				f17f3elem := &svcsdktypes.ServiceConnectService{}
+				if f17f3iter.ClientAliases != nil {
+					f17f3elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
+					for _, f17f3elemf0iter := range f17f3iter.ClientAliases {
+						f17f3elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
+						if f17f3elemf0iter.DNSName != nil {
+							f17f3elemf0elem.DnsName = f17f3elemf0iter.DNSName
 						}
-						if f17f4elemf0iter.Port != nil {
-							portCopy0 := *f17f4elemf0iter.Port
+						if f17f3elemf0iter.Port != nil {
+							portCopy0 := *f17f3elemf0iter.Port
 							if portCopy0 > math.MaxInt32 || portCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field port is of type int32")
 							}
 							portCopy := int32(portCopy0)
-							f17f4elemf0elem.Port = &portCopy
+							f17f3elemf0elem.Port = &portCopy
 						}
-						if f17f4elemf0iter.TestTrafficRules != nil {
-							f17f4elemf0elemf2 := &svcsdktypes.ServiceConnectTestTrafficRules{}
-							if f17f4elemf0iter.TestTrafficRules.Header != nil {
-								f17f4elemf0elemf2f0 := &svcsdktypes.ServiceConnectTestTrafficHeaderRules{}
-								if f17f4elemf0iter.TestTrafficRules.Header.Name != nil {
-									f17f4elemf0elemf2f0.Name = f17f4elemf0iter.TestTrafficRules.Header.Name
-								}
-								if f17f4elemf0iter.TestTrafficRules.Header.Value != nil {
-									f17f4elemf0elemf2f0f1 := &svcsdktypes.ServiceConnectTestTrafficHeaderMatchRules{}
-									if f17f4elemf0iter.TestTrafficRules.Header.Value.Exact != nil {
-										f17f4elemf0elemf2f0f1.Exact = f17f4elemf0iter.TestTrafficRules.Header.Value.Exact
-									}
-									f17f4elemf0elemf2f0.Value = f17f4elemf0elemf2f0f1
-								}
-								f17f4elemf0elemf2.Header = f17f4elemf0elemf2f0
-							}
-							f17f4elemf0elem.TestTrafficRules = f17f4elemf0elemf2
-						}
-						f17f4elemf0 = append(f17f4elemf0, *f17f4elemf0elem)
+						f17f3elemf0 = append(f17f3elemf0, *f17f3elemf0elem)
 					}
-					f17f4elem.ClientAliases = f17f4elemf0
+					f17f3elem.ClientAliases = f17f3elemf0
 				}
-				if f17f4iter.DiscoveryName != nil {
-					f17f4elem.DiscoveryName = f17f4iter.DiscoveryName
+				if f17f3iter.DiscoveryName != nil {
+					f17f3elem.DiscoveryName = f17f3iter.DiscoveryName
 				}
-				if f17f4iter.IngressPortOverride != nil {
-					ingressPortOverrideCopy0 := *f17f4iter.IngressPortOverride
+				if f17f3iter.IngressPortOverride != nil {
+					ingressPortOverrideCopy0 := *f17f3iter.IngressPortOverride
 					if ingressPortOverrideCopy0 > math.MaxInt32 || ingressPortOverrideCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field ingressPortOverride is of type int32")
 					}
 					ingressPortOverrideCopy := int32(ingressPortOverrideCopy0)
-					f17f4elem.IngressPortOverride = &ingressPortOverrideCopy
+					f17f3elem.IngressPortOverride = &ingressPortOverrideCopy
 				}
-				if f17f4iter.PortName != nil {
-					f17f4elem.PortName = f17f4iter.PortName
+				if f17f3iter.PortName != nil {
+					f17f3elem.PortName = f17f3iter.PortName
 				}
-				if f17f4iter.Timeout != nil {
-					f17f4elemf4 := &svcsdktypes.TimeoutConfiguration{}
-					if f17f4iter.Timeout.IdleTimeoutSeconds != nil {
-						idleTimeoutSecondsCopy0 := *f17f4iter.Timeout.IdleTimeoutSeconds
+				if f17f3iter.Timeout != nil {
+					f17f3elemf4 := &svcsdktypes.TimeoutConfiguration{}
+					if f17f3iter.Timeout.IdleTimeoutSeconds != nil {
+						idleTimeoutSecondsCopy0 := *f17f3iter.Timeout.IdleTimeoutSeconds
 						if idleTimeoutSecondsCopy0 > math.MaxInt32 || idleTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field idleTimeoutSeconds is of type int32")
 						}
 						idleTimeoutSecondsCopy := int32(idleTimeoutSecondsCopy0)
-						f17f4elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+						f17f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
 					}
-					if f17f4iter.Timeout.PerRequestTimeoutSeconds != nil {
-						perRequestTimeoutSecondsCopy0 := *f17f4iter.Timeout.PerRequestTimeoutSeconds
+					if f17f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+						perRequestTimeoutSecondsCopy0 := *f17f3iter.Timeout.PerRequestTimeoutSeconds
 						if perRequestTimeoutSecondsCopy0 > math.MaxInt32 || perRequestTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field perRequestTimeoutSeconds is of type int32")
 						}
 						perRequestTimeoutSecondsCopy := int32(perRequestTimeoutSecondsCopy0)
-						f17f4elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+						f17f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
 					}
-					f17f4elem.Timeout = f17f4elemf4
+					f17f3elem.Timeout = f17f3elemf4
 				}
-				if f17f4iter.TLS != nil {
-					f17f4elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
-					if f17f4iter.TLS.IssuerCertificateAuthority != nil {
-						f17f4elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
-						if f17f4iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
-							f17f4elemf5f0.AwsPcaAuthorityArn = f17f4iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
+				if f17f3iter.TLS != nil {
+					f17f3elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
+					if f17f3iter.TLS.IssuerCertificateAuthority != nil {
+						f17f3elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
+						if f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
+							f17f3elemf5f0.AwsPcaAuthorityArn = f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
 						}
-						f17f4elemf5.IssuerCertificateAuthority = f17f4elemf5f0
+						f17f3elemf5.IssuerCertificateAuthority = f17f3elemf5f0
 					}
-					if f17f4iter.TLS.KMSKey != nil {
-						f17f4elemf5.KmsKey = f17f4iter.TLS.KMSKey
+					if f17f3iter.TLS.KMSKey != nil {
+						f17f3elemf5.KmsKey = f17f3iter.TLS.KMSKey
 					}
-					if f17f4iter.TLS.RoleARN != nil {
-						f17f4elemf5.RoleArn = f17f4iter.TLS.RoleARN
+					if f17f3iter.TLS.RoleARN != nil {
+						f17f3elemf5.RoleArn = f17f3iter.TLS.RoleARN
 					}
-					f17f4elem.Tls = f17f4elemf5
+					f17f3elem.Tls = f17f3elemf5
 				}
-				f17f4 = append(f17f4, *f17f4elem)
+				f17f3 = append(f17f3, *f17f3elem)
 			}
-			f17.Services = f17f4
+			f17.Services = f17f3
 		}
 		res.ServiceConnectConfiguration = f17
 	}
@@ -2316,14 +1987,6 @@ func (rm *resourceManager) newCreateRequestPayload(
 					throughputCopy := int32(throughputCopy0)
 					f22elemf0.Throughput = &throughputCopy
 				}
-				if f22iter.ManagedEBSVolume.VolumeInitializationRate != nil {
-					volumeInitializationRateCopy0 := *f22iter.ManagedEBSVolume.VolumeInitializationRate
-					if volumeInitializationRateCopy0 > math.MaxInt32 || volumeInitializationRateCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field volumeInitializationRate is of type int32")
-					}
-					volumeInitializationRateCopy := int32(volumeInitializationRateCopy0)
-					f22elemf0.VolumeInitializationRate = &volumeInitializationRateCopy
-				}
 				if f22iter.ManagedEBSVolume.VolumeType != nil {
 					f22elemf0.VolumeType = f22iter.ManagedEBSVolume.VolumeType
 				}
@@ -2404,387 +2067,302 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Status.CreatedBy = nil
 	}
-	if resp.Service.CurrentServiceDeployment != nil {
-		ko.Status.CurrentServiceDeployment = resp.Service.CurrentServiceDeployment
-	} else {
-		ko.Status.CurrentServiceDeployment = nil
-	}
-	if resp.Service.CurrentServiceRevisions != nil {
-		f5 := []*svcapitypes.ServiceCurrentRevisionSummary{}
-		for _, f5iter := range resp.Service.CurrentServiceRevisions {
-			f5elem := &svcapitypes.ServiceCurrentRevisionSummary{}
-			if f5iter.Arn != nil {
-				f5elem.ARN = f5iter.Arn
-			}
-			pendingTaskCountCopy := int64(f5iter.PendingTaskCount)
-			f5elem.PendingTaskCount = &pendingTaskCountCopy
-			requestedTaskCountCopy := int64(f5iter.RequestedTaskCount)
-			f5elem.RequestedTaskCount = &requestedTaskCountCopy
-			runningTaskCountCopy := int64(f5iter.RunningTaskCount)
-			f5elem.RunningTaskCount = &runningTaskCountCopy
-			f5 = append(f5, f5elem)
-		}
-		ko.Status.CurrentServiceRevisions = f5
-	} else {
-		ko.Status.CurrentServiceRevisions = nil
-	}
 	if resp.Service.DeploymentConfiguration != nil {
-		f6 := &svcapitypes.DeploymentConfiguration{}
+		f4 := &svcapitypes.DeploymentConfiguration{}
 		if resp.Service.DeploymentConfiguration.Alarms != nil {
-			f6f0 := &svcapitypes.DeploymentAlarms{}
+			f4f0 := &svcapitypes.DeploymentAlarms{}
 			if resp.Service.DeploymentConfiguration.Alarms.AlarmNames != nil {
-				f6f0.AlarmNames = aws.StringSlice(resp.Service.DeploymentConfiguration.Alarms.AlarmNames)
+				f4f0.AlarmNames = aws.StringSlice(resp.Service.DeploymentConfiguration.Alarms.AlarmNames)
 			}
-			f6f0.Enable = &resp.Service.DeploymentConfiguration.Alarms.Enable
-			f6f0.Rollback = &resp.Service.DeploymentConfiguration.Alarms.Rollback
-			f6.Alarms = f6f0
-		}
-		if resp.Service.DeploymentConfiguration.BakeTimeInMinutes != nil {
-			bakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.BakeTimeInMinutes)
-			f6.BakeTimeInMinutes = &bakeTimeInMinutesCopy
-		}
-		if resp.Service.DeploymentConfiguration.CanaryConfiguration != nil {
-			f6f2 := &svcapitypes.CanaryConfiguration{}
-			if resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
-				canaryBakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes)
-				f6f2.CanaryBakeTimeInMinutes = &canaryBakeTimeInMinutesCopy
-			}
-			if resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
-				f6f2.CanaryPercent = resp.Service.DeploymentConfiguration.CanaryConfiguration.CanaryPercent
-			}
-			f6.CanaryConfiguration = f6f2
+			f4f0.Enable = &resp.Service.DeploymentConfiguration.Alarms.Enable
+			f4f0.Rollback = &resp.Service.DeploymentConfiguration.Alarms.Rollback
+			f4.Alarms = f4f0
 		}
 		if resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
-			f6f3 := &svcapitypes.DeploymentCircuitBreaker{}
-			f6f3.Enable = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
-			f6f3.Rollback = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
-			f6.DeploymentCircuitBreaker = f6f3
-		}
-		if resp.Service.DeploymentConfiguration.LinearConfiguration != nil {
-			f6f4 := &svcapitypes.LinearConfiguration{}
-			if resp.Service.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
-				stepBakeTimeInMinutesCopy := int64(*resp.Service.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes)
-				f6f4.StepBakeTimeInMinutes = &stepBakeTimeInMinutesCopy
-			}
-			if resp.Service.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
-				f6f4.StepPercent = resp.Service.DeploymentConfiguration.LinearConfiguration.StepPercent
-			}
-			f6.LinearConfiguration = f6f4
+			f4f1 := &svcapitypes.DeploymentCircuitBreaker{}
+			f4f1.Enable = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
+			f4f1.Rollback = &resp.Service.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
+			f4.DeploymentCircuitBreaker = f4f1
 		}
 		if resp.Service.DeploymentConfiguration.MaximumPercent != nil {
 			maximumPercentCopy := int64(*resp.Service.DeploymentConfiguration.MaximumPercent)
-			f6.MaximumPercent = &maximumPercentCopy
+			f4.MaximumPercent = &maximumPercentCopy
 		}
 		if resp.Service.DeploymentConfiguration.MinimumHealthyPercent != nil {
 			minimumHealthyPercentCopy := int64(*resp.Service.DeploymentConfiguration.MinimumHealthyPercent)
-			f6.MinimumHealthyPercent = &minimumHealthyPercentCopy
+			f4.MinimumHealthyPercent = &minimumHealthyPercentCopy
 		}
-		if resp.Service.DeploymentConfiguration.Strategy != "" {
-			f6.Strategy = aws.String(string(resp.Service.DeploymentConfiguration.Strategy))
-		}
-		ko.Spec.DeploymentConfiguration = f6
+		ko.Spec.DeploymentConfiguration = f4
 	} else {
 		ko.Spec.DeploymentConfiguration = nil
 	}
 	if resp.Service.DeploymentController != nil {
-		f7 := &svcapitypes.DeploymentController{}
+		f5 := &svcapitypes.DeploymentController{}
 		if resp.Service.DeploymentController.Type != "" {
-			f7.Type = aws.String(string(resp.Service.DeploymentController.Type))
+			f5.Type = aws.String(string(resp.Service.DeploymentController.Type))
 		}
-		ko.Spec.DeploymentController = f7
+		ko.Spec.DeploymentController = f5
 	} else {
 		ko.Spec.DeploymentController = nil
 	}
 	if resp.Service.Deployments != nil {
-		f8 := []*svcapitypes.Deployment{}
-		for _, f8iter := range resp.Service.Deployments {
-			f8elem := &svcapitypes.Deployment{}
-			if f8iter.CapacityProviderStrategy != nil {
-				f8elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-				for _, f8elemf0iter := range f8iter.CapacityProviderStrategy {
-					f8elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-					baseCopy := int64(f8elemf0iter.Base)
-					f8elemf0elem.Base = &baseCopy
-					if f8elemf0iter.CapacityProvider != nil {
-						f8elemf0elem.CapacityProvider = f8elemf0iter.CapacityProvider
+		f6 := []*svcapitypes.Deployment{}
+		for _, f6iter := range resp.Service.Deployments {
+			f6elem := &svcapitypes.Deployment{}
+			if f6iter.CapacityProviderStrategy != nil {
+				f6elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+				for _, f6elemf0iter := range f6iter.CapacityProviderStrategy {
+					f6elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+					baseCopy := int64(f6elemf0iter.Base)
+					f6elemf0elem.Base = &baseCopy
+					if f6elemf0iter.CapacityProvider != nil {
+						f6elemf0elem.CapacityProvider = f6elemf0iter.CapacityProvider
 					}
-					weightCopy := int64(f8elemf0iter.Weight)
-					f8elemf0elem.Weight = &weightCopy
-					f8elemf0 = append(f8elemf0, f8elemf0elem)
+					weightCopy := int64(f6elemf0iter.Weight)
+					f6elemf0elem.Weight = &weightCopy
+					f6elemf0 = append(f6elemf0, f6elemf0elem)
 				}
-				f8elem.CapacityProviderStrategy = f8elemf0
+				f6elem.CapacityProviderStrategy = f6elemf0
 			}
-			if f8iter.CreatedAt != nil {
-				f8elem.CreatedAt = &metav1.Time{*f8iter.CreatedAt}
+			if f6iter.CreatedAt != nil {
+				f6elem.CreatedAt = &metav1.Time{*f6iter.CreatedAt}
 			}
-			desiredCountCopy := int64(f8iter.DesiredCount)
-			f8elem.DesiredCount = &desiredCountCopy
-			failedTasksCopy := int64(f8iter.FailedTasks)
-			f8elem.FailedTasks = &failedTasksCopy
-			if f8iter.Id != nil {
-				f8elem.ID = f8iter.Id
+			desiredCountCopy := int64(f6iter.DesiredCount)
+			f6elem.DesiredCount = &desiredCountCopy
+			failedTasksCopy := int64(f6iter.FailedTasks)
+			f6elem.FailedTasks = &failedTasksCopy
+			if f6iter.Id != nil {
+				f6elem.ID = f6iter.Id
 			}
-			if f8iter.LaunchType != "" {
-				f8elem.LaunchType = aws.String(string(f8iter.LaunchType))
+			if f6iter.LaunchType != "" {
+				f6elem.LaunchType = aws.String(string(f6iter.LaunchType))
 			}
-			if f8iter.NetworkConfiguration != nil {
-				f8elemf6 := &svcapitypes.NetworkConfiguration{}
-				if f8iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-					f8elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-						f8elemf6f0.AssignPublicIP = aws.String(string(f8iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+			if f6iter.NetworkConfiguration != nil {
+				f6elemf6 := &svcapitypes.NetworkConfiguration{}
+				if f6iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+					f6elemf6f0 := &svcapitypes.AWSVPCConfiguration{}
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+						f6elemf6f0.AssignPublicIP = aws.String(string(f6iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 					}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-						f8elemf6f0.SecurityGroups = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+						f6elemf6f0.SecurityGroups = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 					}
-					if f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-						f8elemf6f0.Subnets = aws.StringSlice(f8iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+					if f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+						f6elemf6f0.Subnets = aws.StringSlice(f6iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 					}
-					f8elemf6.AWSVPCConfiguration = f8elemf6f0
+					f6elemf6.AWSVPCConfiguration = f6elemf6f0
 				}
-				f8elem.NetworkConfiguration = f8elemf6
+				f6elem.NetworkConfiguration = f6elemf6
 			}
-			pendingCountCopy := int64(f8iter.PendingCount)
-			f8elem.PendingCount = &pendingCountCopy
-			if f8iter.PlatformFamily != nil {
-				f8elem.PlatformFamily = f8iter.PlatformFamily
+			pendingCountCopy := int64(f6iter.PendingCount)
+			f6elem.PendingCount = &pendingCountCopy
+			if f6iter.PlatformFamily != nil {
+				f6elem.PlatformFamily = f6iter.PlatformFamily
 			}
-			if f8iter.PlatformVersion != nil {
-				f8elem.PlatformVersion = f8iter.PlatformVersion
+			if f6iter.PlatformVersion != nil {
+				f6elem.PlatformVersion = f6iter.PlatformVersion
 			}
-			if f8iter.RolloutState != "" {
-				f8elem.RolloutState = aws.String(string(f8iter.RolloutState))
+			if f6iter.RolloutState != "" {
+				f6elem.RolloutState = aws.String(string(f6iter.RolloutState))
 			}
-			if f8iter.RolloutStateReason != nil {
-				f8elem.RolloutStateReason = f8iter.RolloutStateReason
+			if f6iter.RolloutStateReason != nil {
+				f6elem.RolloutStateReason = f6iter.RolloutStateReason
 			}
-			runningCountCopy := int64(f8iter.RunningCount)
-			f8elem.RunningCount = &runningCountCopy
-			if f8iter.ServiceConnectConfiguration != nil {
-				f8elemf13 := &svcapitypes.ServiceConnectConfiguration{}
-				if f8iter.ServiceConnectConfiguration.AccessLogConfiguration != nil {
-					f8elemf13f0 := &svcapitypes.ServiceConnectAccessLogConfiguration{}
-					if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format != "" {
-						f8elemf13f0.Format = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.Format))
+			runningCountCopy := int64(f6iter.RunningCount)
+			f6elem.RunningCount = &runningCountCopy
+			if f6iter.ServiceConnectConfiguration != nil {
+				f6elemf13 := &svcapitypes.ServiceConnectConfiguration{}
+				f6elemf13.Enabled = &f6iter.ServiceConnectConfiguration.Enabled
+				if f6iter.ServiceConnectConfiguration.LogConfiguration != nil {
+					f6elemf13f1 := &svcapitypes.LogConfiguration{}
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
+						f6elemf13f1.LogDriver = aws.String(string(f6iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
 					}
-					if f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != "" {
-						f8elemf13f0.IncludeQueryParameters = aws.String(string(f8iter.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters))
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
+						f6elemf13f1.Options = aws.StringMap(f6iter.ServiceConnectConfiguration.LogConfiguration.Options)
 					}
-					f8elemf13.AccessLogConfiguration = f8elemf13f0
-				}
-				f8elemf13.Enabled = &f8iter.ServiceConnectConfiguration.Enabled
-				if f8iter.ServiceConnectConfiguration.LogConfiguration != nil {
-					f8elemf13f2 := &svcapitypes.LogConfiguration{}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver != "" {
-						f8elemf13f2.LogDriver = aws.String(string(f8iter.ServiceConnectConfiguration.LogConfiguration.LogDriver))
-					}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-						f8elemf13f2.Options = aws.StringMap(f8iter.ServiceConnectConfiguration.LogConfiguration.Options)
-					}
-					if f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-						f8elemf13f2f2 := []*svcapitypes.Secret{}
-						for _, f8elemf13f2f2iter := range f8iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-							f8elemf13f2f2elem := &svcapitypes.Secret{}
-							if f8elemf13f2f2iter.Name != nil {
-								f8elemf13f2f2elem.Name = f8elemf13f2f2iter.Name
+					if f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
+						f6elemf13f1f2 := []*svcapitypes.Secret{}
+						for _, f6elemf13f1f2iter := range f6iter.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+							f6elemf13f1f2elem := &svcapitypes.Secret{}
+							if f6elemf13f1f2iter.Name != nil {
+								f6elemf13f1f2elem.Name = f6elemf13f1f2iter.Name
 							}
-							if f8elemf13f2f2iter.ValueFrom != nil {
-								f8elemf13f2f2elem.ValueFrom = f8elemf13f2f2iter.ValueFrom
+							if f6elemf13f1f2iter.ValueFrom != nil {
+								f6elemf13f1f2elem.ValueFrom = f6elemf13f1f2iter.ValueFrom
 							}
-							f8elemf13f2f2 = append(f8elemf13f2f2, f8elemf13f2f2elem)
+							f6elemf13f1f2 = append(f6elemf13f1f2, f6elemf13f1f2elem)
 						}
-						f8elemf13f2.SecretOptions = f8elemf13f2f2
+						f6elemf13f1.SecretOptions = f6elemf13f1f2
 					}
-					f8elemf13.LogConfiguration = f8elemf13f2
+					f6elemf13.LogConfiguration = f6elemf13f1
 				}
-				if f8iter.ServiceConnectConfiguration.Namespace != nil {
-					f8elemf13.Namespace = f8iter.ServiceConnectConfiguration.Namespace
+				if f6iter.ServiceConnectConfiguration.Namespace != nil {
+					f6elemf13.Namespace = f6iter.ServiceConnectConfiguration.Namespace
 				}
-				if f8iter.ServiceConnectConfiguration.Services != nil {
-					f8elemf13f4 := []*svcapitypes.ServiceConnectService{}
-					for _, f8elemf13f4iter := range f8iter.ServiceConnectConfiguration.Services {
-						f8elemf13f4elem := &svcapitypes.ServiceConnectService{}
-						if f8elemf13f4iter.ClientAliases != nil {
-							f8elemf13f4elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
-							for _, f8elemf13f4elemf0iter := range f8elemf13f4iter.ClientAliases {
-								f8elemf13f4elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
-								if f8elemf13f4elemf0iter.DnsName != nil {
-									f8elemf13f4elemf0elem.DNSName = f8elemf13f4elemf0iter.DnsName
+				if f6iter.ServiceConnectConfiguration.Services != nil {
+					f6elemf13f3 := []*svcapitypes.ServiceConnectService{}
+					for _, f6elemf13f3iter := range f6iter.ServiceConnectConfiguration.Services {
+						f6elemf13f3elem := &svcapitypes.ServiceConnectService{}
+						if f6elemf13f3iter.ClientAliases != nil {
+							f6elemf13f3elemf0 := []*svcapitypes.ServiceConnectClientAlias{}
+							for _, f6elemf13f3elemf0iter := range f6elemf13f3iter.ClientAliases {
+								f6elemf13f3elemf0elem := &svcapitypes.ServiceConnectClientAlias{}
+								if f6elemf13f3elemf0iter.DnsName != nil {
+									f6elemf13f3elemf0elem.DNSName = f6elemf13f3elemf0iter.DnsName
 								}
-								if f8elemf13f4elemf0iter.Port != nil {
-									portCopy := int64(*f8elemf13f4elemf0iter.Port)
-									f8elemf13f4elemf0elem.Port = &portCopy
+								if f6elemf13f3elemf0iter.Port != nil {
+									portCopy := int64(*f6elemf13f3elemf0iter.Port)
+									f6elemf13f3elemf0elem.Port = &portCopy
 								}
-								if f8elemf13f4elemf0iter.TestTrafficRules != nil {
-									f8elemf13f4elemf0elemf2 := &svcapitypes.ServiceConnectTestTrafficRules{}
-									if f8elemf13f4elemf0iter.TestTrafficRules.Header != nil {
-										f8elemf13f4elemf0elemf2f0 := &svcapitypes.ServiceConnectTestTrafficHeaderRules{}
-										if f8elemf13f4elemf0iter.TestTrafficRules.Header.Name != nil {
-											f8elemf13f4elemf0elemf2f0.Name = f8elemf13f4elemf0iter.TestTrafficRules.Header.Name
+								f6elemf13f3elemf0 = append(f6elemf13f3elemf0, f6elemf13f3elemf0elem)
+							}
+							f6elemf13f3elem.ClientAliases = f6elemf13f3elemf0
+						}
+						if f6elemf13f3iter.DiscoveryName != nil {
+							f6elemf13f3elem.DiscoveryName = f6elemf13f3iter.DiscoveryName
+						}
+						if f6elemf13f3iter.IngressPortOverride != nil {
+							ingressPortOverrideCopy := int64(*f6elemf13f3iter.IngressPortOverride)
+							f6elemf13f3elem.IngressPortOverride = &ingressPortOverrideCopy
+						}
+						if f6elemf13f3iter.PortName != nil {
+							f6elemf13f3elem.PortName = f6elemf13f3iter.PortName
+						}
+						if f6elemf13f3iter.Timeout != nil {
+							f6elemf13f3elemf4 := &svcapitypes.TimeoutConfiguration{}
+							if f6elemf13f3iter.Timeout.IdleTimeoutSeconds != nil {
+								idleTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.IdleTimeoutSeconds)
+								f6elemf13f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+							}
+							if f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+								perRequestTimeoutSecondsCopy := int64(*f6elemf13f3iter.Timeout.PerRequestTimeoutSeconds)
+								f6elemf13f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+							}
+							f6elemf13f3elem.Timeout = f6elemf13f3elemf4
+						}
+						if f6elemf13f3iter.Tls != nil {
+							f6elemf13f3elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
+							if f6elemf13f3iter.Tls.IssuerCertificateAuthority != nil {
+								f6elemf13f3elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
+								if f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
+									f6elemf13f3elemf5f0.AWSPCAAuthorityARN = f6elemf13f3iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
+								}
+								f6elemf13f3elemf5.IssuerCertificateAuthority = f6elemf13f3elemf5f0
+							}
+							if f6elemf13f3iter.Tls.KmsKey != nil {
+								f6elemf13f3elemf5.KMSKey = f6elemf13f3iter.Tls.KmsKey
+							}
+							if f6elemf13f3iter.Tls.RoleArn != nil {
+								f6elemf13f3elemf5.RoleARN = f6elemf13f3iter.Tls.RoleArn
+							}
+							f6elemf13f3elem.TLS = f6elemf13f3elemf5
+						}
+						f6elemf13f3 = append(f6elemf13f3, f6elemf13f3elem)
+					}
+					f6elemf13.Services = f6elemf13f3
+				}
+				f6elem.ServiceConnectConfiguration = f6elemf13
+			}
+			if f6iter.ServiceConnectResources != nil {
+				f6elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
+				for _, f6elemf14iter := range f6iter.ServiceConnectResources {
+					f6elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
+					if f6elemf14iter.DiscoveryArn != nil {
+						f6elemf14elem.DiscoveryARN = f6elemf14iter.DiscoveryArn
+					}
+					if f6elemf14iter.DiscoveryName != nil {
+						f6elemf14elem.DiscoveryName = f6elemf14iter.DiscoveryName
+					}
+					f6elemf14 = append(f6elemf14, f6elemf14elem)
+				}
+				f6elem.ServiceConnectResources = f6elemf14
+			}
+			if f6iter.Status != nil {
+				f6elem.Status = f6iter.Status
+			}
+			if f6iter.TaskDefinition != nil {
+				f6elem.TaskDefinition = f6iter.TaskDefinition
+			}
+			if f6iter.UpdatedAt != nil {
+				f6elem.UpdatedAt = &metav1.Time{*f6iter.UpdatedAt}
+			}
+			if f6iter.VolumeConfigurations != nil {
+				f6elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
+				for _, f6elemf18iter := range f6iter.VolumeConfigurations {
+					f6elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
+					if f6elemf18iter.ManagedEBSVolume != nil {
+						f6elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
+						if f6elemf18iter.ManagedEBSVolume.Encrypted != nil {
+							f6elemf18elemf0.Encrypted = f6elemf18iter.ManagedEBSVolume.Encrypted
+						}
+						if f6elemf18iter.ManagedEBSVolume.FilesystemType != "" {
+							f6elemf18elemf0.FilesystemType = aws.String(string(f6elemf18iter.ManagedEBSVolume.FilesystemType))
+						}
+						if f6elemf18iter.ManagedEBSVolume.Iops != nil {
+							iopsCopy := int64(*f6elemf18iter.ManagedEBSVolume.Iops)
+							f6elemf18elemf0.IOPS = &iopsCopy
+						}
+						if f6elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
+							f6elemf18elemf0.KMSKeyID = f6elemf18iter.ManagedEBSVolume.KmsKeyId
+						}
+						if f6elemf18iter.ManagedEBSVolume.RoleArn != nil {
+							f6elemf18elemf0.RoleARN = f6elemf18iter.ManagedEBSVolume.RoleArn
+						}
+						if f6elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
+							sizeInGiBCopy := int64(*f6elemf18iter.ManagedEBSVolume.SizeInGiB)
+							f6elemf18elemf0.SizeInGiB = &sizeInGiBCopy
+						}
+						if f6elemf18iter.ManagedEBSVolume.SnapshotId != nil {
+							f6elemf18elemf0.SnapshotID = f6elemf18iter.ManagedEBSVolume.SnapshotId
+						}
+						if f6elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
+							f6elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
+							for _, f6elemf18elemf0f7iter := range f6elemf18iter.ManagedEBSVolume.TagSpecifications {
+								f6elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
+								if f6elemf18elemf0f7iter.PropagateTags != "" {
+									f6elemf18elemf0f7elem.PropagateTags = aws.String(string(f6elemf18elemf0f7iter.PropagateTags))
+								}
+								if f6elemf18elemf0f7iter.ResourceType != "" {
+									f6elemf18elemf0f7elem.ResourceType = aws.String(string(f6elemf18elemf0f7iter.ResourceType))
+								}
+								if f6elemf18elemf0f7iter.Tags != nil {
+									f6elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
+									for _, f6elemf18elemf0f7elemf2iter := range f6elemf18elemf0f7iter.Tags {
+										f6elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
+										if f6elemf18elemf0f7elemf2iter.Key != nil {
+											f6elemf18elemf0f7elemf2elem.Key = f6elemf18elemf0f7elemf2iter.Key
 										}
-										if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value != nil {
-											f8elemf13f4elemf0elemf2f0f1 := &svcapitypes.ServiceConnectTestTrafficHeaderMatchRules{}
-											if f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact != nil {
-												f8elemf13f4elemf0elemf2f0f1.Exact = f8elemf13f4elemf0iter.TestTrafficRules.Header.Value.Exact
-											}
-											f8elemf13f4elemf0elemf2f0.Value = f8elemf13f4elemf0elemf2f0f1
+										if f6elemf18elemf0f7elemf2iter.Value != nil {
+											f6elemf18elemf0f7elemf2elem.Value = f6elemf18elemf0f7elemf2iter.Value
 										}
-										f8elemf13f4elemf0elemf2.Header = f8elemf13f4elemf0elemf2f0
+										f6elemf18elemf0f7elemf2 = append(f6elemf18elemf0f7elemf2, f6elemf18elemf0f7elemf2elem)
 									}
-									f8elemf13f4elemf0elem.TestTrafficRules = f8elemf13f4elemf0elemf2
+									f6elemf18elemf0f7elem.Tags = f6elemf18elemf0f7elemf2
 								}
-								f8elemf13f4elemf0 = append(f8elemf13f4elemf0, f8elemf13f4elemf0elem)
+								f6elemf18elemf0f7 = append(f6elemf18elemf0f7, f6elemf18elemf0f7elem)
 							}
-							f8elemf13f4elem.ClientAliases = f8elemf13f4elemf0
+							f6elemf18elemf0.TagSpecifications = f6elemf18elemf0f7
 						}
-						if f8elemf13f4iter.DiscoveryName != nil {
-							f8elemf13f4elem.DiscoveryName = f8elemf13f4iter.DiscoveryName
+						if f6elemf18iter.ManagedEBSVolume.Throughput != nil {
+							throughputCopy := int64(*f6elemf18iter.ManagedEBSVolume.Throughput)
+							f6elemf18elemf0.Throughput = &throughputCopy
 						}
-						if f8elemf13f4iter.IngressPortOverride != nil {
-							ingressPortOverrideCopy := int64(*f8elemf13f4iter.IngressPortOverride)
-							f8elemf13f4elem.IngressPortOverride = &ingressPortOverrideCopy
+						if f6elemf18iter.ManagedEBSVolume.VolumeType != nil {
+							f6elemf18elemf0.VolumeType = f6elemf18iter.ManagedEBSVolume.VolumeType
 						}
-						if f8elemf13f4iter.PortName != nil {
-							f8elemf13f4elem.PortName = f8elemf13f4iter.PortName
-						}
-						if f8elemf13f4iter.Timeout != nil {
-							f8elemf13f4elemf4 := &svcapitypes.TimeoutConfiguration{}
-							if f8elemf13f4iter.Timeout.IdleTimeoutSeconds != nil {
-								idleTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.IdleTimeoutSeconds)
-								f8elemf13f4elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
-							}
-							if f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds != nil {
-								perRequestTimeoutSecondsCopy := int64(*f8elemf13f4iter.Timeout.PerRequestTimeoutSeconds)
-								f8elemf13f4elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
-							}
-							f8elemf13f4elem.Timeout = f8elemf13f4elemf4
-						}
-						if f8elemf13f4iter.Tls != nil {
-							f8elemf13f4elemf5 := &svcapitypes.ServiceConnecTTLSConfiguration{}
-							if f8elemf13f4iter.Tls.IssuerCertificateAuthority != nil {
-								f8elemf13f4elemf5f0 := &svcapitypes.ServiceConnecTTLSCertificateAuthority{}
-								if f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn != nil {
-									f8elemf13f4elemf5f0.AWSPCAAuthorityARN = f8elemf13f4iter.Tls.IssuerCertificateAuthority.AwsPcaAuthorityArn
-								}
-								f8elemf13f4elemf5.IssuerCertificateAuthority = f8elemf13f4elemf5f0
-							}
-							if f8elemf13f4iter.Tls.KmsKey != nil {
-								f8elemf13f4elemf5.KMSKey = f8elemf13f4iter.Tls.KmsKey
-							}
-							if f8elemf13f4iter.Tls.RoleArn != nil {
-								f8elemf13f4elemf5.RoleARN = f8elemf13f4iter.Tls.RoleArn
-							}
-							f8elemf13f4elem.TLS = f8elemf13f4elemf5
-						}
-						f8elemf13f4 = append(f8elemf13f4, f8elemf13f4elem)
+						f6elemf18elem.ManagedEBSVolume = f6elemf18elemf0
 					}
-					f8elemf13.Services = f8elemf13f4
+					if f6elemf18iter.Name != nil {
+						f6elemf18elem.Name = f6elemf18iter.Name
+					}
+					f6elemf18 = append(f6elemf18, f6elemf18elem)
 				}
-				f8elem.ServiceConnectConfiguration = f8elemf13
+				f6elem.VolumeConfigurations = f6elemf18
 			}
-			if f8iter.ServiceConnectResources != nil {
-				f8elemf14 := []*svcapitypes.ServiceConnectServiceResource{}
-				for _, f8elemf14iter := range f8iter.ServiceConnectResources {
-					f8elemf14elem := &svcapitypes.ServiceConnectServiceResource{}
-					if f8elemf14iter.DiscoveryArn != nil {
-						f8elemf14elem.DiscoveryARN = f8elemf14iter.DiscoveryArn
-					}
-					if f8elemf14iter.DiscoveryName != nil {
-						f8elemf14elem.DiscoveryName = f8elemf14iter.DiscoveryName
-					}
-					f8elemf14 = append(f8elemf14, f8elemf14elem)
-				}
-				f8elem.ServiceConnectResources = f8elemf14
-			}
-			if f8iter.Status != nil {
-				f8elem.Status = f8iter.Status
-			}
-			if f8iter.TaskDefinition != nil {
-				f8elem.TaskDefinition = f8iter.TaskDefinition
-			}
-			if f8iter.UpdatedAt != nil {
-				f8elem.UpdatedAt = &metav1.Time{*f8iter.UpdatedAt}
-			}
-			if f8iter.VolumeConfigurations != nil {
-				f8elemf18 := []*svcapitypes.ServiceVolumeConfiguration{}
-				for _, f8elemf18iter := range f8iter.VolumeConfigurations {
-					f8elemf18elem := &svcapitypes.ServiceVolumeConfiguration{}
-					if f8elemf18iter.ManagedEBSVolume != nil {
-						f8elemf18elemf0 := &svcapitypes.ServiceManagedEBSVolumeConfiguration{}
-						if f8elemf18iter.ManagedEBSVolume.Encrypted != nil {
-							f8elemf18elemf0.Encrypted = f8elemf18iter.ManagedEBSVolume.Encrypted
-						}
-						if f8elemf18iter.ManagedEBSVolume.FilesystemType != "" {
-							f8elemf18elemf0.FilesystemType = aws.String(string(f8elemf18iter.ManagedEBSVolume.FilesystemType))
-						}
-						if f8elemf18iter.ManagedEBSVolume.Iops != nil {
-							iopsCopy := int64(*f8elemf18iter.ManagedEBSVolume.Iops)
-							f8elemf18elemf0.IOPS = &iopsCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.KmsKeyId != nil {
-							f8elemf18elemf0.KMSKeyID = f8elemf18iter.ManagedEBSVolume.KmsKeyId
-						}
-						if f8elemf18iter.ManagedEBSVolume.RoleArn != nil {
-							f8elemf18elemf0.RoleARN = f8elemf18iter.ManagedEBSVolume.RoleArn
-						}
-						if f8elemf18iter.ManagedEBSVolume.SizeInGiB != nil {
-							sizeInGiBCopy := int64(*f8elemf18iter.ManagedEBSVolume.SizeInGiB)
-							f8elemf18elemf0.SizeInGiB = &sizeInGiBCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.SnapshotId != nil {
-							f8elemf18elemf0.SnapshotID = f8elemf18iter.ManagedEBSVolume.SnapshotId
-						}
-						if f8elemf18iter.ManagedEBSVolume.TagSpecifications != nil {
-							f8elemf18elemf0f7 := []*svcapitypes.EBSTagSpecification{}
-							for _, f8elemf18elemf0f7iter := range f8elemf18iter.ManagedEBSVolume.TagSpecifications {
-								f8elemf18elemf0f7elem := &svcapitypes.EBSTagSpecification{}
-								if f8elemf18elemf0f7iter.PropagateTags != "" {
-									f8elemf18elemf0f7elem.PropagateTags = aws.String(string(f8elemf18elemf0f7iter.PropagateTags))
-								}
-								if f8elemf18elemf0f7iter.ResourceType != "" {
-									f8elemf18elemf0f7elem.ResourceType = aws.String(string(f8elemf18elemf0f7iter.ResourceType))
-								}
-								if f8elemf18elemf0f7iter.Tags != nil {
-									f8elemf18elemf0f7elemf2 := []*svcapitypes.Tag{}
-									for _, f8elemf18elemf0f7elemf2iter := range f8elemf18elemf0f7iter.Tags {
-										f8elemf18elemf0f7elemf2elem := &svcapitypes.Tag{}
-										if f8elemf18elemf0f7elemf2iter.Key != nil {
-											f8elemf18elemf0f7elemf2elem.Key = f8elemf18elemf0f7elemf2iter.Key
-										}
-										if f8elemf18elemf0f7elemf2iter.Value != nil {
-											f8elemf18elemf0f7elemf2elem.Value = f8elemf18elemf0f7elemf2iter.Value
-										}
-										f8elemf18elemf0f7elemf2 = append(f8elemf18elemf0f7elemf2, f8elemf18elemf0f7elemf2elem)
-									}
-									f8elemf18elemf0f7elem.Tags = f8elemf18elemf0f7elemf2
-								}
-								f8elemf18elemf0f7 = append(f8elemf18elemf0f7, f8elemf18elemf0f7elem)
-							}
-							f8elemf18elemf0.TagSpecifications = f8elemf18elemf0f7
-						}
-						if f8elemf18iter.ManagedEBSVolume.Throughput != nil {
-							throughputCopy := int64(*f8elemf18iter.ManagedEBSVolume.Throughput)
-							f8elemf18elemf0.Throughput = &throughputCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate != nil {
-							volumeInitializationRateCopy := int64(*f8elemf18iter.ManagedEBSVolume.VolumeInitializationRate)
-							f8elemf18elemf0.VolumeInitializationRate = &volumeInitializationRateCopy
-						}
-						if f8elemf18iter.ManagedEBSVolume.VolumeType != nil {
-							f8elemf18elemf0.VolumeType = f8elemf18iter.ManagedEBSVolume.VolumeType
-						}
-						f8elemf18elem.ManagedEBSVolume = f8elemf18elemf0
-					}
-					if f8elemf18iter.Name != nil {
-						f8elemf18elem.Name = f8elemf18iter.Name
-					}
-					f8elemf18 = append(f8elemf18, f8elemf18elem)
-				}
-				f8elem.VolumeConfigurations = f8elemf18
-			}
-			f8 = append(f8, f8elem)
+			f6 = append(f6, f6elem)
 		}
-		ko.Status.Deployments = f8
+		ko.Status.Deployments = f6
 	} else {
 		ko.Status.Deployments = nil
 	}
@@ -2793,21 +2371,21 @@ func (rm *resourceManager) sdkUpdate(
 	ko.Spec.EnableECSManagedTags = &resp.Service.EnableECSManagedTags
 	ko.Spec.EnableExecuteCommand = &resp.Service.EnableExecuteCommand
 	if resp.Service.Events != nil {
-		f12 := []*svcapitypes.ServiceEvent{}
-		for _, f12iter := range resp.Service.Events {
-			f12elem := &svcapitypes.ServiceEvent{}
-			if f12iter.CreatedAt != nil {
-				f12elem.CreatedAt = &metav1.Time{*f12iter.CreatedAt}
+		f10 := []*svcapitypes.ServiceEvent{}
+		for _, f10iter := range resp.Service.Events {
+			f10elem := &svcapitypes.ServiceEvent{}
+			if f10iter.CreatedAt != nil {
+				f10elem.CreatedAt = &metav1.Time{*f10iter.CreatedAt}
 			}
-			if f12iter.Id != nil {
-				f12elem.ID = f12iter.Id
+			if f10iter.Id != nil {
+				f10elem.ID = f10iter.Id
 			}
-			if f12iter.Message != nil {
-				f12elem.Message = f12iter.Message
+			if f10iter.Message != nil {
+				f10elem.Message = f10iter.Message
 			}
-			f12 = append(f12, f12elem)
+			f10 = append(f10, f10elem)
 		}
-		ko.Status.Events = f12
+		ko.Status.Events = f10
 	} else {
 		ko.Status.Events = nil
 	}
@@ -2823,94 +2401,78 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Spec.LaunchType = nil
 	}
 	if resp.Service.LoadBalancers != nil {
-		f15 := []*svcapitypes.LoadBalancer{}
-		for _, f15iter := range resp.Service.LoadBalancers {
-			f15elem := &svcapitypes.LoadBalancer{}
-			if f15iter.AdvancedConfiguration != nil {
-				f15elemf0 := &svcapitypes.AdvancedConfiguration{}
-				if f15iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-					f15elemf0.AlternateTargetGroupARN = f15iter.AdvancedConfiguration.AlternateTargetGroupArn
-				}
-				if f15iter.AdvancedConfiguration.ProductionListenerRule != nil {
-					f15elemf0.ProductionListenerRule = f15iter.AdvancedConfiguration.ProductionListenerRule
-				}
-				if f15iter.AdvancedConfiguration.RoleArn != nil {
-					f15elemf0.RoleARN = f15iter.AdvancedConfiguration.RoleArn
-				}
-				if f15iter.AdvancedConfiguration.TestListenerRule != nil {
-					f15elemf0.TestListenerRule = f15iter.AdvancedConfiguration.TestListenerRule
-				}
-				f15elem.AdvancedConfiguration = f15elemf0
+		f13 := []*svcapitypes.LoadBalancer{}
+		for _, f13iter := range resp.Service.LoadBalancers {
+			f13elem := &svcapitypes.LoadBalancer{}
+			if f13iter.ContainerName != nil {
+				f13elem.ContainerName = f13iter.ContainerName
 			}
-			if f15iter.ContainerName != nil {
-				f15elem.ContainerName = f15iter.ContainerName
+			if f13iter.ContainerPort != nil {
+				containerPortCopy := int64(*f13iter.ContainerPort)
+				f13elem.ContainerPort = &containerPortCopy
 			}
-			if f15iter.ContainerPort != nil {
-				containerPortCopy := int64(*f15iter.ContainerPort)
-				f15elem.ContainerPort = &containerPortCopy
+			if f13iter.LoadBalancerName != nil {
+				f13elem.LoadBalancerName = f13iter.LoadBalancerName
 			}
-			if f15iter.LoadBalancerName != nil {
-				f15elem.LoadBalancerName = f15iter.LoadBalancerName
+			if f13iter.TargetGroupArn != nil {
+				f13elem.TargetGroupARN = f13iter.TargetGroupArn
 			}
-			if f15iter.TargetGroupArn != nil {
-				f15elem.TargetGroupARN = f15iter.TargetGroupArn
-			}
-			f15 = append(f15, f15elem)
+			f13 = append(f13, f13elem)
 		}
-		ko.Spec.LoadBalancers = f15
+		ko.Spec.LoadBalancers = f13
 	} else {
 		ko.Spec.LoadBalancers = nil
 	}
 	if resp.Service.NetworkConfiguration != nil {
-		f16 := &svcapitypes.NetworkConfiguration{}
+		f14 := &svcapitypes.NetworkConfiguration{}
 		if resp.Service.NetworkConfiguration.AwsvpcConfiguration != nil {
-			f16f0 := &svcapitypes.AWSVPCConfiguration{}
+			f14f0 := &svcapitypes.AWSVPCConfiguration{}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-				f16f0.AssignPublicIP = aws.String(string(resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+				f14f0.AssignPublicIP = aws.String(string(resp.Service.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 			}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-				f16f0.SecurityGroups = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+				f14f0.SecurityGroups = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 			}
 			if resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-				f16f0.Subnets = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+				f14f0.Subnets = aws.StringSlice(resp.Service.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 			}
-			f16.AWSVPCConfiguration = f16f0
+			f14.AWSVPCConfiguration = f14f0
 		}
-		ko.Spec.NetworkConfiguration = f16
+		ko.Spec.NetworkConfiguration = f14
 	} else {
 		ko.Spec.NetworkConfiguration = nil
 	}
 	pendingCountCopy := int64(resp.Service.PendingCount)
 	ko.Status.PendingCount = &pendingCountCopy
 	if resp.Service.PlacementConstraints != nil {
-		f18 := []*svcapitypes.PlacementConstraint{}
-		for _, f18iter := range resp.Service.PlacementConstraints {
-			f18elem := &svcapitypes.PlacementConstraint{}
-			if f18iter.Expression != nil {
-				f18elem.Expression = f18iter.Expression
+		f16 := []*svcapitypes.PlacementConstraint{}
+		for _, f16iter := range resp.Service.PlacementConstraints {
+			f16elem := &svcapitypes.PlacementConstraint{}
+			if f16iter.Expression != nil {
+				f16elem.Expression = f16iter.Expression
 			}
-			if f18iter.Type != "" {
-				f18elem.Type = aws.String(string(f18iter.Type))
+			if f16iter.Type != "" {
+				f16elem.Type = aws.String(string(f16iter.Type))
 			}
-			f18 = append(f18, f18elem)
+			f16 = append(f16, f16elem)
 		}
-		ko.Spec.PlacementConstraints = f18
+		ko.Spec.PlacementConstraints = f16
 	} else {
 		ko.Spec.PlacementConstraints = nil
 	}
 	if resp.Service.PlacementStrategy != nil {
-		f19 := []*svcapitypes.PlacementStrategy{}
-		for _, f19iter := range resp.Service.PlacementStrategy {
-			f19elem := &svcapitypes.PlacementStrategy{}
-			if f19iter.Field != nil {
-				f19elem.Field = f19iter.Field
+		f17 := []*svcapitypes.PlacementStrategy{}
+		for _, f17iter := range resp.Service.PlacementStrategy {
+			f17elem := &svcapitypes.PlacementStrategy{}
+			if f17iter.Field != nil {
+				f17elem.Field = f17iter.Field
 			}
-			if f19iter.Type != "" {
-				f19elem.Type = aws.String(string(f19iter.Type))
+			if f17iter.Type != "" {
+				f17elem.Type = aws.String(string(f17iter.Type))
 			}
-			f19 = append(f19, f19elem)
+			f17 = append(f17, f17elem)
 		}
-		ko.Spec.PlacementStrategy = f19
+		ko.Spec.PlacementStrategy = f17
 	} else {
 		ko.Spec.PlacementStrategy = nil
 	}
@@ -2928,11 +2490,6 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Spec.PropagateTags = aws.String(string(resp.Service.PropagateTags))
 	} else {
 		ko.Spec.PropagateTags = nil
-	}
-	if resp.Service.ResourceManagementType != "" {
-		ko.Status.ResourceManagementType = aws.String(string(resp.Service.ResourceManagementType))
-	} else {
-		ko.Status.ResourceManagementType = nil
 	}
 	if resp.Service.RoleArn != nil {
 		ko.Status.RoleARN = resp.Service.RoleArn
@@ -2959,26 +2516,26 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Spec.Name = nil
 	}
 	if resp.Service.ServiceRegistries != nil {
-		f29 := []*svcapitypes.ServiceRegistry{}
-		for _, f29iter := range resp.Service.ServiceRegistries {
-			f29elem := &svcapitypes.ServiceRegistry{}
-			if f29iter.ContainerName != nil {
-				f29elem.ContainerName = f29iter.ContainerName
+		f26 := []*svcapitypes.ServiceRegistry{}
+		for _, f26iter := range resp.Service.ServiceRegistries {
+			f26elem := &svcapitypes.ServiceRegistry{}
+			if f26iter.ContainerName != nil {
+				f26elem.ContainerName = f26iter.ContainerName
 			}
-			if f29iter.ContainerPort != nil {
-				containerPortCopy := int64(*f29iter.ContainerPort)
-				f29elem.ContainerPort = &containerPortCopy
+			if f26iter.ContainerPort != nil {
+				containerPortCopy := int64(*f26iter.ContainerPort)
+				f26elem.ContainerPort = &containerPortCopy
 			}
-			if f29iter.Port != nil {
-				portCopy := int64(*f29iter.Port)
-				f29elem.Port = &portCopy
+			if f26iter.Port != nil {
+				portCopy := int64(*f26iter.Port)
+				f26elem.Port = &portCopy
 			}
-			if f29iter.RegistryArn != nil {
-				f29elem.RegistryARN = f29iter.RegistryArn
+			if f26iter.RegistryArn != nil {
+				f26elem.RegistryARN = f26iter.RegistryArn
 			}
-			f29 = append(f29, f29elem)
+			f26 = append(f26, f26elem)
 		}
-		ko.Spec.ServiceRegistries = f29
+		ko.Spec.ServiceRegistries = f26
 	} else {
 		ko.Spec.ServiceRegistries = nil
 	}
@@ -2988,18 +2545,18 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Status.Status = nil
 	}
 	if resp.Service.Tags != nil {
-		f31 := []*svcapitypes.Tag{}
-		for _, f31iter := range resp.Service.Tags {
-			f31elem := &svcapitypes.Tag{}
-			if f31iter.Key != nil {
-				f31elem.Key = f31iter.Key
+		f28 := []*svcapitypes.Tag{}
+		for _, f28iter := range resp.Service.Tags {
+			f28elem := &svcapitypes.Tag{}
+			if f28iter.Key != nil {
+				f28elem.Key = f28iter.Key
 			}
-			if f31iter.Value != nil {
-				f31elem.Value = f31iter.Value
+			if f28iter.Value != nil {
+				f28elem.Value = f28iter.Value
 			}
-			f31 = append(f31, f31elem)
+			f28 = append(f28, f28elem)
 		}
-		ko.Spec.Tags = f31
+		ko.Spec.Tags = f28
 	} else {
 		ko.Spec.Tags = nil
 	}
@@ -3009,176 +2566,160 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Spec.TaskDefinition = nil
 	}
 	if resp.Service.TaskSets != nil {
-		f33 := []*svcapitypes.TaskSet{}
-		for _, f33iter := range resp.Service.TaskSets {
-			f33elem := &svcapitypes.TaskSet{}
-			if f33iter.CapacityProviderStrategy != nil {
-				f33elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
-				for _, f33elemf0iter := range f33iter.CapacityProviderStrategy {
-					f33elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
-					baseCopy := int64(f33elemf0iter.Base)
-					f33elemf0elem.Base = &baseCopy
-					if f33elemf0iter.CapacityProvider != nil {
-						f33elemf0elem.CapacityProvider = f33elemf0iter.CapacityProvider
+		f30 := []*svcapitypes.TaskSet{}
+		for _, f30iter := range resp.Service.TaskSets {
+			f30elem := &svcapitypes.TaskSet{}
+			if f30iter.CapacityProviderStrategy != nil {
+				f30elemf0 := []*svcapitypes.CapacityProviderStrategyItem{}
+				for _, f30elemf0iter := range f30iter.CapacityProviderStrategy {
+					f30elemf0elem := &svcapitypes.CapacityProviderStrategyItem{}
+					baseCopy := int64(f30elemf0iter.Base)
+					f30elemf0elem.Base = &baseCopy
+					if f30elemf0iter.CapacityProvider != nil {
+						f30elemf0elem.CapacityProvider = f30elemf0iter.CapacityProvider
 					}
-					weightCopy := int64(f33elemf0iter.Weight)
-					f33elemf0elem.Weight = &weightCopy
-					f33elemf0 = append(f33elemf0, f33elemf0elem)
+					weightCopy := int64(f30elemf0iter.Weight)
+					f30elemf0elem.Weight = &weightCopy
+					f30elemf0 = append(f30elemf0, f30elemf0elem)
 				}
-				f33elem.CapacityProviderStrategy = f33elemf0
+				f30elem.CapacityProviderStrategy = f30elemf0
 			}
-			if f33iter.ClusterArn != nil {
-				f33elem.ClusterARN = f33iter.ClusterArn
+			if f30iter.ClusterArn != nil {
+				f30elem.ClusterARN = f30iter.ClusterArn
 			}
-			computedDesiredCountCopy := int64(f33iter.ComputedDesiredCount)
-			f33elem.ComputedDesiredCount = &computedDesiredCountCopy
-			if f33iter.CreatedAt != nil {
-				f33elem.CreatedAt = &metav1.Time{*f33iter.CreatedAt}
+			computedDesiredCountCopy := int64(f30iter.ComputedDesiredCount)
+			f30elem.ComputedDesiredCount = &computedDesiredCountCopy
+			if f30iter.CreatedAt != nil {
+				f30elem.CreatedAt = &metav1.Time{*f30iter.CreatedAt}
 			}
-			if f33iter.ExternalId != nil {
-				f33elem.ExternalID = f33iter.ExternalId
+			if f30iter.ExternalId != nil {
+				f30elem.ExternalID = f30iter.ExternalId
 			}
-			if f33iter.Id != nil {
-				f33elem.ID = f33iter.Id
+			if f30iter.Id != nil {
+				f30elem.ID = f30iter.Id
 			}
-			if f33iter.LaunchType != "" {
-				f33elem.LaunchType = aws.String(string(f33iter.LaunchType))
+			if f30iter.LaunchType != "" {
+				f30elem.LaunchType = aws.String(string(f30iter.LaunchType))
 			}
-			if f33iter.LoadBalancers != nil {
-				f33elemf7 := []*svcapitypes.LoadBalancer{}
-				for _, f33elemf7iter := range f33iter.LoadBalancers {
-					f33elemf7elem := &svcapitypes.LoadBalancer{}
-					if f33elemf7iter.AdvancedConfiguration != nil {
-						f33elemf7elemf0 := &svcapitypes.AdvancedConfiguration{}
-						if f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn != nil {
-							f33elemf7elemf0.AlternateTargetGroupARN = f33elemf7iter.AdvancedConfiguration.AlternateTargetGroupArn
-						}
-						if f33elemf7iter.AdvancedConfiguration.ProductionListenerRule != nil {
-							f33elemf7elemf0.ProductionListenerRule = f33elemf7iter.AdvancedConfiguration.ProductionListenerRule
-						}
-						if f33elemf7iter.AdvancedConfiguration.RoleArn != nil {
-							f33elemf7elemf0.RoleARN = f33elemf7iter.AdvancedConfiguration.RoleArn
-						}
-						if f33elemf7iter.AdvancedConfiguration.TestListenerRule != nil {
-							f33elemf7elemf0.TestListenerRule = f33elemf7iter.AdvancedConfiguration.TestListenerRule
-						}
-						f33elemf7elem.AdvancedConfiguration = f33elemf7elemf0
+			if f30iter.LoadBalancers != nil {
+				f30elemf7 := []*svcapitypes.LoadBalancer{}
+				for _, f30elemf7iter := range f30iter.LoadBalancers {
+					f30elemf7elem := &svcapitypes.LoadBalancer{}
+					if f30elemf7iter.ContainerName != nil {
+						f30elemf7elem.ContainerName = f30elemf7iter.ContainerName
 					}
-					if f33elemf7iter.ContainerName != nil {
-						f33elemf7elem.ContainerName = f33elemf7iter.ContainerName
+					if f30elemf7iter.ContainerPort != nil {
+						containerPortCopy := int64(*f30elemf7iter.ContainerPort)
+						f30elemf7elem.ContainerPort = &containerPortCopy
 					}
-					if f33elemf7iter.ContainerPort != nil {
-						containerPortCopy := int64(*f33elemf7iter.ContainerPort)
-						f33elemf7elem.ContainerPort = &containerPortCopy
+					if f30elemf7iter.LoadBalancerName != nil {
+						f30elemf7elem.LoadBalancerName = f30elemf7iter.LoadBalancerName
 					}
-					if f33elemf7iter.LoadBalancerName != nil {
-						f33elemf7elem.LoadBalancerName = f33elemf7iter.LoadBalancerName
+					if f30elemf7iter.TargetGroupArn != nil {
+						f30elemf7elem.TargetGroupARN = f30elemf7iter.TargetGroupArn
 					}
-					if f33elemf7iter.TargetGroupArn != nil {
-						f33elemf7elem.TargetGroupARN = f33elemf7iter.TargetGroupArn
-					}
-					f33elemf7 = append(f33elemf7, f33elemf7elem)
+					f30elemf7 = append(f30elemf7, f30elemf7elem)
 				}
-				f33elem.LoadBalancers = f33elemf7
+				f30elem.LoadBalancers = f30elemf7
 			}
-			if f33iter.NetworkConfiguration != nil {
-				f33elemf8 := &svcapitypes.NetworkConfiguration{}
-				if f33iter.NetworkConfiguration.AwsvpcConfiguration != nil {
-					f33elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
-						f33elemf8f0.AssignPublicIP = aws.String(string(f33iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
+			if f30iter.NetworkConfiguration != nil {
+				f30elemf8 := &svcapitypes.NetworkConfiguration{}
+				if f30iter.NetworkConfiguration.AwsvpcConfiguration != nil {
+					f30elemf8f0 := &svcapitypes.AWSVPCConfiguration{}
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != "" {
+						f30elemf8f0.AssignPublicIP = aws.String(string(f30iter.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp))
 					}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
-						f33elemf8f0.SecurityGroups = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups != nil {
+						f30elemf8f0.SecurityGroups = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.SecurityGroups)
 					}
-					if f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
-						f33elemf8f0.Subnets = aws.StringSlice(f33iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
+					if f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets != nil {
+						f30elemf8f0.Subnets = aws.StringSlice(f30iter.NetworkConfiguration.AwsvpcConfiguration.Subnets)
 					}
-					f33elemf8.AWSVPCConfiguration = f33elemf8f0
+					f30elemf8.AWSVPCConfiguration = f30elemf8f0
 				}
-				f33elem.NetworkConfiguration = f33elemf8
+				f30elem.NetworkConfiguration = f30elemf8
 			}
-			pendingCountCopy := int64(f33iter.PendingCount)
-			f33elem.PendingCount = &pendingCountCopy
-			if f33iter.PlatformFamily != nil {
-				f33elem.PlatformFamily = f33iter.PlatformFamily
+			pendingCountCopy := int64(f30iter.PendingCount)
+			f30elem.PendingCount = &pendingCountCopy
+			if f30iter.PlatformFamily != nil {
+				f30elem.PlatformFamily = f30iter.PlatformFamily
 			}
-			if f33iter.PlatformVersion != nil {
-				f33elem.PlatformVersion = f33iter.PlatformVersion
+			if f30iter.PlatformVersion != nil {
+				f30elem.PlatformVersion = f30iter.PlatformVersion
 			}
-			runningCountCopy := int64(f33iter.RunningCount)
-			f33elem.RunningCount = &runningCountCopy
-			if f33iter.Scale != nil {
-				f33elemf13 := &svcapitypes.Scale{}
-				if f33iter.Scale.Unit != "" {
-					f33elemf13.Unit = aws.String(string(f33iter.Scale.Unit))
+			runningCountCopy := int64(f30iter.RunningCount)
+			f30elem.RunningCount = &runningCountCopy
+			if f30iter.Scale != nil {
+				f30elemf13 := &svcapitypes.Scale{}
+				if f30iter.Scale.Unit != "" {
+					f30elemf13.Unit = aws.String(string(f30iter.Scale.Unit))
 				}
-				f33elemf13.Value = &f33iter.Scale.Value
-				f33elem.Scale = f33elemf13
+				f30elemf13.Value = &f30iter.Scale.Value
+				f30elem.Scale = f30elemf13
 			}
-			if f33iter.ServiceArn != nil {
-				f33elem.ServiceARN = f33iter.ServiceArn
+			if f30iter.ServiceArn != nil {
+				f30elem.ServiceARN = f30iter.ServiceArn
 			}
-			if f33iter.ServiceRegistries != nil {
-				f33elemf15 := []*svcapitypes.ServiceRegistry{}
-				for _, f33elemf15iter := range f33iter.ServiceRegistries {
-					f33elemf15elem := &svcapitypes.ServiceRegistry{}
-					if f33elemf15iter.ContainerName != nil {
-						f33elemf15elem.ContainerName = f33elemf15iter.ContainerName
+			if f30iter.ServiceRegistries != nil {
+				f30elemf15 := []*svcapitypes.ServiceRegistry{}
+				for _, f30elemf15iter := range f30iter.ServiceRegistries {
+					f30elemf15elem := &svcapitypes.ServiceRegistry{}
+					if f30elemf15iter.ContainerName != nil {
+						f30elemf15elem.ContainerName = f30elemf15iter.ContainerName
 					}
-					if f33elemf15iter.ContainerPort != nil {
-						containerPortCopy := int64(*f33elemf15iter.ContainerPort)
-						f33elemf15elem.ContainerPort = &containerPortCopy
+					if f30elemf15iter.ContainerPort != nil {
+						containerPortCopy := int64(*f30elemf15iter.ContainerPort)
+						f30elemf15elem.ContainerPort = &containerPortCopy
 					}
-					if f33elemf15iter.Port != nil {
-						portCopy := int64(*f33elemf15iter.Port)
-						f33elemf15elem.Port = &portCopy
+					if f30elemf15iter.Port != nil {
+						portCopy := int64(*f30elemf15iter.Port)
+						f30elemf15elem.Port = &portCopy
 					}
-					if f33elemf15iter.RegistryArn != nil {
-						f33elemf15elem.RegistryARN = f33elemf15iter.RegistryArn
+					if f30elemf15iter.RegistryArn != nil {
+						f30elemf15elem.RegistryARN = f30elemf15iter.RegistryArn
 					}
-					f33elemf15 = append(f33elemf15, f33elemf15elem)
+					f30elemf15 = append(f30elemf15, f30elemf15elem)
 				}
-				f33elem.ServiceRegistries = f33elemf15
+				f30elem.ServiceRegistries = f30elemf15
 			}
-			if f33iter.StabilityStatus != "" {
-				f33elem.StabilityStatus = aws.String(string(f33iter.StabilityStatus))
+			if f30iter.StabilityStatus != "" {
+				f30elem.StabilityStatus = aws.String(string(f30iter.StabilityStatus))
 			}
-			if f33iter.StabilityStatusAt != nil {
-				f33elem.StabilityStatusAt = &metav1.Time{*f33iter.StabilityStatusAt}
+			if f30iter.StabilityStatusAt != nil {
+				f30elem.StabilityStatusAt = &metav1.Time{*f30iter.StabilityStatusAt}
 			}
-			if f33iter.StartedBy != nil {
-				f33elem.StartedBy = f33iter.StartedBy
+			if f30iter.StartedBy != nil {
+				f30elem.StartedBy = f30iter.StartedBy
 			}
-			if f33iter.Status != nil {
-				f33elem.Status = f33iter.Status
+			if f30iter.Status != nil {
+				f30elem.Status = f30iter.Status
 			}
-			if f33iter.Tags != nil {
-				f33elemf20 := []*svcapitypes.Tag{}
-				for _, f33elemf20iter := range f33iter.Tags {
-					f33elemf20elem := &svcapitypes.Tag{}
-					if f33elemf20iter.Key != nil {
-						f33elemf20elem.Key = f33elemf20iter.Key
+			if f30iter.Tags != nil {
+				f30elemf20 := []*svcapitypes.Tag{}
+				for _, f30elemf20iter := range f30iter.Tags {
+					f30elemf20elem := &svcapitypes.Tag{}
+					if f30elemf20iter.Key != nil {
+						f30elemf20elem.Key = f30elemf20iter.Key
 					}
-					if f33elemf20iter.Value != nil {
-						f33elemf20elem.Value = f33elemf20iter.Value
+					if f30elemf20iter.Value != nil {
+						f30elemf20elem.Value = f30elemf20iter.Value
 					}
-					f33elemf20 = append(f33elemf20, f33elemf20elem)
+					f30elemf20 = append(f30elemf20, f30elemf20elem)
 				}
-				f33elem.Tags = f33elemf20
+				f30elem.Tags = f30elemf20
 			}
-			if f33iter.TaskDefinition != nil {
-				f33elem.TaskDefinition = f33iter.TaskDefinition
+			if f30iter.TaskDefinition != nil {
+				f30elem.TaskDefinition = f30iter.TaskDefinition
 			}
-			if f33iter.TaskSetArn != nil {
-				f33elem.TaskSetARN = f33iter.TaskSetArn
+			if f30iter.TaskSetArn != nil {
+				f30elem.TaskSetARN = f30iter.TaskSetArn
 			}
-			if f33iter.UpdatedAt != nil {
-				f33elem.UpdatedAt = &metav1.Time{*f33iter.UpdatedAt}
+			if f30iter.UpdatedAt != nil {
+				f30elem.UpdatedAt = &metav1.Time{*f30iter.UpdatedAt}
 			}
-			f33 = append(f33, f33elem)
+			f30 = append(f30, f30elem)
 		}
-		ko.Status.TaskSets = f33
+		ko.Status.TaskSets = f30
 	} else {
 		ko.Status.TaskSets = nil
 	}
@@ -3241,53 +2782,15 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			}
 			f3.Alarms = f3f0
 		}
-		if r.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes != nil {
-			bakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.BakeTimeInMinutes
-			if bakeTimeInMinutesCopy0 > math.MaxInt32 || bakeTimeInMinutesCopy0 < math.MinInt32 {
-				return nil, fmt.Errorf("error: field bakeTimeInMinutes is of type int32")
-			}
-			bakeTimeInMinutesCopy := int32(bakeTimeInMinutesCopy0)
-			f3.BakeTimeInMinutes = &bakeTimeInMinutesCopy
-		}
-		if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration != nil {
-			f3f2 := &svcsdktypes.CanaryConfiguration{}
-			if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes != nil {
-				canaryBakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryBakeTimeInMinutes
-				if canaryBakeTimeInMinutesCopy0 > math.MaxInt32 || canaryBakeTimeInMinutesCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field canaryBakeTimeInMinutes is of type int32")
-				}
-				canaryBakeTimeInMinutesCopy := int32(canaryBakeTimeInMinutesCopy0)
-				f3f2.CanaryBakeTimeInMinutes = &canaryBakeTimeInMinutesCopy
-			}
-			if r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent != nil {
-				f3f2.CanaryPercent = r.ko.Spec.DeploymentConfiguration.CanaryConfiguration.CanaryPercent
-			}
-			f3.CanaryConfiguration = f3f2
-		}
 		if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker != nil {
-			f3f3 := &svcsdktypes.DeploymentCircuitBreaker{}
+			f3f1 := &svcsdktypes.DeploymentCircuitBreaker{}
 			if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable != nil {
-				f3f3.Enable = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
+				f3f1.Enable = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Enable
 			}
 			if r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback != nil {
-				f3f3.Rollback = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
+				f3f1.Rollback = *r.ko.Spec.DeploymentConfiguration.DeploymentCircuitBreaker.Rollback
 			}
-			f3.DeploymentCircuitBreaker = f3f3
-		}
-		if r.ko.Spec.DeploymentConfiguration.LinearConfiguration != nil {
-			f3f4 := &svcsdktypes.LinearConfiguration{}
-			if r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes != nil {
-				stepBakeTimeInMinutesCopy0 := *r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepBakeTimeInMinutes
-				if stepBakeTimeInMinutesCopy0 > math.MaxInt32 || stepBakeTimeInMinutesCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field stepBakeTimeInMinutes is of type int32")
-				}
-				stepBakeTimeInMinutesCopy := int32(stepBakeTimeInMinutesCopy0)
-				f3f4.StepBakeTimeInMinutes = &stepBakeTimeInMinutesCopy
-			}
-			if r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent != nil {
-				f3f4.StepPercent = r.ko.Spec.DeploymentConfiguration.LinearConfiguration.StepPercent
-			}
-			f3.LinearConfiguration = f3f4
+			f3.DeploymentCircuitBreaker = f3f1
 		}
 		if r.ko.Spec.DeploymentConfiguration.MaximumPercent != nil {
 			maximumPercentCopy0 := *r.ko.Spec.DeploymentConfiguration.MaximumPercent
@@ -3304,9 +2807,6 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			}
 			minimumHealthyPercentCopy := int32(minimumHealthyPercentCopy0)
 			f3.MinimumHealthyPercent = &minimumHealthyPercentCopy
-		}
-		if r.ko.Spec.DeploymentConfiguration.Strategy != nil {
-			f3.Strategy = svcsdktypes.DeploymentStrategy(*r.ko.Spec.DeploymentConfiguration.Strategy)
 		}
 		res.DeploymentConfiguration = f3
 	}
@@ -3343,22 +2843,6 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		f10 := []svcsdktypes.LoadBalancer{}
 		for _, f10iter := range r.ko.Spec.LoadBalancers {
 			f10elem := &svcsdktypes.LoadBalancer{}
-			if f10iter.AdvancedConfiguration != nil {
-				f10elemf0 := &svcsdktypes.AdvancedConfiguration{}
-				if f10iter.AdvancedConfiguration.AlternateTargetGroupARN != nil {
-					f10elemf0.AlternateTargetGroupArn = f10iter.AdvancedConfiguration.AlternateTargetGroupARN
-				}
-				if f10iter.AdvancedConfiguration.ProductionListenerRule != nil {
-					f10elemf0.ProductionListenerRule = f10iter.AdvancedConfiguration.ProductionListenerRule
-				}
-				if f10iter.AdvancedConfiguration.RoleARN != nil {
-					f10elemf0.RoleArn = f10iter.AdvancedConfiguration.RoleARN
-				}
-				if f10iter.AdvancedConfiguration.TestListenerRule != nil {
-					f10elemf0.TestListenerRule = f10iter.AdvancedConfiguration.TestListenerRule
-				}
-				f10elem.AdvancedConfiguration = f10elemf0
-			}
 			if f10iter.ContainerName != nil {
 				f10elem.ContainerName = f10iter.ContainerName
 			}
@@ -3433,141 +2917,113 @@ func (rm *resourceManager) newUpdateRequestPayload(
 	}
 	if r.ko.Spec.ServiceConnectConfiguration != nil {
 		f17 := &svcsdktypes.ServiceConnectConfiguration{}
-		if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration != nil {
-			f17f0 := &svcsdktypes.ServiceConnectAccessLogConfiguration{}
-			if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format != nil {
-				f17f0.Format = svcsdktypes.ServiceConnectAccessLoggingFormat(*r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.Format)
-			}
-			if r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters != nil {
-				f17f0.IncludeQueryParameters = svcsdktypes.ServiceConnectIncludeQueryParameters(*r.ko.Spec.ServiceConnectConfiguration.AccessLogConfiguration.IncludeQueryParameters)
-			}
-			f17.AccessLogConfiguration = f17f0
-		}
 		if r.ko.Spec.ServiceConnectConfiguration.Enabled != nil {
 			f17.Enabled = *r.ko.Spec.ServiceConnectConfiguration.Enabled
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration != nil {
-			f17f2 := &svcsdktypes.LogConfiguration{}
+			f17f1 := &svcsdktypes.LogConfiguration{}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver != nil {
-				f17f2.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
+				f17f1.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-				f17f2.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
+				f17f1.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-				f17f2f2 := []svcsdktypes.Secret{}
-				for _, f17f2f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-					f17f2f2elem := &svcsdktypes.Secret{}
-					if f17f2f2iter.Name != nil {
-						f17f2f2elem.Name = f17f2f2iter.Name
+				f17f1f2 := []svcsdktypes.Secret{}
+				for _, f17f1f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+					f17f1f2elem := &svcsdktypes.Secret{}
+					if f17f1f2iter.Name != nil {
+						f17f1f2elem.Name = f17f1f2iter.Name
 					}
-					if f17f2f2iter.ValueFrom != nil {
-						f17f2f2elem.ValueFrom = f17f2f2iter.ValueFrom
+					if f17f1f2iter.ValueFrom != nil {
+						f17f1f2elem.ValueFrom = f17f1f2iter.ValueFrom
 					}
-					f17f2f2 = append(f17f2f2, *f17f2f2elem)
+					f17f1f2 = append(f17f1f2, *f17f1f2elem)
 				}
-				f17f2.SecretOptions = f17f2f2
+				f17f1.SecretOptions = f17f1f2
 			}
-			f17.LogConfiguration = f17f2
+			f17.LogConfiguration = f17f1
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Namespace != nil {
 			f17.Namespace = r.ko.Spec.ServiceConnectConfiguration.Namespace
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Services != nil {
-			f17f4 := []svcsdktypes.ServiceConnectService{}
-			for _, f17f4iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
-				f17f4elem := &svcsdktypes.ServiceConnectService{}
-				if f17f4iter.ClientAliases != nil {
-					f17f4elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
-					for _, f17f4elemf0iter := range f17f4iter.ClientAliases {
-						f17f4elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
-						if f17f4elemf0iter.DNSName != nil {
-							f17f4elemf0elem.DnsName = f17f4elemf0iter.DNSName
+			f17f3 := []svcsdktypes.ServiceConnectService{}
+			for _, f17f3iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
+				f17f3elem := &svcsdktypes.ServiceConnectService{}
+				if f17f3iter.ClientAliases != nil {
+					f17f3elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
+					for _, f17f3elemf0iter := range f17f3iter.ClientAliases {
+						f17f3elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
+						if f17f3elemf0iter.DNSName != nil {
+							f17f3elemf0elem.DnsName = f17f3elemf0iter.DNSName
 						}
-						if f17f4elemf0iter.Port != nil {
-							portCopy0 := *f17f4elemf0iter.Port
+						if f17f3elemf0iter.Port != nil {
+							portCopy0 := *f17f3elemf0iter.Port
 							if portCopy0 > math.MaxInt32 || portCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field port is of type int32")
 							}
 							portCopy := int32(portCopy0)
-							f17f4elemf0elem.Port = &portCopy
+							f17f3elemf0elem.Port = &portCopy
 						}
-						if f17f4elemf0iter.TestTrafficRules != nil {
-							f17f4elemf0elemf2 := &svcsdktypes.ServiceConnectTestTrafficRules{}
-							if f17f4elemf0iter.TestTrafficRules.Header != nil {
-								f17f4elemf0elemf2f0 := &svcsdktypes.ServiceConnectTestTrafficHeaderRules{}
-								if f17f4elemf0iter.TestTrafficRules.Header.Name != nil {
-									f17f4elemf0elemf2f0.Name = f17f4elemf0iter.TestTrafficRules.Header.Name
-								}
-								if f17f4elemf0iter.TestTrafficRules.Header.Value != nil {
-									f17f4elemf0elemf2f0f1 := &svcsdktypes.ServiceConnectTestTrafficHeaderMatchRules{}
-									if f17f4elemf0iter.TestTrafficRules.Header.Value.Exact != nil {
-										f17f4elemf0elemf2f0f1.Exact = f17f4elemf0iter.TestTrafficRules.Header.Value.Exact
-									}
-									f17f4elemf0elemf2f0.Value = f17f4elemf0elemf2f0f1
-								}
-								f17f4elemf0elemf2.Header = f17f4elemf0elemf2f0
-							}
-							f17f4elemf0elem.TestTrafficRules = f17f4elemf0elemf2
-						}
-						f17f4elemf0 = append(f17f4elemf0, *f17f4elemf0elem)
+						f17f3elemf0 = append(f17f3elemf0, *f17f3elemf0elem)
 					}
-					f17f4elem.ClientAliases = f17f4elemf0
+					f17f3elem.ClientAliases = f17f3elemf0
 				}
-				if f17f4iter.DiscoveryName != nil {
-					f17f4elem.DiscoveryName = f17f4iter.DiscoveryName
+				if f17f3iter.DiscoveryName != nil {
+					f17f3elem.DiscoveryName = f17f3iter.DiscoveryName
 				}
-				if f17f4iter.IngressPortOverride != nil {
-					ingressPortOverrideCopy0 := *f17f4iter.IngressPortOverride
+				if f17f3iter.IngressPortOverride != nil {
+					ingressPortOverrideCopy0 := *f17f3iter.IngressPortOverride
 					if ingressPortOverrideCopy0 > math.MaxInt32 || ingressPortOverrideCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field ingressPortOverride is of type int32")
 					}
 					ingressPortOverrideCopy := int32(ingressPortOverrideCopy0)
-					f17f4elem.IngressPortOverride = &ingressPortOverrideCopy
+					f17f3elem.IngressPortOverride = &ingressPortOverrideCopy
 				}
-				if f17f4iter.PortName != nil {
-					f17f4elem.PortName = f17f4iter.PortName
+				if f17f3iter.PortName != nil {
+					f17f3elem.PortName = f17f3iter.PortName
 				}
-				if f17f4iter.Timeout != nil {
-					f17f4elemf4 := &svcsdktypes.TimeoutConfiguration{}
-					if f17f4iter.Timeout.IdleTimeoutSeconds != nil {
-						idleTimeoutSecondsCopy0 := *f17f4iter.Timeout.IdleTimeoutSeconds
+				if f17f3iter.Timeout != nil {
+					f17f3elemf4 := &svcsdktypes.TimeoutConfiguration{}
+					if f17f3iter.Timeout.IdleTimeoutSeconds != nil {
+						idleTimeoutSecondsCopy0 := *f17f3iter.Timeout.IdleTimeoutSeconds
 						if idleTimeoutSecondsCopy0 > math.MaxInt32 || idleTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field idleTimeoutSeconds is of type int32")
 						}
 						idleTimeoutSecondsCopy := int32(idleTimeoutSecondsCopy0)
-						f17f4elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+						f17f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
 					}
-					if f17f4iter.Timeout.PerRequestTimeoutSeconds != nil {
-						perRequestTimeoutSecondsCopy0 := *f17f4iter.Timeout.PerRequestTimeoutSeconds
+					if f17f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+						perRequestTimeoutSecondsCopy0 := *f17f3iter.Timeout.PerRequestTimeoutSeconds
 						if perRequestTimeoutSecondsCopy0 > math.MaxInt32 || perRequestTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field perRequestTimeoutSeconds is of type int32")
 						}
 						perRequestTimeoutSecondsCopy := int32(perRequestTimeoutSecondsCopy0)
-						f17f4elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+						f17f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
 					}
-					f17f4elem.Timeout = f17f4elemf4
+					f17f3elem.Timeout = f17f3elemf4
 				}
-				if f17f4iter.TLS != nil {
-					f17f4elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
-					if f17f4iter.TLS.IssuerCertificateAuthority != nil {
-						f17f4elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
-						if f17f4iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
-							f17f4elemf5f0.AwsPcaAuthorityArn = f17f4iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
+				if f17f3iter.TLS != nil {
+					f17f3elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
+					if f17f3iter.TLS.IssuerCertificateAuthority != nil {
+						f17f3elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
+						if f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
+							f17f3elemf5f0.AwsPcaAuthorityArn = f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
 						}
-						f17f4elemf5.IssuerCertificateAuthority = f17f4elemf5f0
+						f17f3elemf5.IssuerCertificateAuthority = f17f3elemf5f0
 					}
-					if f17f4iter.TLS.KMSKey != nil {
-						f17f4elemf5.KmsKey = f17f4iter.TLS.KMSKey
+					if f17f3iter.TLS.KMSKey != nil {
+						f17f3elemf5.KmsKey = f17f3iter.TLS.KMSKey
 					}
-					if f17f4iter.TLS.RoleARN != nil {
-						f17f4elemf5.RoleArn = f17f4iter.TLS.RoleARN
+					if f17f3iter.TLS.RoleARN != nil {
+						f17f3elemf5.RoleArn = f17f3iter.TLS.RoleARN
 					}
-					f17f4elem.Tls = f17f4elemf5
+					f17f3elem.Tls = f17f3elemf5
 				}
-				f17f4 = append(f17f4, *f17f4elem)
+				f17f3 = append(f17f3, *f17f3elem)
 			}
-			f17.Services = f17f4
+			f17.Services = f17f3
 		}
 		res.ServiceConnectConfiguration = f17
 	}
@@ -3676,14 +3132,6 @@ func (rm *resourceManager) newUpdateRequestPayload(
 					}
 					throughputCopy := int32(throughputCopy0)
 					f20elemf0.Throughput = &throughputCopy
-				}
-				if f20iter.ManagedEBSVolume.VolumeInitializationRate != nil {
-					volumeInitializationRateCopy0 := *f20iter.ManagedEBSVolume.VolumeInitializationRate
-					if volumeInitializationRateCopy0 > math.MaxInt32 || volumeInitializationRateCopy0 < math.MinInt32 {
-						return nil, fmt.Errorf("error: field volumeInitializationRate is of type int32")
-					}
-					volumeInitializationRateCopy := int32(volumeInitializationRateCopy0)
-					f20elemf0.VolumeInitializationRate = &volumeInitializationRateCopy
 				}
 				if f20iter.ManagedEBSVolume.VolumeType != nil {
 					f20elemf0.VolumeType = f20iter.ManagedEBSVolume.VolumeType

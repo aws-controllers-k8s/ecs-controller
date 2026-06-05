@@ -22,6 +22,21 @@ ignore:
   - Deployment.FargateEphemeralStorage
   - Deployment.VpcLatticeConfigurations
   - ContainerDefinition.VersionConsistency
+  - DeploymentConfiguration.BakeTimeInMinutes
+  - DeploymentConfiguration.CanaryConfiguration
+  - DeploymentConfiguration.LinearConfiguration
+  - DeploymentConfiguration.Strategy
+  - LoadBalancer.AdvancedConfiguration
+  - ServiceConnectConfiguration.AccessLogConfiguration
+  - ServiceConnectClientAlias.TestTrafficRules
+  - ServiceManagedEBSVolumeConfiguration.VolumeInitializationRate
+  - CreateServiceOutput.Service.CurrentServiceDeployment
+  - CreateServiceOutput.Service.CurrentServiceRevisions
+  - CreateServiceOutput.Service.ResourceManagementType
+  - RegisterTaskDefinitionInput.EnableFaultInjection
+  - RegisterTaskDefinitionOutput.TaskDefinition.EnableFaultInjection
+  - RegisterTaskDefinitionInput.Volumes.Volume.S3filesVolumeConfiguration
+  - TaskDefinition.DeleteRequestedAt
 operations:
   DescribeCapacityProviders:
     operation_type:
