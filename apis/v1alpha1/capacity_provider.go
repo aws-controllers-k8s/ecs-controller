@@ -31,7 +31,8 @@ type CapacityProviderSpec struct {
 	// create a capacity provider with Amazon ECS Managed Instances, it becomes
 	// available only within the specified cluster.
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
-	Cluster *string `json:"cluster,omitempty"`
+	Cluster    *string                                  `json:"cluster,omitempty"`
+	ClusterRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"clusterRef,omitempty"`
 	// The configuration for the Amazon ECS Managed Instances provider. This configuration
 	// specifies how Amazon ECS manages Amazon EC2 instances on your behalf, including
 	// the infrastructure role, instance launch template, and tag propagation settings.

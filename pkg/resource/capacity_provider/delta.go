@@ -20,6 +20,7 @@ import (
 
 	ackcompare "github.com/aws-controllers-k8s/runtime/pkg/compare"
 	acktags "github.com/aws-controllers-k8s/runtime/pkg/tags"
+	"k8s.io/apimachinery/pkg/api/equality"
 )
 
 // Hack to avoid import errors during build...
@@ -111,6 +112,9 @@ func newResourceDelta(
 		if *a.ko.Spec.Cluster != *b.ko.Spec.Cluster {
 			delta.Add("Spec.Cluster", a.ko.Spec.Cluster, b.ko.Spec.Cluster)
 		}
+	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ClusterRef, b.ko.Spec.ClusterRef) {
+		delta.Add("Spec.ClusterRef", a.ko.Spec.ClusterRef, b.ko.Spec.ClusterRef)
 	}
 	if ackcompare.HasNilDifference(a.ko.Spec.ManagedInstancesProvider, b.ko.Spec.ManagedInstancesProvider) {
 		delta.Add("Spec.ManagedInstancesProvider", a.ko.Spec.ManagedInstancesProvider, b.ko.Spec.ManagedInstancesProvider)

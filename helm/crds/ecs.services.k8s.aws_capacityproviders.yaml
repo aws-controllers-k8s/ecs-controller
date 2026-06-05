@@ -94,6 +94,23 @@ spec:
                 x-kubernetes-validations:
                 - message: Value is immutable once set
                   rule: self == oldSelf
+              clusterRef:
+                description: "AWSResourceReferenceWrapper provides a wrapper around
+                  *AWSResourceReference\ntype to provide more user friendly syntax
+                  for references using 'from' field\nEx:\nAPIIDRef:\n\n\tfrom:\n\t
+                  \ name: my-api"
+                properties:
+                  from:
+                    description: |-
+                      AWSResourceReference provides all the values necessary to reference another
+                      k8s resource for finding the identifier(Id/ARN/Name)
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                type: object
               managedInstancesProvider:
                 description: |-
                   The configuration for the Amazon ECS Managed Instances provider. This configuration
@@ -120,6 +137,20 @@ spec:
                     type: object
                   infrastructureRoleARN:
                     type: string
+                  infrastructureRoleRef:
+                    description: Reference field for InfrastructureRoleARN
+                    properties:
+                      from:
+                        description: |-
+                          AWSResourceReference provides all the values necessary to reference another
+                          k8s resource for finding the identifier(Id/ARN/Name)
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
+                    type: object
                   instanceLaunchTemplate:
                     description: |-
                       The launch template configuration for Amazon ECS Managed Instances. This
@@ -141,6 +172,20 @@ spec:
                         type: object
                       ec2InstanceProfileARN:
                         type: string
+                      ec2InstanceProfileRef:
+                        description: Reference field for EC2InstanceProfileARN
+                        properties:
+                          from:
+                            description: |-
+                              AWSResourceReference provides all the values necessary to reference another
+                              k8s resource for finding the identifier(Id/ARN/Name)
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            type: object
+                        type: object
                       fipsEnabled:
                         type: boolean
                       instanceMetadataTagsPropagation:
@@ -331,9 +376,49 @@ spec:
                           namespace with tasks), and none (no external network connectivity), ensuring
                           backward compatibility for migrating workloads from Fargate or Amazon EC2.
                         properties:
+                          securityGroupRefs:
+                            description: Reference field for SecurityGroups
+                            items:
+                              description: "AWSResourceReferenceWrapper provides a
+                                wrapper around *AWSResourceReference\ntype to provide
+                                more user friendly syntax for references using 'from'
+                                field\nEx:\nAPIIDRef:\n\n\tfrom:\n\t  name: my-api"
+                              properties:
+                                from:
+                                  description: |-
+                                    AWSResourceReference provides all the values necessary to reference another
+                                    k8s resource for finding the identifier(Id/ARN/Name)
+                                  properties:
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  type: object
+                              type: object
+                            type: array
                           securityGroups:
                             items:
                               type: string
+                            type: array
+                          subnetRefs:
+                            description: Reference field for Subnets
+                            items:
+                              description: "AWSResourceReferenceWrapper provides a
+                                wrapper around *AWSResourceReference\ntype to provide
+                                more user friendly syntax for references using 'from'
+                                field\nEx:\nAPIIDRef:\n\n\tfrom:\n\t  name: my-api"
+                              properties:
+                                from:
+                                  description: |-
+                                    AWSResourceReference provides all the values necessary to reference another
+                                    k8s resource for finding the identifier(Id/ARN/Name)
+                                  properties:
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  type: object
+                              type: object
                             type: array
                           subnets:
                             items:

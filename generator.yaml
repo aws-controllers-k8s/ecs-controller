@@ -62,14 +62,29 @@ resources:
         is_immutable: true
       Cluster:
         is_immutable: true
-      CapacityProviderArn:
-        is_read_only: true
-      Status:
-        is_read_only: true
-      UpdateStatus:
-        is_read_only: true
-      UpdateStatusReason:
-        is_read_only: true
+        references:
+          resource: Cluster
+          path: Spec.Name
+      ManagedInstancesProvider.InfrastructureRoleARN:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: Role
+          service_name: iam
+      ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileARN:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: InstanceProfile
+          service_name: iam
+      ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroups:
+        references:
+          path: Status.ID
+          resource: SecurityGroup
+          service_name: ec2
+      ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.Subnets:
+        references:
+          path: Status.SubnetID
+          resource: Subnet
+          service_name: ec2
     list_operation:
       match_fields:
       - Name

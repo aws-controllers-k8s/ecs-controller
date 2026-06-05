@@ -679,6 +679,8 @@ type CreateManagedInstancesProviderConfiguration struct {
 	// The configuration that controls how Amazon ECS optimizes your infrastructure.
 	InfrastructureOptimization *InfrastructureOptimization `json:"infrastructureOptimization,omitempty"`
 	InfrastructureRoleARN      *string                     `json:"infrastructureRoleARN,omitempty"`
+	// Reference field for InfrastructureRoleARN
+	InfrastructureRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"infrastructureRoleRef,omitempty"`
 	// The launch template configuration for Amazon ECS Managed Instances. This
 	// defines how Amazon ECS launches Amazon EC2 instances, including the instance
 	// profile for your tasks, network and storage configuration, capacity options,
@@ -1716,10 +1718,12 @@ type InstanceLaunchTemplate struct {
 	CapacityOptionType *string `json:"capacityOptionType,omitempty"`
 	// The Capacity Reservation configurations to be used when using the RESERVED
 	// capacity option type.
-	CapacityReservations            *CapacityReservationRequest `json:"capacityReservations,omitempty"`
-	EC2InstanceProfileARN           *string                     `json:"ec2InstanceProfileARN,omitempty"`
-	FipsEnabled                     *bool                       `json:"fipsEnabled,omitempty"`
-	InstanceMetadataTagsPropagation *bool                       `json:"instanceMetadataTagsPropagation,omitempty"`
+	CapacityReservations  *CapacityReservationRequest `json:"capacityReservations,omitempty"`
+	EC2InstanceProfileARN *string                     `json:"ec2InstanceProfileARN,omitempty"`
+	// Reference field for EC2InstanceProfileARN
+	EC2InstanceProfileRef           *ackv1alpha1.AWSResourceReferenceWrapper `json:"ec2InstanceProfileRef,omitempty"`
+	FipsEnabled                     *bool                                    `json:"fipsEnabled,omitempty"`
+	InstanceMetadataTagsPropagation *bool                                    `json:"instanceMetadataTagsPropagation,omitempty"`
 	// The instance requirements for attribute-based instance type selection. Instead
 	// of specifying exact instance types, you define requirements such as vCPU
 	// count, memory size, network performance, and accelerator specifications.
@@ -2045,8 +2049,12 @@ type ManagedInstancesLocalStorageConfiguration struct {
 // namespace with tasks), and none (no external network connectivity), ensuring
 // backward compatibility for migrating workloads from Fargate or Amazon EC2.
 type ManagedInstancesNetworkConfiguration struct {
-	SecurityGroups []*string `json:"securityGroups,omitempty"`
-	Subnets        []*string `json:"subnets,omitempty"`
+	// Reference field for SecurityGroups
+	SecurityGroupRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"securityGroupRefs,omitempty"`
+	SecurityGroups    []*string                                  `json:"securityGroups,omitempty"`
+	// Reference field for Subnets
+	SubnetRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"subnetRefs,omitempty"`
+	Subnets    []*string                                  `json:"subnets,omitempty"`
 }
 
 // The configuration for a Amazon ECS Managed Instances provider. Amazon ECS
