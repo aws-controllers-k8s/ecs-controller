@@ -19,6 +19,7 @@ import (
 	"context"
 	"os"
 
+	autoscalingapitypes "github.com/aws-controllers-k8s/autoscaling-controller/apis/v1alpha1"
 	ec2apitypes "github.com/aws-controllers-k8s/ec2-controller/apis/v1alpha1"
 	elbv2apitypes "github.com/aws-controllers-k8s/elbv2-controller/apis/v1alpha1"
 	iamapitypes "github.com/aws-controllers-k8s/iam-controller/apis/v1alpha1"
@@ -62,6 +63,7 @@ func init() {
 
 	_ = svctypes.AddToScheme(scheme)
 	_ = ackv1alpha1.AddToScheme(scheme)
+	_ = autoscalingapitypes.AddToScheme(scheme)
 	_ = ec2apitypes.AddToScheme(scheme)
 	_ = elbv2apitypes.AddToScheme(scheme)
 	_ = iamapitypes.AddToScheme(scheme)

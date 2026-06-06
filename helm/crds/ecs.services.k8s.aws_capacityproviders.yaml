@@ -51,6 +51,20 @@ spec:
                     x-kubernetes-validations:
                     - message: Value is immutable once set
                       rule: self == oldSelf
+                  autoScalingGroupRef:
+                    description: Reference field for AutoScalingGroupARN
+                    properties:
+                      from:
+                        description: |-
+                          AWSResourceReference provides all the values necessary to reference another
+                          k8s resource for finding the identifier(Id/ARN/Name)
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
+                    type: object
                   managedDraining:
                     type: string
                   managedScaling:
@@ -589,7 +603,7 @@ spec:
                   ACTIVE state can be used in a cluster. When a capacity provider is successfully
                   deleted, it has an INACTIVE status.
                 type: string
-              type_:
+              type:
                 description: |-
                   The type of capacity provider. For Amazon ECS Managed Instances, this value
                   is MANAGED_INSTANCES, indicating that Amazon ECS manages the underlying Amazon

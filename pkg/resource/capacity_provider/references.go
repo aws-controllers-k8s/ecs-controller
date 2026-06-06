@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	autoscalingapitypes "github.com/aws-controllers-k8s/autoscaling-controller/apis/v1alpha1"
 	ec2apitypes "github.com/aws-controllers-k8s/ec2-controller/apis/v1alpha1"
 	iamapitypes "github.com/aws-controllers-k8s/iam-controller/apis/v1alpha1"
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
@@ -31,6 +32,9 @@ import (
 
 	svcapitypes "github.com/aws-controllers-k8s/ecs-controller/apis/v1alpha1"
 )
+
+// +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups,verbs=get;list
+// +kubebuilder:rbac:groups=autoscaling.services.k8s.aws,resources=autoscalinggroups/status,verbs=get;list
 
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
@@ -50,6 +54,12 @@ import (
 // values.
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
+
+	if ko.Spec.AutoScalingGroupProvider != nil {
+		if ko.Spec.AutoScalingGroupProvider.AutoScalingGroupRef != nil {
+			ko.Spec.AutoScalingGroupProvider.AutoScalingGroupARN = nil
+		}
+	}
 
 	if ko.Spec.ClusterRef != nil {
 		ko.Spec.Cluster = nil
@@ -108,6 +118,12 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForAutoScalingGroupProvider_AutoScalingGroupARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForCluster(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
@@ -145,6 +161,12 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.CapacityProvider) error {
 
+	if ko.Spec.AutoScalingGroupProvider != nil {
+		if ko.Spec.AutoScalingGroupProvider.AutoScalingGroupRef != nil && ko.Spec.AutoScalingGroupProvider.AutoScalingGroupARN != nil {
+			return ackerr.ResourceReferenceAndIDNotSupportedFor("AutoScalingGroupProvider.AutoScalingGroupARN", "AutoScalingGroupProvider.AutoScalingGroupRef")
+		}
+	}
+
 	if ko.Spec.ClusterRef != nil && ko.Spec.Cluster != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("Cluster", "ClusterRef")
 	}
@@ -181,6 +203,91 @@ func validateReferenceFields(ko *svcapitypes.CapacityProvider) error {
 				}
 			}
 		}
+	}
+	return nil
+}
+
+// resolveReferenceForAutoScalingGroupProvider_AutoScalingGroupARN reads the resource referenced
+// from AutoScalingGroupProvider.AutoScalingGroupRef field and sets the AutoScalingGroupProvider.AutoScalingGroupARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForAutoScalingGroupProvider_AutoScalingGroupARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.CapacityProvider,
+) (hasReferences bool, err error) {
+	if ko.Spec.AutoScalingGroupProvider != nil {
+		if ko.Spec.AutoScalingGroupProvider.AutoScalingGroupRef != nil && ko.Spec.AutoScalingGroupProvider.AutoScalingGroupRef.From != nil {
+			hasReferences = true
+			arr := ko.Spec.AutoScalingGroupProvider.AutoScalingGroupRef.From
+			if arr.Name == nil || *arr.Name == "" {
+				return hasReferences, fmt.Errorf("provided resource reference is nil or empty: AutoScalingGroupProvider.AutoScalingGroupRef")
+			}
+			namespace := ko.ObjectMeta.GetNamespace()
+			if arr.Namespace != nil && *arr.Namespace != "" {
+				namespace = *arr.Namespace
+			}
+			obj := &autoscalingapitypes.AutoScalingGroup{}
+			if err := getReferencedResourceState_AutoScalingGroup(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+				return hasReferences, err
+			}
+			ko.Spec.AutoScalingGroupProvider.AutoScalingGroupARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+		}
+	}
+
+	return hasReferences, nil
+}
+
+// getReferencedResourceState_AutoScalingGroup looks up whether a referenced resource
+// exists and is in a ACK.ResourceSynced=True state. If the referenced resource does exist and is
+// in a Synced state, returns nil, otherwise returns `ackerr.ResourceReferenceTerminalFor` or
+// `ResourceReferenceNotSyncedFor` depending on if the resource is in a Terminal state.
+func getReferencedResourceState_AutoScalingGroup(
+	ctx context.Context,
+	apiReader client.Reader,
+	obj *autoscalingapitypes.AutoScalingGroup,
+	name string, // the Kubernetes name of the referenced resource
+	namespace string, // the Kubernetes namespace of the referenced resource
+) error {
+	namespacedName := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	err := apiReader.Get(ctx, namespacedName, obj)
+	if err != nil {
+		return err
+	}
+	var refResourceTerminal bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeTerminal &&
+			cond.Status == corev1.ConditionTrue {
+			return ackerr.ResourceReferenceTerminalFor(
+				"AutoScalingGroup",
+				namespace, name)
+		}
+	}
+	if refResourceTerminal {
+		return ackerr.ResourceReferenceTerminalFor(
+			"AutoScalingGroup",
+			namespace, name)
+	}
+	var refResourceSynced bool
+	for _, cond := range obj.Status.Conditions {
+		if cond.Type == ackv1alpha1.ConditionTypeResourceSynced &&
+			cond.Status == corev1.ConditionTrue {
+			refResourceSynced = true
+		}
+	}
+	if !refResourceSynced {
+		return ackerr.ResourceReferenceNotSyncedFor(
+			"AutoScalingGroup",
+			namespace, name)
+	}
+	if obj.Status.ACKResourceMetadata == nil || obj.Status.ACKResourceMetadata.ARN == nil {
+		return ackerr.ResourceReferenceMissingTargetFieldFor(
+			"AutoScalingGroup",
+			namespace, name,
+			"Status.ACKResourceMetadata.ARN")
 	}
 	return nil
 }

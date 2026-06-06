@@ -470,6 +470,10 @@ func (rm *resourceManager) sdkFind(
 	}
 
 	rm.setStatusDefaults(ko)
+	if ko.Status.Status != nil && *ko.Status.Status == "INACTIVE" {
+		return nil, ackerr.NotFound
+	}
+
 	return &resource{ko}, nil
 }
 
@@ -488,10 +492,6 @@ func (rm *resourceManager) newListRequestPayload(
 	r *resource,
 ) (*svcsdk.DescribeCapacityProvidersInput, error) {
 	res := &svcsdk.DescribeCapacityProvidersInput{}
-
-	if r.ko.Spec.Cluster != nil {
-		res.Cluster = r.ko.Spec.Cluster
-	}
 
 	return res, nil
 }

@@ -94,7 +94,7 @@ type CapacityProviderStatus struct {
 	// is MANAGED_INSTANCES, indicating that Amazon ECS manages the underlying Amazon
 	// EC2 instances on your behalf.
 	// +kubebuilder:validation:Optional
-	Type *string `json:"type_,omitempty"`
+	Type *string `json:"type,omitempty"`
 	// The update status of the capacity provider. The following are the possible
 	// states that is returned.
 	//

@@ -105,7 +105,9 @@ type AutoRepairConfiguration struct {
 type AutoScalingGroupProvider struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
 	AutoScalingGroupARN *string `json:"autoScalingGroupARN,omitempty"`
-	ManagedDraining     *string `json:"managedDraining,omitempty"`
+	// Reference field for AutoScalingGroupARN
+	AutoScalingGroupRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"autoScalingGroupRef,omitempty"`
+	ManagedDraining     *string                                  `json:"managedDraining,omitempty"`
 	// The managed scaling settings for the Auto Scaling group capacity provider.
 	//
 	// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out

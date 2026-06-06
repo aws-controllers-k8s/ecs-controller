@@ -21,7 +21,6 @@ import (
 	ackv1alpha1 "github.com/aws-controllers-k8s/runtime/apis/core/v1alpha1"
 	ackerrors "github.com/aws-controllers-k8s/runtime/pkg/errors"
 	acktypes "github.com/aws-controllers-k8s/runtime/pkg/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	rtclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -93,11 +92,6 @@ func (r *resource) SetIdentifiers(identifier *ackv1alpha1.AWSIdentifiers) error 
 	}
 	r.ko.Spec.Name = &identifier.NameOrID
 
-	f1, f1ok := identifier.AdditionalKeys["cluster"]
-	if f1ok {
-		r.ko.Spec.Cluster = aws.String(f1)
-	}
-
 	return nil
 }
 
@@ -108,11 +102,6 @@ func (r *resource) PopulateResourceFromAnnotation(fields map[string]string) erro
 		return ackerrors.NewTerminalError(fmt.Errorf("required field missing: name"))
 	}
 	r.ko.Spec.Name = &primaryKey
-
-	f1, f1ok := fields["cluster"]
-	if f1ok {
-		r.ko.Spec.Cluster = aws.String(f1)
-	}
 
 	return nil
 }

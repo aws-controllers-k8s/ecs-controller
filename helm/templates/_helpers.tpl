@@ -70,6 +70,14 @@ rules:
   - list
   - watch
 - apiGroups:
+  - autoscaling.services.k8s.aws
+  resources:
+  - autoscalinggroups
+  - autoscalinggroups/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - ec2.services.k8s.aws
   resources:
   - securitygroups

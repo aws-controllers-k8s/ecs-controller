@@ -302,6 +302,11 @@ func (in *AutoScalingGroupProvider) DeepCopyInto(out *AutoScalingGroupProvider) 
 		*out = new(string)
 		**out = **in
 	}
+	if in.AutoScalingGroupRef != nil {
+		in, out := &in.AutoScalingGroupRef, &out.AutoScalingGroupRef
+		*out = new(corev1alpha1.AWSResourceReferenceWrapper)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.ManagedDraining != nil {
 		in, out := &in.ManagedDraining, &out.ManagedDraining
 		*out = new(string)

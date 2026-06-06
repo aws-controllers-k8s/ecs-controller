@@ -10,6 +10,7 @@ ignore:
   - ExpressGatewayService
   - Daemon
   field_paths:
+  - DescribeCapacityProvidersInput.Cluster
   - DescribeTaskDefinitionOutput.Tags
   - RegisterTaskDefinitionOutput.Tags
   - CreateServiceInput.ClientToken
@@ -75,6 +76,10 @@ resources:
         is_immutable: true
       AutoScalingGroupProvider.AutoScalingGroupArn:
         is_immutable: true
+        references:
+          resource: AutoScalingGroup
+          service_name: autoscaling
+          path: Status.ACKResourceMetadata.ARN
       Cluster:
         is_immutable: true
         references:
@@ -100,17 +105,26 @@ resources:
           path: Status.SubnetID
           resource: Subnet
           service_name: ec2
+      Type:
+        go_tag: json:"type,omitempty"
     list_operation:
       match_fields:
       - Name
     hooks:
       sdk_read_many_post_build_request:
         template_path: hooks/capacity_provider/sdk_read_many_post_build_request.go.tpl
+      sdk_read_many_post_set_output:
+        template_path: hooks/capacity_provider/sdk_read_many_post_set_output.go.tpl
     renames:
       operations:
         DeleteCapacityProvider:
           input_fields:
             CapacityProvider: Name
+    synced:
+      when:
+        - path: Status.Status
+          in:
+            - ACTIVE
     exceptions:
       terminal_codes:
       - InvalidParameterException
