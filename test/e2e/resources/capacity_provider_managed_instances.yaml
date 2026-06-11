@@ -8,6 +8,7 @@ spec:
   managedInstancesProvider:
     infrastructureRoleARN: $INFRA_ROLE_ARN
     instanceLaunchTemplate:
+      ec2InstanceProfileARN: $INSTANCE_PROFILE_ARN
       capacityOptionType: ON_DEMAND
       instanceRequirements:
         vCPUCount:
@@ -16,6 +17,11 @@ spec:
         memoryMiB:
           min: 4096
           max: 8192
+      networkConfiguration:
+        subnets:
+        - $SUBNET_ID
+        securityGroups:
+        - $SECURITY_GROUP_ID
       storageConfiguration:
         storageSizeGiB: 30
     infrastructureOptimization:

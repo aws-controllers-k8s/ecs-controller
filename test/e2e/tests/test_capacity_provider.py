@@ -30,7 +30,7 @@ from e2e.tests.helper import ECSValidator
 RESOURCE_PLURAL = "capacityproviders"
 
 CREATE_WAIT_AFTER_SECONDS = 60
-UPDATE_WAIT_AFTER_SECONDS = 60
+UPDATE_WAIT_AFTER_SECONDS = 120
 DELETE_WAIT_AFTER_SECONDS = 60
 
 
@@ -192,6 +192,41 @@ class TestCapacityProvider:
 
 
 @pytest.fixture(scope="module")
+def instance_profile_for_managed_instances():
+    """Create an IAM instance profile for managed instances capacity provider tests."""
+    iam_client = boto3.client("iam")
+    bootstrap_resources = get_bootstrap_resources()
+    role_name = bootstrap_resources.ManagedInstancesEC2Role.name
+
+    suffix = random_suffix_name("", 8).lstrip("-")
+    profile_name = f"ack-ecs-mi-profile-{suffix}"
+
+    resp = iam_client.create_instance_profile(InstanceProfileName=profile_name)
+    profile_arn = resp["InstanceProfile"]["Arn"]
+
+    iam_client.add_role_to_instance_profile(
+        InstanceProfileName=profile_name,
+        RoleName=role_name,
+    )
+
+    time.sleep(15)
+
+    yield profile_arn
+
+    try:
+        iam_client.remove_role_from_instance_profile(
+            InstanceProfileName=profile_name,
+            RoleName=role_name,
+        )
+    except Exception:
+        pass
+    try:
+        iam_client.delete_instance_profile(InstanceProfileName=profile_name)
+    except Exception:
+        pass
+
+
+@pytest.fixture(scope="module")
 def managed_instances_cluster(ecs_client):
     """Create a dedicated cluster for managed instances capacity provider tests."""
     resource_name = random_suffix_name("ack-ecs-mi", 24)
@@ -224,7 +259,7 @@ def managed_instances_cluster(ecs_client):
 
 
 @pytest.fixture(scope="module")
-def managed_instances_capacity_provider(ecs_client, managed_instances_cluster):
+def managed_instances_capacity_provider(ecs_client, managed_instances_cluster, instance_profile_for_managed_instances):
     (_, _, cluster_name) = managed_instances_cluster
 
     resource_name = random_suffix_name("ack-ecs-mi-cp", 24)
@@ -234,6 +269,9 @@ def managed_instances_capacity_provider(ecs_client, managed_instances_cluster):
     replacements["CAPACITY_PROVIDER_NAME"] = resource_name
     replacements["CLUSTER_NAME"] = cluster_name
     replacements["INFRA_ROLE_ARN"] = bootstrap_resources.ManagedInstancesInfraRole.arn
+    replacements["INSTANCE_PROFILE_ARN"] = instance_profile_for_managed_instances
+    replacements["SUBNET_ID"] = bootstrap_resources.ManagedInstancesVPC.public_subnets.subnet_ids[0]
+    replacements["SECURITY_GROUP_ID"] = bootstrap_resources.ManagedInstancesVPC.security_group.group_id
 
     resource_data = load_ecs_resource(
         "capacity_provider_managed_instances",
@@ -271,6 +309,8 @@ class TestManagedInstancesCapacityProvider:
 
         k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
 
+        bootstrap_resources = get_bootstrap_resources()
+
         validator = ECSValidator(ecs_client)
         cp = validator.get_capacity_provider(cp_name)
         assert cp is not None
@@ -282,6 +322,15 @@ class TestManagedInstancesCapacityProvider:
         assert mip is not None
         assert mip.get("infrastructureRoleArn") is not None
         assert mip["infrastructureOptimization"]["scaleInAfter"] == 15
+
+        ilt = mip.get("instanceLaunchTemplate")
+        assert ilt is not None
+        assert ilt.get("ec2InstanceProfileArn") is not None
+
+        net_config = ilt.get("networkConfiguration")
+        assert net_config is not None
+        assert bootstrap_resources.ManagedInstancesVPC.public_subnets.subnet_ids[0] in net_config.get("subnets", [])
+        assert bootstrap_resources.ManagedInstancesVPC.security_group.group_id in net_config.get("securityGroups", [])
 
     def test_update_managed_instances(self, ecs_client, managed_instances_capacity_provider):
         (ref, _, cp_name, _) = managed_instances_capacity_provider

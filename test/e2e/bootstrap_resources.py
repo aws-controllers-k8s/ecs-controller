@@ -24,6 +24,8 @@ from e2e import bootstrap_directory
 @dataclass
 class BootstrapResources(Resources):
     ManagedInstancesInfraRole: Role = None
+    ManagedInstancesEC2Role: Role = None
+    ManagedInstancesVPC: VPC = None
 
 _bootstrap_resources = None
 
