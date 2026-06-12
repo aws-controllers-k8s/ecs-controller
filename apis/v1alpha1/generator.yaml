@@ -74,6 +74,14 @@ resources:
       Name:
         is_primary_key: true
         is_immutable: true
+
+      # UpdateCapacityProvider returns stale data in its response.
+      # Ignore setting values during the update operation to avoid improperly
+      # mutating spec fields to stale values.
+      AutoScalingGroupProvider:
+        set:
+          - method: Update
+            ignore: from
       AutoScalingGroupProvider.AutoScalingGroupArn:
         is_immutable: true
         references:
@@ -85,6 +93,18 @@ resources:
         references:
           resource: Cluster
           path: Spec.Name
+      
+      # UpdateCapacityProvider returns stale data in its response.
+      # Ignore setting values during the update operation to avoid improperly
+      # mutating spec fields to stale values.
+      ManagedInstancesProvider:
+        set:
+          - method: Update
+            ignore: from
+      ManagedInstancesProvider.AutoRepairConfiguration:
+        late_initialize: {
+          skip_incomplete_check: {}
+        }
       ManagedInstancesProvider.InfrastructureRoleARN:
         references:
           path: Status.ACKResourceMetadata.ARN
