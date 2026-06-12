@@ -70,6 +70,14 @@ rules:
   - list
   - watch
 - apiGroups:
+  - autoscaling.services.k8s.aws
+  resources:
+  - autoscalinggroups
+  - autoscalinggroups/status
+  verbs:
+  - get
+  - list
+- apiGroups:
   - ec2.services.k8s.aws
   resources:
   - securitygroups
@@ -82,6 +90,7 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - capacityproviders
   - clusters
   - services
   - taskdefinitions
@@ -96,6 +105,7 @@ rules:
 - apiGroups:
   - ecs.services.k8s.aws
   resources:
+  - capacityproviders/status
   - clusters/status
   - services/status
   - taskdefinitions/status
@@ -116,6 +126,8 @@ rules:
 - apiGroups:
   - iam.services.k8s.aws
   resources:
+  - instanceprofiles
+  - instanceprofiles/status
   - roles
   - roles/status
   verbs:

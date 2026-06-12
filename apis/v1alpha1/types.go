@@ -40,6 +40,34 @@ type AWSVPCConfiguration struct {
 	Subnets    []*string                                  `json:"subnets,omitempty"`
 }
 
+// The minimum and maximum number of accelerators (such as GPUs) for instance
+// type selection. This is used for workloads that require specific numbers
+// of accelerators.
+type AcceleratorCountRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// The minimum and maximum total accelerator memory in mebibytes (MiB) for instance
+// type selection. This is important for GPU workloads that require specific
+// amounts of video memory.
+type AcceleratorTotalMemoryMiBRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// The advanced settings for a load balancer used in blue/green deployments.
+// Specify the alternate target group, listener rules, and IAM role required
+// for traffic shifting during blue/green deployments. For more information,
+// see Required resources for Amazon ECS blue/green deployments (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/blue-green-deployment-implementation.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type AdvancedConfiguration struct {
+	AlternateTargetGroupARN *string `json:"alternateTargetGroupARN,omitempty"`
+	ProductionListenerRule  *string `json:"productionListenerRule,omitempty"`
+	RoleARN                 *string `json:"roleARN,omitempty"`
+	TestListenerRule        *string `json:"testListenerRule,omitempty"`
+}
+
 // An object representing a container instance or task attachment.
 type Attachment struct {
 	Details []*KeyValuePair `json:"details,omitempty"`
@@ -65,17 +93,71 @@ type Attribute struct {
 	Value      *string `json:"value,omitempty"`
 }
 
-// The details of the Auto Scaling group for the capacity provider.
-type AutoScalingGroupProvider struct {
-	AutoScalingGroupARN *string `json:"autoScalingGroupARN,omitempty"`
+// The auto repair configuration for an Amazon ECS Managed Instances capacity
+// provider. When enabled, Amazon ECS automatically replaces container instances
+// that are detected as unhealthy based on container instance health checks,
+// including accelerated compute device and daemon health checks.
+type AutoRepairConfiguration struct {
+	ActionsStatus *string `json:"actionsStatus,omitempty"`
 }
 
-// The details for a capacity provider.
-type CapacityProvider struct {
-	CapacityProviderARN *string `json:"capacityProviderARN,omitempty"`
-	Name                *string `json:"name,omitempty"`
-	Tags                []*Tag  `json:"tags,omitempty"`
-	UpdateStatusReason  *string `json:"updateStatusReason,omitempty"`
+// The details of the Auto Scaling group for the capacity provider.
+type AutoScalingGroupProvider struct {
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Value is immutable once set"
+	AutoScalingGroupARN *string `json:"autoScalingGroupARN,omitempty"`
+	// Reference field for AutoScalingGroupARN
+	AutoScalingGroupRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"autoScalingGroupRef,omitempty"`
+	ManagedDraining     *string                                  `json:"managedDraining,omitempty"`
+	// The managed scaling settings for the Auto Scaling group capacity provider.
+	//
+	// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+	// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+	// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+	// value as the target value for the metric. For more information, see Using
+	// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+	// group.
+	ManagedScaling               *ManagedScaling `json:"managedScaling,omitempty"`
+	ManagedTerminationProtection *string         `json:"managedTerminationProtection,omitempty"`
+}
+
+// The details of the Auto Scaling group capacity provider to update.
+type AutoScalingGroupProviderUpdate struct {
+	ManagedDraining *string `json:"managedDraining,omitempty"`
+	// The managed scaling settings for the Auto Scaling group capacity provider.
+	//
+	// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+	// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+	// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+	// value as the target value for the metric. For more information, see Using
+	// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+	// group.
+	ManagedScaling               *ManagedScaling `json:"managedScaling,omitempty"`
+	ManagedTerminationProtection *string         `json:"managedTerminationProtection,omitempty"`
+}
+
+// The minimum and maximum baseline Amazon EBS bandwidth in megabits per second
+// (Mbps) for instance type selection. This is important for workloads with
+// high storage I/O requirements.
+type BaselineEBSBandwidthMbpsRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
+// Configuration for a canary deployment strategy that shifts a fixed percentage
+// of traffic to the new service revision, waits for a specified bake time,
+// then shifts the remaining traffic.
+//
+// This is only valid when you run CreateService or UpdateService with deploymentController
+// set to ECS and a deploymentConfiguration with a strategy set to CANARY.
+type CanaryConfiguration struct {
+	CanaryBakeTimeInMinutes *int64   `json:"canaryBakeTimeInMinutes,omitempty"`
+	CanaryPercent           *float64 `json:"canaryPercent,omitempty"`
 }
 
 // The details of a capacity provider strategy. A capacity provider strategy
@@ -107,11 +189,38 @@ type CapacityProvider struct {
 // supports Linux tasks with the ARM64 architecture on platform version 1.4.0
 // or later.
 //
-// A capacity provider strategy may contain a maximum of 6 capacity providers.
+// A capacity provider strategy can contain a maximum of 20 capacity providers.
 type CapacityProviderStrategyItem struct {
 	Base             *int64  `json:"base,omitempty"`
 	CapacityProvider *string `json:"capacityProvider,omitempty"`
 	Weight           *int64  `json:"weight,omitempty"`
+}
+
+// The details for a capacity provider.
+type CapacityProvider_SDK struct {
+	// The details of the Auto Scaling group for the capacity provider.
+	AutoScalingGroupProvider *AutoScalingGroupProvider `json:"autoScalingGroupProvider,omitempty"`
+	CapacityProviderARN      *string                   `json:"capacityProviderARN,omitempty"`
+	Cluster                  *string                   `json:"cluster,omitempty"`
+	// The configuration for a Amazon ECS Managed Instances provider. Amazon ECS
+	// uses this configuration to automatically launch, manage, and terminate Amazon
+	// EC2 instances on your behalf. Managed instances provide access to the full
+	// range of Amazon EC2 instance types and features while offloading infrastructure
+	// management to Amazon Web Services.
+	ManagedInstancesProvider *ManagedInstancesProvider `json:"managedInstancesProvider,omitempty"`
+	Name                     *string                   `json:"name,omitempty"`
+	Status                   *string                   `json:"status,omitempty"`
+	Tags                     []*Tag                    `json:"tags,omitempty"`
+	Type                     *string                   `json:"type_,omitempty"`
+	UpdateStatus             *string                   `json:"updateStatus,omitempty"`
+	UpdateStatusReason       *string                   `json:"updateStatusReason,omitempty"`
+}
+
+// The Capacity Reservation configurations to be used when using the RESERVED
+// capacity option type.
+type CapacityReservationRequest struct {
+	ReservationGroupARN   *string `json:"reservationGroupARN,omitempty"`
+	ReservationPreference *string `json:"reservationPreference,omitempty"`
 }
 
 // The execute command and managed storage configuration for the cluster.
@@ -339,6 +448,43 @@ type ContainerDefinition struct {
 	// a service, if the task reports as unhealthy then the task will be stopped
 	// and the service scheduler will replace it.
 	//
+	// When a container health check fails for a task that is part of a service,
+	// the following process occurs:
+	//
+	// The task is marked as UNHEALTHY.
+	//
+	// The unhealthy task will be stopped, and during the stopping process, it will
+	// go through the following states:
+	//
+	//    * DEACTIVATING - In this state, Amazon ECS performs additional steps before
+	//    stopping the task. For example, for tasks that are part of services configured
+	//    to use Elastic Load Balancing target groups, target groups will be deregistered
+	//    in this state.
+	//
+	//    * STOPPING - The task is in the process of being stopped.
+	//
+	//    * DEPROVISIONING - Resources associated with the task are being cleaned
+	//    up.
+	//
+	//    * STOPPED - The task has been completely stopped.
+	//
+	// After the old task stops, a new task will be launched to ensure service operation,
+	// and the new task will go through the following lifecycle:
+	//
+	//    * PROVISIONING - Resources required for the task are being provisioned.
+	//
+	//    * PENDING - The task is waiting to be placed on a container instance.
+	//
+	//    * ACTIVATING - In this state, Amazon ECS pulls container images, creates
+	//    containers, configures task networking, registers load balancer target
+	//    groups, and configures service discovery status.
+	//
+	//    * RUNNING - The task is running and performing its work.
+	//
+	// For more detailed information about task lifecycle states, see Task lifecycle
+	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
 	// The following are notes about container health check support:
 	//
 	//    * If the Amazon ECS container agent becomes disconnected from the Amazon
@@ -360,6 +506,10 @@ type ContainerDefinition struct {
 	//
 	//    * Container health checks aren't supported for tasks that are part of
 	//    a service that's configured to use a Classic Load Balancer.
+	//
+	// For an example of how to specify a task definition with multiple containers
+	// where container dependency is specified, see Container dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
+	// in the Amazon Elastic Container Service Developer Guide.
 	HealthCheck *HealthCheck `json:"healthCheck,omitempty"`
 	Hostname    *string      `json:"hostname,omitempty"`
 	Image       *string      `json:"image,omitempty"`
@@ -518,6 +668,29 @@ type ContainerStateChange struct {
 	Status        *string `json:"status,omitempty"`
 }
 
+// The configuration for creating a Amazon ECS Managed Instances provider. This
+// specifies how Amazon ECS should manage Amazon EC2 instances, including the
+// infrastructure role, instance launch template, and whether to propagate tags
+// from the capacity provider to the instances.
+type CreateManagedInstancesProviderConfiguration struct {
+	// The auto repair configuration for an Amazon ECS Managed Instances capacity
+	// provider. When enabled, Amazon ECS automatically replaces container instances
+	// that are detected as unhealthy based on container instance health checks,
+	// including accelerated compute device and daemon health checks.
+	AutoRepairConfiguration *AutoRepairConfiguration `json:"autoRepairConfiguration,omitempty"`
+	// The configuration that controls how Amazon ECS optimizes your infrastructure.
+	InfrastructureOptimization *InfrastructureOptimization `json:"infrastructureOptimization,omitempty"`
+	InfrastructureRoleARN      *string                     `json:"infrastructureRoleARN,omitempty"`
+	// Reference field for InfrastructureRoleARN
+	InfrastructureRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"infrastructureRoleRef,omitempty"`
+	// The launch template configuration for Amazon ECS Managed Instances. This
+	// defines how Amazon ECS launches Amazon EC2 instances, including the instance
+	// profile for your tasks, network and storage configuration, capacity options,
+	// and instance requirements for flexible instance type selection.
+	InstanceLaunchTemplate *InstanceLaunchTemplate `json:"instanceLaunchTemplate,omitempty"`
+	PropagateTags          *string                 `json:"propagateTags,omitempty"`
+}
+
 // The optional filter to narrow the ListServiceDeployment results.
 //
 // If you do not specify a value, service deployments that were created before
@@ -525,6 +698,411 @@ type ContainerStateChange struct {
 type CreatedAt struct {
 	After  *metav1.Time `json:"after,omitempty"`
 	Before *metav1.Time `json:"before,omitempty"`
+}
+
+// The CloudWatch alarm configuration for a daemon. When enabled, CloudWatch
+// alarms determine whether a daemon deployment has failed.
+type DaemonAlarmConfiguration struct {
+	AlarmNames []*string `json:"alarmNames,omitempty"`
+	Enable     *bool     `json:"enable,omitempty"`
+}
+
+// Information about a capacity provider associated with a daemon revision.
+type DaemonCapacityProvider struct {
+	ARN          *string `json:"arn,omitempty"`
+	RunningCount *int64  `json:"runningCount,omitempty"`
+}
+
+// Information about the circuit breaker used to determine when a daemon deployment
+// has failed.
+type DaemonCircuitBreaker struct {
+	FailureCount *int64 `json:"failureCount,omitempty"`
+	Threshold    *int64 `json:"threshold,omitempty"`
+}
+
+// A container definition for a daemon task. Daemon container definitions describe
+// the containers that run as part of a daemon task on container instances managed
+// by capacity providers.
+type DaemonContainerDefinition struct {
+	Command          []*string              `json:"command,omitempty"`
+	CPU              *int64                 `json:"cpu,omitempty"`
+	DependsOn        []*ContainerDependency `json:"dependsOn,omitempty"`
+	EntryPoint       []*string              `json:"entryPoint,omitempty"`
+	Environment      []*KeyValuePair        `json:"environment,omitempty"`
+	EnvironmentFiles []*EnvironmentFile     `json:"environmentFiles,omitempty"`
+	Essential        *bool                  `json:"essential,omitempty"`
+	// The FireLens configuration for the container. This is used to specify and
+	// configure a log router for container logs. For more information, see Custom
+	// log routing (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_firelens.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	FirelensConfiguration *FirelensConfiguration `json:"firelensConfiguration,omitempty"`
+	// An object representing a container health check. Health check parameters
+	// that are specified in a container definition override any Docker health checks
+	// that exist in the container image (such as those specified in a parent image
+	// or from the image's Dockerfile). This configuration maps to the HEALTHCHECK
+	// parameter of docker run.
+	//
+	// The Amazon ECS container agent only monitors and reports on the health checks
+	// specified in the task definition. Amazon ECS does not monitor Docker health
+	// checks that are embedded in a container image and not specified in the container
+	// definition. Health check parameters that are specified in a container definition
+	// override any Docker health checks that exist in the container image.
+	//
+	// You can view the health status of both individual containers and a task with
+	// the DescribeTasks API operation or when viewing the task details in the console.
+	//
+	// The health check is designed to make sure that your containers survive agent
+	// restarts, upgrades, or temporary unavailability.
+	//
+	// Amazon ECS performs health checks on containers with the default that launched
+	// the container instance or the task.
+	//
+	// The following describes the possible healthStatus values for a container:
+	//
+	//    * HEALTHY-The container health check has passed successfully.
+	//
+	//    * UNHEALTHY-The container health check has failed.
+	//
+	//    * UNKNOWN-The container health check is being evaluated, there's no container
+	//    health check defined, or Amazon ECS doesn't have the health status of
+	//    the container.
+	//
+	// The following describes the possible healthStatus values based on the container
+	// health checker status of essential containers in the task with the following
+	// priority order (high to low):
+	//
+	//    * UNHEALTHY-One or more essential containers have failed their health
+	//    check.
+	//
+	//    * UNKNOWN-Any essential container running within the task is in an UNKNOWN
+	//    state and no other essential containers have an UNHEALTHY state.
+	//
+	//    * HEALTHY-All essential containers within the task have passed their health
+	//    checks.
+	//
+	// Consider the following task health example with 2 containers.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, the task health
+	//    is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is HEALTHY, the task health
+	//    is UNHEALTHY.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, the task health
+	//    is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is HEALTHY, the task health
+	//    is HEALTHY.
+	//
+	// Consider the following task health example with 3 containers.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+	//    is UNKNOWN, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is UNKNOWN, and Container3
+	//    is HEALTHY, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is UNHEALTHY and Container2 is HEALTHY, and Container3
+	//    is HEALTHY, the task health is UNHEALTHY.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+	//    HEALTHY, the task health is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is UNKNOWN, and Container3 is
+	//    UNKNOWN, the task health is UNKNOWN.
+	//
+	//    * If Container1 is HEALTHY and Container2 is HEALTHY, and Container3 is
+	//    HEALTHY, the task health is HEALTHY.
+	//
+	// If a task is run manually, and not as part of a service, the task will continue
+	// its lifecycle regardless of its health status. For tasks that are part of
+	// a service, if the task reports as unhealthy then the task will be stopped
+	// and the service scheduler will replace it.
+	//
+	// When a container health check fails for a task that is part of a service,
+	// the following process occurs:
+	//
+	// The task is marked as UNHEALTHY.
+	//
+	// The unhealthy task will be stopped, and during the stopping process, it will
+	// go through the following states:
+	//
+	//    * DEACTIVATING - In this state, Amazon ECS performs additional steps before
+	//    stopping the task. For example, for tasks that are part of services configured
+	//    to use Elastic Load Balancing target groups, target groups will be deregistered
+	//    in this state.
+	//
+	//    * STOPPING - The task is in the process of being stopped.
+	//
+	//    * DEPROVISIONING - Resources associated with the task are being cleaned
+	//    up.
+	//
+	//    * STOPPED - The task has been completely stopped.
+	//
+	// After the old task stops, a new task will be launched to ensure service operation,
+	// and the new task will go through the following lifecycle:
+	//
+	//    * PROVISIONING - Resources required for the task are being provisioned.
+	//
+	//    * PENDING - The task is waiting to be placed on a container instance.
+	//
+	//    * ACTIVATING - In this state, Amazon ECS pulls container images, creates
+	//    containers, configures task networking, registers load balancer target
+	//    groups, and configures service discovery status.
+	//
+	//    * RUNNING - The task is running and performing its work.
+	//
+	// For more detailed information about task lifecycle states, see Task lifecycle
+	// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html)
+	// in the Amazon Elastic Container Service Developer Guide.
+	//
+	// The following are notes about container health check support:
+	//
+	//    * If the Amazon ECS container agent becomes disconnected from the Amazon
+	//    ECS service, this won't cause a container to transition to an UNHEALTHY
+	//    status. This is by design, to ensure that containers remain running during
+	//    agent restarts or temporary unavailability. The health check status is
+	//    the "last heard from" response from the Amazon ECS agent, so if the container
+	//    was considered HEALTHY prior to the disconnect, that status will remain
+	//    until the agent reconnects and another health check occurs. There are
+	//    no assumptions made about the status of the container health checks.
+	//
+	//    * Container health checks require version 1.17.0 or greater of the Amazon
+	//    ECS container agent. For more information, see Updating the Amazon ECS
+	//    container agent (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-update.html).
+	//
+	//    * Container health checks are supported for Fargate tasks if you're using
+	//    platform version 1.1.0 or greater. For more information, see Fargate platform
+	//    versions (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/platform_versions.html).
+	//
+	//    * Container health checks aren't supported for tasks that are part of
+	//    a service that's configured to use a Classic Load Balancer.
+	//
+	// For an example of how to specify a task definition with multiple containers
+	// where container dependency is specified, see Container dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
+	// in the Amazon Elastic Container Service Developer Guide.
+	HealthCheck *HealthCheck `json:"healthCheck,omitempty"`
+	Image       *string      `json:"image,omitempty"`
+	Interactive *bool        `json:"interactive,omitempty"`
+	// The log configuration for the container. This parameter maps to LogConfig
+	// in the docker container create command and the --log-driver option to docker
+	// run.
+	//
+	// By default, containers use the same logging driver that the Docker daemon
+	// uses. However, the container might use a different logging driver than the
+	// Docker daemon by specifying a log driver configuration in the container definition.
+	//
+	// Understand the following when specifying a log configuration for your containers.
+	//
+	//    * Amazon ECS currently supports a subset of the logging drivers available
+	//    to the Docker daemon. Additional log drivers may be available in future
+	//    releases of the Amazon ECS container agent. For tasks on Fargate, the
+	//    supported log drivers are awslogs, splunk, and awsfirelens. For tasks
+	//    hosted on Amazon EC2 instances, the supported log drivers are awslogs,
+	//    fluentd, gelf, json-file, journald,syslog, splunk, and awsfirelens.
+	//
+	//    * This parameter requires version 1.18 of the Docker Remote API or greater
+	//    on your container instance.
+	//
+	//    * For tasks that are hosted on Amazon EC2 instances, the Amazon ECS container
+	//    agent must register the available logging drivers with the ECS_AVAILABLE_LOGGING_DRIVERS
+	//    environment variable before containers placed on that instance can use
+	//    these log configuration options. For more information, see Amazon ECS
+	//    container agent configuration (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-config.html)
+	//    in the Amazon Elastic Container Service Developer Guide.
+	//
+	//    * For tasks that are on Fargate, because you don't have access to the
+	//    underlying infrastructure your tasks are hosted on, any additional software
+	//    needed must be installed outside of the task. For example, the Fluentd
+	//    output aggregators or a remote host running Logstash to send Gelf logs
+	//    to.
+	LogConfiguration       *LogConfiguration `json:"logConfiguration,omitempty"`
+	Memory                 *int64            `json:"memory,omitempty"`
+	MemoryReservation      *int64            `json:"memoryReservation,omitempty"`
+	MountPoints            []*MountPoint     `json:"mountPoints,omitempty"`
+	Name                   *string           `json:"name,omitempty"`
+	Privileged             *bool             `json:"privileged,omitempty"`
+	PseudoTerminal         *bool             `json:"pseudoTerminal,omitempty"`
+	ReadonlyRootFilesystem *bool             `json:"readonlyRootFilesystem,omitempty"`
+	// The repository credentials for private registry authentication.
+	RepositoryCredentials *RepositoryCredentials `json:"repositoryCredentials,omitempty"`
+	Secrets               []*Secret              `json:"secrets,omitempty"`
+	StartTimeout          *int64                 `json:"startTimeout,omitempty"`
+	StopTimeout           *int64                 `json:"stopTimeout,omitempty"`
+	SystemControls        []*SystemControl       `json:"systemControls,omitempty"`
+	Ulimits               []*Ulimit              `json:"ulimits,omitempty"`
+	User                  *string                `json:"user,omitempty"`
+	WorkingDirectory      *string                `json:"workingDirectory,omitempty"`
+}
+
+// The details about the container image a daemon revision uses.
+type DaemonContainerImage struct {
+	ContainerName *string `json:"containerName,omitempty"`
+	Image         *string `json:"image,omitempty"`
+	ImageDigest   *string `json:"imageDigest,omitempty"`
+}
+
+// Information about a daemon deployment. A daemon deployment orchestrates the
+// progressive rollout of daemon task updates across container instances.
+type DaemonDeployment struct {
+	ClusterARN          *string      `json:"clusterARN,omitempty"`
+	CreatedAt           *metav1.Time `json:"createdAt,omitempty"`
+	DaemonDeploymentARN *string      `json:"daemonDeploymentARN,omitempty"`
+	FinishedAt          *metav1.Time `json:"finishedAt,omitempty"`
+	StartedAt           *metav1.Time `json:"startedAt,omitempty"`
+	StatusReason        *string      `json:"statusReason,omitempty"`
+	StoppedAt           *metav1.Time `json:"stoppedAt,omitempty"`
+}
+
+// The CloudWatch alarms used to determine a daemon deployment failed.
+type DaemonDeploymentAlarms struct {
+	AlarmNames          []*string `json:"alarmNames,omitempty"`
+	TriggeredAlarmNames []*string `json:"triggeredAlarmNames,omitempty"`
+}
+
+// Information about a capacity provider during a daemon deployment.
+type DaemonDeploymentCapacityProvider struct {
+	ARN                   *string `json:"arn,omitempty"`
+	DrainingInstanceCount *int64  `json:"drainingInstanceCount,omitempty"`
+	RunningInstanceCount  *int64  `json:"runningInstanceCount,omitempty"`
+}
+
+// Optional deployment parameters that control how a daemon rolls out updates
+// across container instances.
+type DaemonDeploymentConfiguration struct {
+	BakeTimeInMinutes *int64 `json:"bakeTimeInMinutes,omitempty"`
+}
+
+// Details about a daemon revision during a deployment, including running and
+// draining instance counts per capacity provider.
+type DaemonDeploymentRevisionDetail struct {
+	ARN                        *string `json:"arn,omitempty"`
+	TotalDrainingInstanceCount *int64  `json:"totalDrainingInstanceCount,omitempty"`
+	TotalRunningInstanceCount  *int64  `json:"totalRunningInstanceCount,omitempty"`
+}
+
+// A summary of a daemon deployment.
+type DaemonDeploymentSummary struct {
+	ClusterARN              *string      `json:"clusterARN,omitempty"`
+	CreatedAt               *metav1.Time `json:"createdAt,omitempty"`
+	DaemonARN               *string      `json:"daemonARN,omitempty"`
+	DaemonDeploymentARN     *string      `json:"daemonDeploymentARN,omitempty"`
+	FinishedAt              *metav1.Time `json:"finishedAt,omitempty"`
+	StartedAt               *metav1.Time `json:"startedAt,omitempty"`
+	StatusReason            *string      `json:"statusReason,omitempty"`
+	StoppedAt               *metav1.Time `json:"stoppedAt,omitempty"`
+	TargetDaemonRevisionARN *string      `json:"targetDaemonRevisionARN,omitempty"`
+}
+
+// The detailed information about a daemon.
+type DaemonDetail struct {
+	ClusterARN    *string      `json:"clusterARN,omitempty"`
+	CreatedAt     *metav1.Time `json:"createdAt,omitempty"`
+	DaemonARN     *string      `json:"daemonARN,omitempty"`
+	DeploymentARN *string      `json:"deploymentARN,omitempty"`
+	UpdatedAt     *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The Linux-specific options that are applied to the daemon container, such
+// as Linux kernel capabilities.
+type DaemonLinuxParameters struct {
+	// The Linux capabilities to add or remove from the default Docker configuration
+	// for a container defined in the task definition. For more detailed information
+	// about these Linux capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
+	// Linux manual page.
+	//
+	// The following describes how Docker processes the Linux capabilities specified
+	// in the add and drop request parameters. For information about the latest
+	// behavior, see Docker Compose: order of cap_drop and cap_add (https://forums.docker.com/t/docker-compose-order-of-cap-drop-and-cap-add/97136/1)
+	// in the Docker Community Forum.
+	//
+	//    * When the container is a privleged container, the container capabilities
+	//    are all of the default Docker capabilities. The capabilities specified
+	//    in the add request parameter, and the drop request parameter are ignored.
+	//
+	//    * When the add request parameter is set to ALL, the container capabilities
+	//    are all of the default Docker capabilities, excluding those specified
+	//    in the drop request parameter.
+	//
+	//    * When the drop request parameter is set to ALL, the container capabilities
+	//    are the capabilities specified in the add request parameter.
+	//
+	//    * When the add request parameter and the drop request parameter are both
+	//    empty, the capabilities the container capabilities are all of the default
+	//    Docker capabilities.
+	//
+	//    * The default is to first drop the capabilities specified in the drop
+	//    request parameter, and then add the capabilities specified in the add
+	//    request parameter.
+	Capabilities       *KernelCapabilities `json:"capabilities,omitempty"`
+	Devices            []*Device           `json:"devices,omitempty"`
+	InitProcessEnabled *bool               `json:"initProcessEnabled,omitempty"`
+	Tmpfs              []*Tmpfs            `json:"tmpfs,omitempty"`
+}
+
+// Information about a daemon revision. A daemon revision is a snapshot of the
+// daemon's configuration at the time a deployment was initiated.
+type DaemonRevision struct {
+	ClusterARN              *string      `json:"clusterARN,omitempty"`
+	CreatedAt               *metav1.Time `json:"createdAt,omitempty"`
+	DaemonARN               *string      `json:"daemonARN,omitempty"`
+	DaemonRevisionARN       *string      `json:"daemonRevisionARN,omitempty"`
+	DaemonTaskDefinitionARN *string      `json:"daemonTaskDefinitionARN,omitempty"`
+	EnableECSManagedTags    *bool        `json:"enableECSManagedTags,omitempty"`
+	EnableExecuteCommand    *bool        `json:"enableExecuteCommand,omitempty"`
+}
+
+// Details about a daemon revision, including the running task counts per capacity
+// provider.
+type DaemonRevisionDetail struct {
+	ARN               *string `json:"arn,omitempty"`
+	TotalRunningCount *int64  `json:"totalRunningCount,omitempty"`
+}
+
+// Information about a daemon deployment rollback.
+type DaemonRollback struct {
+	Reason                          *string      `json:"reason,omitempty"`
+	RollbackCapacityProviders       []*string    `json:"rollbackCapacityProviders,omitempty"`
+	RollbackTargetDaemonRevisionARN *string      `json:"rollbackTargetDaemonRevisionARN,omitempty"`
+	StartedAt                       *metav1.Time `json:"startedAt,omitempty"`
+}
+
+// A summary of a daemon.
+type DaemonSummary struct {
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	DaemonARN *string      `json:"daemonARN,omitempty"`
+	UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The details of a daemon task definition. A daemon task definition is a template
+// that describes the containers that form a daemon. Daemons deploy cross-cutting
+// software agents independently across your Amazon ECS infrastructure.
+type DaemonTaskDefinition struct {
+	CPU                     *string      `json:"cpu,omitempty"`
+	DaemonTaskDefinitionARN *string      `json:"daemonTaskDefinitionARN,omitempty"`
+	DeleteRequestedAt       *metav1.Time `json:"deleteRequestedAt,omitempty"`
+	ExecutionRoleARN        *string      `json:"executionRoleARN,omitempty"`
+	Family                  *string      `json:"family,omitempty"`
+	Memory                  *string      `json:"memory,omitempty"`
+	RegisteredAt            *metav1.Time `json:"registeredAt,omitempty"`
+	RegisteredBy            *string      `json:"registeredBy,omitempty"`
+	Revision                *int64       `json:"revision,omitempty"`
+	TaskRoleARN             *string      `json:"taskRoleARN,omitempty"`
+}
+
+// A summary of a daemon task definition.
+type DaemonTaskDefinitionSummary struct {
+	ARN               *string      `json:"arn,omitempty"`
+	DeleteRequestedAt *metav1.Time `json:"deleteRequestedAt,omitempty"`
+	RegisteredAt      *metav1.Time `json:"registeredAt,omitempty"`
+	RegisteredBy      *string      `json:"registeredBy,omitempty"`
+}
+
+// A data volume definition for a daemon task.
+type DaemonVolume struct {
+	// Details on a container instance bind mount host volume.
+	Host *HostVolumeProperties `json:"host,omitempty"`
+	Name *string               `json:"name,omitempty"`
 }
 
 // The details of an Amazon ECS service deployment. This is used only when a
@@ -572,7 +1150,7 @@ type Deployment struct {
 // to the last completed deployment after a failure.
 //
 // You can only use the DeploymentAlarms method to detect failures when the
-// DeploymentController is set to ECS (rolling update).
+// DeploymentController is set to ECS.
 //
 // For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
 // in the Amazon Elastic Container Service Developer Guide .
@@ -611,7 +1189,7 @@ type DeploymentConfiguration struct {
 	// to the last completed deployment after a failure.
 	//
 	// You can only use the DeploymentAlarms method to detect failures when the
-	// DeploymentController is set to ECS (rolling update).
+	// DeploymentController is set to ECS.
 	//
 	// For more information, see Rolling update (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html)
 	// in the Amazon Elastic Container Service Developer Guide .
@@ -644,6 +1222,28 @@ type DeploymentEphemeralStorage struct {
 	KMSKeyID *string `json:"kmsKeyID,omitempty"`
 }
 
+// A deployment lifecycle hook runs custom logic at specific stages of the deployment
+// process. Currently, you can use Lambda functions as hook targets.
+//
+// For more information, see Lifecycle hooks for Amazon ECS service deployments
+// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-lifecycle-hooks.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type DeploymentLifecycleHook struct {
+	HookTargetARN *string `json:"hookTargetARN,omitempty"`
+	RoleARN       *string `json:"roleARN,omitempty"`
+}
+
+// The details of a deployment lifecycle hook that is active during a service
+// deployment.
+//
+// You can view lifecycle hook details by calling DescribeServiceDeployments
+// (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeServiceDeployments.html).
+type DeploymentLifecycleHookDetail struct {
+	ExpiresAt *metav1.Time `json:"expiresAt,omitempty"`
+	HookID    *string      `json:"hookID,omitempty"`
+	TargetARN *string      `json:"targetARN,omitempty"`
+}
+
 // An object representing a container instance host device.
 type Device struct {
 	ContainerPath *string   `json:"containerPath,omitempty"`
@@ -668,6 +1268,26 @@ type EBSTagSpecification struct {
 	PropagateTags *string `json:"propagateTags,omitempty"`
 	ResourceType  *string `json:"resourceType,omitempty"`
 	Tags          []*Tag  `json:"tags,omitempty"`
+}
+
+// Represents an Express service, which provides a simplified way to deploy
+// containerized web applications on Amazon ECS with managed Amazon Web Services
+// infrastructure. An Express service automatically provisions and manages Application
+// Load Balancers, target groups, security groups, and auto-scaling policies.
+//
+// Express services use a service revision architecture where each service can
+// have multiple active configurations, enabling blue-green deployments and
+// gradual rollouts. The service maintains a list of active configurations and
+// manages the lifecycle of the underlying Amazon Web Services resources.
+type ECSExpressGatewayService struct {
+	Cluster               *string      `json:"cluster,omitempty"`
+	CreatedAt             *metav1.Time `json:"createdAt,omitempty"`
+	CurrentDeployment     *string      `json:"currentDeployment,omitempty"`
+	InfrastructureRoleARN *string      `json:"infrastructureRoleARN,omitempty"`
+	ServiceARN            *string      `json:"serviceARN,omitempty"`
+	ServiceName           *string      `json:"serviceName,omitempty"`
+	Tags                  []*Tag       `json:"tags,omitempty"`
+	UpdatedAt             *metav1.Time `json:"updatedAt,omitempty"`
 }
 
 // The authorization configuration details for the Amazon EFS file system.
@@ -757,6 +1377,75 @@ type ExecuteCommandLogConfiguration struct {
 	S3BucketName                *string `json:"s3BucketName,omitempty"`
 	S3EncryptionEnabled         *bool   `json:"s3EncryptionEnabled,omitempty"`
 	S3KeyPrefix                 *string `json:"s3KeyPrefix,omitempty"`
+}
+
+// Defines the configuration for the primary container in an Express service.
+// This container receives traffic from the Application Load Balancer and runs
+// your application code.
+//
+// The container configuration includes the container image, port mapping, logging
+// settings, environment variables, and secrets. The container image is the
+// only required parameter, with sensible defaults provided for other settings.
+type ExpressGatewayContainer struct {
+	Command       []*string       `json:"command,omitempty"`
+	ContainerPort *int64          `json:"containerPort,omitempty"`
+	Environment   []*KeyValuePair `json:"environment,omitempty"`
+	Image         *string         `json:"image,omitempty"`
+	Secrets       []*Secret       `json:"secrets,omitempty"`
+}
+
+// The repository credentials for private registry authentication to pass to
+// the container.
+type ExpressGatewayRepositoryCredentials struct {
+	CredentialsParameter *string `json:"credentialsParameter,omitempty"`
+}
+
+// Defines the auto-scaling configuration for an Express service. This determines
+// how the service automatically adjusts the number of running tasks based on
+// demand metrics such as CPU utilization, memory utilization, or request count
+// per target.
+//
+// Auto-scaling helps ensure your application can handle varying levels of traffic
+// while optimizing costs by scaling down during low-demand periods. You can
+// specify the minimum and maximum number of tasks, the scaling metric, and
+// the target value for that metric.
+type ExpressGatewayScalingTarget struct {
+	AutoScalingTargetValue *int64 `json:"autoScalingTargetValue,omitempty"`
+	MaxTaskCount           *int64 `json:"maxTaskCount,omitempty"`
+	MinTaskCount           *int64 `json:"minTaskCount,omitempty"`
+}
+
+// Specifies the Amazon CloudWatch Logs configuration for the Express service
+// container.
+type ExpressGatewayServiceAWSLogsConfiguration struct {
+	LogGroup        *string `json:"logGroup,omitempty"`
+	LogStreamPrefix *string `json:"logStreamPrefix,omitempty"`
+}
+
+// Represents a specific configuration revision of an Express service, containing
+// all the settings and parameters for that revision.
+type ExpressGatewayServiceConfiguration struct {
+	CPU                *string      `json:"cpu,omitempty"`
+	CreatedAt          *metav1.Time `json:"createdAt,omitempty"`
+	ExecutionRoleARN   *string      `json:"executionRoleARN,omitempty"`
+	HealthCheckPath    *string      `json:"healthCheckPath,omitempty"`
+	Memory             *string      `json:"memory,omitempty"`
+	ServiceRevisionARN *string      `json:"serviceRevisionARN,omitempty"`
+	TaskRoleARN        *string      `json:"taskRoleARN,omitempty"`
+}
+
+// The network configuration for an Express service. By default, an Express
+// service utilizes subnets and security groups associated with the default
+// VPC.
+type ExpressGatewayServiceNetworkConfiguration struct {
+	SecurityGroups []*string `json:"securityGroups,omitempty"`
+	Subnets        []*string `json:"subnets,omitempty"`
+}
+
+// An object that defines the status of Express service creation and information
+// about the status of the service.
+type ExpressGatewayServiceStatus struct {
+	StatusReason *string `json:"statusReason,omitempty"`
 }
 
 // The authorization configuration details for Amazon FSx for Windows File Server
@@ -891,6 +1580,43 @@ type FirelensConfiguration struct {
 // a service, if the task reports as unhealthy then the task will be stopped
 // and the service scheduler will replace it.
 //
+// When a container health check fails for a task that is part of a service,
+// the following process occurs:
+//
+// The task is marked as UNHEALTHY.
+//
+// The unhealthy task will be stopped, and during the stopping process, it will
+// go through the following states:
+//
+//   - DEACTIVATING - In this state, Amazon ECS performs additional steps before
+//     stopping the task. For example, for tasks that are part of services configured
+//     to use Elastic Load Balancing target groups, target groups will be deregistered
+//     in this state.
+//
+//   - STOPPING - The task is in the process of being stopped.
+//
+//   - DEPROVISIONING - Resources associated with the task are being cleaned
+//     up.
+//
+//   - STOPPED - The task has been completely stopped.
+//
+// After the old task stops, a new task will be launched to ensure service operation,
+// and the new task will go through the following lifecycle:
+//
+//   - PROVISIONING - Resources required for the task are being provisioned.
+//
+//   - PENDING - The task is waiting to be placed on a container instance.
+//
+//   - ACTIVATING - In this state, Amazon ECS pulls container images, creates
+//     containers, configures task networking, registers load balancer target
+//     groups, and configures service discovery status.
+//
+//   - RUNNING - The task is running and performing its work.
+//
+// For more detailed information about task lifecycle states, see Task lifecycle
+// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-lifecycle-explanation.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
 // The following are notes about container health check support:
 //
 //   - If the Amazon ECS container agent becomes disconnected from the Amazon
@@ -912,6 +1638,10 @@ type FirelensConfiguration struct {
 //
 //   - Container health checks aren't supported for tasks that are part of
 //     a service that's configured to use a Classic Load Balancer.
+//
+// For an example of how to specify a task definition with multiple containers
+// where container dependency is specified, see Container dependency (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/example_task_definitions.html#example_task_definition-containerdependency)
+// in the Amazon Elastic Container Service Developer Guide.
 type HealthCheck struct {
 	Command     []*string `json:"command,omitempty"`
 	Interval    *int64    `json:"interval,omitempty"`
@@ -950,16 +1680,181 @@ type InferenceAcceleratorOverride struct {
 	DeviceType *string `json:"deviceType,omitempty"`
 }
 
+// The configuration that controls how Amazon ECS optimizes your infrastructure.
+type InfrastructureOptimization struct {
+	ScaleInAfter *int64 `json:"scaleInAfter,omitempty"`
+}
+
+// The entry point into an Express service.
+type IngressPathSummary struct {
+	Endpoint *string `json:"endpoint,omitempty"`
+}
+
 // An object representing the result of a container instance health status check.
 type InstanceHealthCheckResult struct {
 	LastStatusChange *metav1.Time `json:"lastStatusChange,omitempty"`
 	LastUpdated      *metav1.Time `json:"lastUpdated,omitempty"`
+	StatusReason     *string      `json:"statusReason,omitempty"`
+}
+
+// The launch template configuration for Amazon ECS Managed Instances. This
+// defines how Amazon ECS launches Amazon EC2 instances, including the instance
+// profile for your tasks, network and storage configuration, capacity options,
+// and instance requirements for flexible instance type selection.
+type InstanceLaunchTemplate struct {
+	CapacityOptionType *string `json:"capacityOptionType,omitempty"`
+	// The Capacity Reservation configurations to be used when using the RESERVED
+	// capacity option type.
+	CapacityReservations  *CapacityReservationRequest `json:"capacityReservations,omitempty"`
+	EC2InstanceProfileARN *string                     `json:"ec2InstanceProfileARN,omitempty"`
+	// Reference field for EC2InstanceProfileARN
+	EC2InstanceProfileRef           *ackv1alpha1.AWSResourceReferenceWrapper `json:"ec2InstanceProfileRef,omitempty"`
+	FipsEnabled                     *bool                                    `json:"fipsEnabled,omitempty"`
+	InstanceMetadataTagsPropagation *bool                                    `json:"instanceMetadataTagsPropagation,omitempty"`
+	// The instance requirements for attribute-based instance type selection. Instead
+	// of specifying exact instance types, you define requirements such as vCPU
+	// count, memory size, network performance, and accelerator specifications.
+	// Amazon ECS automatically selects Amazon EC2 instance types that match these
+	// requirements, providing flexibility and helping to mitigate capacity constraints.
+	InstanceRequirements *InstanceRequirementsRequest `json:"instanceRequirements,omitempty"`
+	// The local storage configuration for Amazon ECS Managed Instances. This defines
+	// how ECS uses and configures instance store volumes available on container
+	// instance.
+	LocalStorageConfiguration *ManagedInstancesLocalStorageConfiguration `json:"localStorageConfiguration,omitempty"`
+	Monitoring                *string                                    `json:"monitoring,omitempty"`
+	// The network configuration for Amazon ECS Managed Instances. This specifies
+	// the VPC subnets and security groups that instances use for network connectivity.
+	// Amazon ECS Managed Instances support multiple network modes including awsvpc
+	// (instances receive ENIs for task isolation), host (instances share network
+	// namespace with tasks), and none (no external network connectivity), ensuring
+	// backward compatibility for migrating workloads from Fargate or Amazon EC2.
+	NetworkConfiguration *ManagedInstancesNetworkConfiguration `json:"networkConfiguration,omitempty"`
+	// The storage configuration for Amazon ECS Managed Instances. This defines
+	// the data volume configuration for the instances.
+	StorageConfiguration *ManagedInstancesStorageConfiguration `json:"storageConfiguration,omitempty"`
+}
+
+// The updated launch template configuration for Amazon ECS Managed Instances.
+// You can modify the instance profile, network configuration, storage settings,
+// and instance requirements. Changes apply to new instances launched after
+// the update.
+//
+// For more information, see Store instance launch parameters in Amazon EC2
+// launch templates (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)
+// in the Amazon EC2 User Guide.
+type InstanceLaunchTemplateUpdate struct {
+	// The Capacity Reservation configurations to be used when using the RESERVED
+	// capacity option type.
+	CapacityReservations            *CapacityReservationRequest `json:"capacityReservations,omitempty"`
+	EC2InstanceProfileARN           *string                     `json:"ec2InstanceProfileARN,omitempty"`
+	InstanceMetadataTagsPropagation *bool                       `json:"instanceMetadataTagsPropagation,omitempty"`
+	// The instance requirements for attribute-based instance type selection. Instead
+	// of specifying exact instance types, you define requirements such as vCPU
+	// count, memory size, network performance, and accelerator specifications.
+	// Amazon ECS automatically selects Amazon EC2 instance types that match these
+	// requirements, providing flexibility and helping to mitigate capacity constraints.
+	InstanceRequirements *InstanceRequirementsRequest `json:"instanceRequirements,omitempty"`
+	// The local storage configuration for Amazon ECS Managed Instances. This defines
+	// how ECS uses and configures instance store volumes available on container
+	// instance.
+	LocalStorageConfiguration *ManagedInstancesLocalStorageConfiguration `json:"localStorageConfiguration,omitempty"`
+	Monitoring                *string                                    `json:"monitoring,omitempty"`
+	// The network configuration for Amazon ECS Managed Instances. This specifies
+	// the VPC subnets and security groups that instances use for network connectivity.
+	// Amazon ECS Managed Instances support multiple network modes including awsvpc
+	// (instances receive ENIs for task isolation), host (instances share network
+	// namespace with tasks), and none (no external network connectivity), ensuring
+	// backward compatibility for migrating workloads from Fargate or Amazon EC2.
+	NetworkConfiguration *ManagedInstancesNetworkConfiguration `json:"networkConfiguration,omitempty"`
+	// The storage configuration for Amazon ECS Managed Instances. This defines
+	// the data volume configuration for the instances.
+	StorageConfiguration *ManagedInstancesStorageConfiguration `json:"storageConfiguration,omitempty"`
+}
+
+// The instance requirements for attribute-based instance type selection. Instead
+// of specifying exact instance types, you define requirements such as vCPU
+// count, memory size, network performance, and accelerator specifications.
+// Amazon ECS automatically selects Amazon EC2 instance types that match these
+// requirements, providing flexibility and helping to mitigate capacity constraints.
+type InstanceRequirementsRequest struct {
+	// The minimum and maximum number of accelerators (such as GPUs) for instance
+	// type selection. This is used for workloads that require specific numbers
+	// of accelerators.
+	AcceleratorCount         *AcceleratorCountRequest `json:"acceleratorCount,omitempty"`
+	AcceleratorManufacturers []*string                `json:"acceleratorManufacturers,omitempty"`
+	AcceleratorNames         []*string                `json:"acceleratorNames,omitempty"`
+	// The minimum and maximum total accelerator memory in mebibytes (MiB) for instance
+	// type selection. This is important for GPU workloads that require specific
+	// amounts of video memory.
+	AcceleratorTotalMemoryMiB *AcceleratorTotalMemoryMiBRequest `json:"acceleratorTotalMemoryMiB,omitempty"`
+	AcceleratorTypes          []*string                         `json:"acceleratorTypes,omitempty"`
+	AllowedInstanceTypes      []*string                         `json:"allowedInstanceTypes,omitempty"`
+	BareMetal                 *string                           `json:"bareMetal,omitempty"`
+	// The minimum and maximum baseline Amazon EBS bandwidth in megabits per second
+	// (Mbps) for instance type selection. This is important for workloads with
+	// high storage I/O requirements.
+	BaselineEBSBandwidthMbps                       *BaselineEBSBandwidthMbpsRequest `json:"baselineEBSBandwidthMbps,omitempty"`
+	BurstablePerformance                           *string                          `json:"burstablePerformance,omitempty"`
+	CPUManufacturers                               []*string                        `json:"cpuManufacturers,omitempty"`
+	ExcludedInstanceTypes                          []*string                        `json:"excludedInstanceTypes,omitempty"`
+	InstanceGenerations                            []*string                        `json:"instanceGenerations,omitempty"`
+	LocalStorage                                   *string                          `json:"localStorage,omitempty"`
+	LocalStorageTypes                              []*string                        `json:"localStorageTypes,omitempty"`
+	MaxSpotPriceAsPercentageOfOptimalOnDemandPrice *int64                           `json:"maxSpotPriceAsPercentageOfOptimalOnDemandPrice,omitempty"`
+	// The minimum and maximum amount of memory per vCPU in gibibytes (GiB). This
+	// helps ensure that instance types have the appropriate memory-to-CPU ratio
+	// for your workloads.
+	MemoryGiBPerVCPU *MemoryGiBPerVCPURequest `json:"memoryGiBPerVCPU,omitempty"`
+	// The minimum and maximum amount of memory in mebibytes (MiB) for instance
+	// type selection. This ensures that selected instance types have adequate memory
+	// for your workloads.
+	MemoryMiB *MemoryMiBRequest `json:"memoryMiB,omitempty"`
+	// The minimum and maximum network bandwidth in gigabits per second (Gbps) for
+	// instance type selection. This is important for network-intensive workloads.
+	NetworkBandwidthGbps *NetworkBandwidthGbpsRequest `json:"networkBandwidthGbps,omitempty"`
+	// The minimum and maximum number of network interfaces for instance type selection.
+	// This is useful for workloads that require multiple network interfaces.
+	NetworkInterfaceCount                     *NetworkInterfaceCountRequest `json:"networkInterfaceCount,omitempty"`
+	OnDemandMaxPricePercentageOverLowestPrice *int64                        `json:"onDemandMaxPricePercentageOverLowestPrice,omitempty"`
+	RequireHibernateSupport                   *bool                         `json:"requireHibernateSupport,omitempty"`
+	SpotMaxPricePercentageOverLowestPrice     *int64                        `json:"spotMaxPricePercentageOverLowestPrice,omitempty"`
+	// The minimum and maximum total local storage in gigabytes (GB) for instance
+	// types with local storage. This is useful for workloads that require local
+	// storage for temporary data or caching.
+	TotalLocalStorageGB *TotalLocalStorageGBRequest `json:"totalLocalStorageGB,omitempty"`
+	// The minimum and maximum number of vCPUs for instance type selection. This
+	// allows you to specify a range of vCPU counts that meet your workload requirements.
+	VCPUCount *VCPUCountRangeRequest `json:"vCPUCount,omitempty"`
 }
 
 // The Linux capabilities to add or remove from the default Docker configuration
 // for a container defined in the task definition. For more detailed information
 // about these Linux capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
 // Linux manual page.
+//
+// The following describes how Docker processes the Linux capabilities specified
+// in the add and drop request parameters. For information about the latest
+// behavior, see Docker Compose: order of cap_drop and cap_add (https://forums.docker.com/t/docker-compose-order-of-cap-drop-and-cap-add/97136/1)
+// in the Docker Community Forum.
+//
+//   - When the container is a privleged container, the container capabilities
+//     are all of the default Docker capabilities. The capabilities specified
+//     in the add request parameter, and the drop request parameter are ignored.
+//
+//   - When the add request parameter is set to ALL, the container capabilities
+//     are all of the default Docker capabilities, excluding those specified
+//     in the drop request parameter.
+//
+//   - When the drop request parameter is set to ALL, the container capabilities
+//     are the capabilities specified in the add request parameter.
+//
+//   - When the add request parameter and the drop request parameter are both
+//     empty, the capabilities the container capabilities are all of the default
+//     Docker capabilities.
+//
+//   - The default is to first drop the capabilities specified in the drop
+//     request parameter, and then add the capabilities specified in the add
+//     request parameter.
 type KernelCapabilities struct {
 	Add  []*string `json:"add,omitempty"`
 	Drop []*string `json:"drop,omitempty"`
@@ -971,6 +1866,16 @@ type KeyValuePair struct {
 	Value *string `json:"value,omitempty"`
 }
 
+// Configuration for linear deployment strategy that shifts production traffic
+// in equal percentage increments with configurable wait times between each
+// step until 100% of traffic is shifted to the new service revision. This is
+// only valid when you run CreateService or UpdateService with deploymentController
+// set to ECS and a deploymentConfiguration with a strategy set to LINEAR.
+type LinearConfiguration struct {
+	StepBakeTimeInMinutes *int64   `json:"stepBakeTimeInMinutes,omitempty"`
+	StepPercent           *float64 `json:"stepPercent,omitempty"`
+}
+
 // The Linux-specific options that are applied to the container, such as Linux
 // KernelCapabilities (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_KernelCapabilities.html).
 type LinuxParameters struct {
@@ -978,6 +1883,30 @@ type LinuxParameters struct {
 	// for a container defined in the task definition. For more detailed information
 	// about these Linux capabilities, see the capabilities(7) (http://man7.org/linux/man-pages/man7/capabilities.7.html)
 	// Linux manual page.
+	//
+	// The following describes how Docker processes the Linux capabilities specified
+	// in the add and drop request parameters. For information about the latest
+	// behavior, see Docker Compose: order of cap_drop and cap_add (https://forums.docker.com/t/docker-compose-order-of-cap-drop-and-cap-add/97136/1)
+	// in the Docker Community Forum.
+	//
+	//    * When the container is a privleged container, the container capabilities
+	//    are all of the default Docker capabilities. The capabilities specified
+	//    in the add request parameter, and the drop request parameter are ignored.
+	//
+	//    * When the add request parameter is set to ALL, the container capabilities
+	//    are all of the default Docker capabilities, excluding those specified
+	//    in the drop request parameter.
+	//
+	//    * When the drop request parameter is set to ALL, the container capabilities
+	//    are the capabilities specified in the add request parameter.
+	//
+	//    * When the add request parameter and the drop request parameter are both
+	//    empty, the capabilities the container capabilities are all of the default
+	//    Docker capabilities.
+	//
+	//    * The default is to first drop the capabilities specified in the drop
+	//    request parameter, and then add the capabilities specified in the add
+	//    request parameter.
 	Capabilities       *KernelCapabilities `json:"capabilities,omitempty"`
 	Devices            []*Device           `json:"devices,omitempty"`
 	InitProcessEnabled *bool               `json:"initProcessEnabled,omitempty"`
@@ -1062,10 +1991,190 @@ type ManagedAgentStateChange struct {
 	Status        *string `json:"status,omitempty"`
 }
 
+// The Application Auto Scaling policy created by Amazon ECS when you create
+// an Express service.
+type ManagedApplicationAutoScalingPolicy struct {
+	ARN          *string      `json:"arn,omitempty"`
+	Metric       *string      `json:"metric,omitempty"`
+	PolicyType   *string      `json:"policyType,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	TargetValue  *float64     `json:"targetValue,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The ACM certificate associated with the HTTPS domain created for the Express
+// service.
+type ManagedCertificate struct {
+	ARN          *string      `json:"arn,omitempty"`
+	DomainName   *string      `json:"domainName,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The entry point into the Express service.
+type ManagedIngressPath struct {
+	Endpoint *string `json:"endpoint,omitempty"`
+}
+
+// The local storage configuration for Amazon ECS Managed Instances. This defines
+// how ECS uses and configures instance store volumes available on container
+// instance.
+type ManagedInstancesLocalStorageConfiguration struct {
+	UseLocalStorage *bool `json:"useLocalStorage,omitempty"`
+}
+
+// The network configuration for Amazon ECS Managed Instances. This specifies
+// the VPC subnets and security groups that instances use for network connectivity.
+// Amazon ECS Managed Instances support multiple network modes including awsvpc
+// (instances receive ENIs for task isolation), host (instances share network
+// namespace with tasks), and none (no external network connectivity), ensuring
+// backward compatibility for migrating workloads from Fargate or Amazon EC2.
+type ManagedInstancesNetworkConfiguration struct {
+	// Reference field for SecurityGroups
+	SecurityGroupRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"securityGroupRefs,omitempty"`
+	SecurityGroups    []*string                                  `json:"securityGroups,omitempty"`
+	// Reference field for Subnets
+	SubnetRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"subnetRefs,omitempty"`
+	Subnets    []*string                                  `json:"subnets,omitempty"`
+}
+
+// The configuration for a Amazon ECS Managed Instances provider. Amazon ECS
+// uses this configuration to automatically launch, manage, and terminate Amazon
+// EC2 instances on your behalf. Managed instances provide access to the full
+// range of Amazon EC2 instance types and features while offloading infrastructure
+// management to Amazon Web Services.
+type ManagedInstancesProvider struct {
+	// The auto repair configuration for an Amazon ECS Managed Instances capacity
+	// provider. When enabled, Amazon ECS automatically replaces container instances
+	// that are detected as unhealthy based on container instance health checks,
+	// including accelerated compute device and daemon health checks.
+	AutoRepairConfiguration *AutoRepairConfiguration `json:"autoRepairConfiguration,omitempty"`
+	// The configuration that controls how Amazon ECS optimizes your infrastructure.
+	InfrastructureOptimization *InfrastructureOptimization `json:"infrastructureOptimization,omitempty"`
+	InfrastructureRoleARN      *string                     `json:"infrastructureRoleARN,omitempty"`
+	// The launch template configuration for Amazon ECS Managed Instances. This
+	// defines how Amazon ECS launches Amazon EC2 instances, including the instance
+	// profile for your tasks, network and storage configuration, capacity options,
+	// and instance requirements for flexible instance type selection.
+	InstanceLaunchTemplate *InstanceLaunchTemplate `json:"instanceLaunchTemplate,omitempty"`
+	PropagateTags          *string                 `json:"propagateTags,omitempty"`
+}
+
+// The storage configuration for Amazon ECS Managed Instances. This defines
+// the data volume configuration for the instances.
+type ManagedInstancesStorageConfiguration struct {
+	StorageSizeGiB *int64 `json:"storageSizeGiB,omitempty"`
+}
+
+// The listeners associated with the Express service's Application Load Balancer.
+type ManagedListener struct {
+	ARN          *string      `json:"arn,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The listener rule associated with the Express service's Application Load
+// Balancer.
+type ManagedListenerRule struct {
+	ARN          *string      `json:"arn,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The Application Load Balancer associated with the Express service.
+type ManagedLoadBalancer struct {
+	ARN              *string      `json:"arn,omitempty"`
+	Scheme           *string      `json:"scheme,omitempty"`
+	SecurityGroupIDs []*string    `json:"securityGroupIDs,omitempty"`
+	StatusReason     *string      `json:"statusReason,omitempty"`
+	SubnetIDs        []*string    `json:"subnetIDs,omitempty"`
+	UpdatedAt        *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The Cloudwatch Log Group created by Amazon ECS for an Express service.
+type ManagedLogGroup struct {
+	ARN          *string      `json:"arn,omitempty"`
+	LogGroupName *string      `json:"logGroupName,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The CloudWatch metric alarm associated with the Express service's scaling
+// policy.
+type ManagedMetricAlarm struct {
+	ARN          *string      `json:"arn,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// Represents a scalable target.
+type ManagedScalableTarget struct {
+	ARN          *string      `json:"arn,omitempty"`
+	MaxCapacity  *int64       `json:"maxCapacity,omitempty"`
+	MinCapacity  *int64       `json:"minCapacity,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The managed scaling settings for the Auto Scaling group capacity provider.
+//
+// When managed scaling is turned on, Amazon ECS manages the scale-in and scale-out
+// actions of the Auto Scaling group. Amazon ECS manages a target tracking scaling
+// policy using an Amazon ECS managed CloudWatch metric with the specified targetCapacity
+// value as the target value for the metric. For more information, see Using
+// managed scaling (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/asg-capacity-providers.html#asg-capacity-providers-managed-scaling)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// If managed scaling is off, the user must manage the scaling of the Auto Scaling
+// group.
+type ManagedScaling struct {
+	InstanceWarmupPeriod   *int64  `json:"instanceWarmupPeriod,omitempty"`
+	MaximumScalingStepSize *int64  `json:"maximumScalingStepSize,omitempty"`
+	MinimumScalingStepSize *int64  `json:"minimumScalingStepSize,omitempty"`
+	Status                 *string `json:"status,omitempty"`
+	TargetCapacity         *int64  `json:"targetCapacity,omitempty"`
+}
+
+// A security group associated with the Express service.
+type ManagedSecurityGroup struct {
+	ARN          *string      `json:"arn,omitempty"`
+	StatusReason *string      `json:"statusReason,omitempty"`
+	UpdatedAt    *metav1.Time `json:"updatedAt,omitempty"`
+}
+
 // The managed storage configuration for the cluster.
 type ManagedStorageConfiguration struct {
 	FargateEphemeralStorageKMSKeyID *string `json:"fargateEphemeralStorageKMSKeyID,omitempty"`
 	KMSKeyID                        *string `json:"kmsKeyID,omitempty"`
+}
+
+// The target group associated with the Express service's Application Load Balancer.
+// For more information about load balancer target groups, see CreateTargetGroup
+// (https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_CreateTargetGroup.html)
+// in the Elastic Load Balancing API Reference
+type ManagedTargetGroup struct {
+	ARN             *string      `json:"arn,omitempty"`
+	HealthCheckPath *string      `json:"healthCheckPath,omitempty"`
+	HealthCheckPort *int64       `json:"healthCheckPort,omitempty"`
+	Port            *int64       `json:"port,omitempty"`
+	StatusReason    *string      `json:"statusReason,omitempty"`
+	UpdatedAt       *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The minimum and maximum amount of memory per vCPU in gibibytes (GiB). This
+// helps ensure that instance types have the appropriate memory-to-CPU ratio
+// for your workloads.
+type MemoryGiBPerVCPURequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
+}
+
+// The minimum and maximum amount of memory in mebibytes (MiB) for instance
+// type selection. This ensures that selected instance types have adequate memory
+// for your workloads.
+type MemoryMiBRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
 }
 
 // The details for a volume mount point that's used in a container definition.
@@ -1073,6 +2182,13 @@ type MountPoint struct {
 	ContainerPath *string `json:"containerPath,omitempty"`
 	ReadOnly      *bool   `json:"readOnly,omitempty"`
 	SourceVolume  *string `json:"sourceVolume,omitempty"`
+}
+
+// The minimum and maximum network bandwidth in gigabits per second (Gbps) for
+// instance type selection. This is important for network-intensive workloads.
+type NetworkBandwidthGbpsRequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
 }
 
 // Details on the network bindings between a container and its host container
@@ -1104,6 +2220,13 @@ type NetworkInterface struct {
 	PrivateIPv4Address *string `json:"privateIPv4Address,omitempty"`
 }
 
+// The minimum and maximum number of network interfaces for instance type selection.
+// This is useful for workloads that require multiple network interfaces.
+type NetworkInterfaceCountRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
+}
+
 // An object representing a constraint on task placement. For more information,
 // see Task placement constraints (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement-constraints.html)
 // in the Amazon Elastic Container Service Developer Guide.
@@ -1123,8 +2246,8 @@ type PlacementStrategy struct {
 	Type  *string `json:"type,omitempty"`
 }
 
-// The devices that are available on the container instance. The only supported
-// device type is a GPU.
+// The devices that are available on the container instance. The supported device
+// types are GPUs and Neuron devices.
 type PlatformDevice struct {
 	ID *string `json:"id,omitempty"`
 }
@@ -1197,8 +2320,8 @@ type Resource struct {
 }
 
 // The type and amount of a resource to assign to a container. The supported
-// resource types are GPUs and Elastic Inference accelerators. For more information,
-// see Working with GPUs on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-gpu.html)
+// resource types are GPUs, Neuron devices, and Elastic Inference accelerators.
+// For more information, see Working with GPUs on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-gpu.html)
 // or Working with Amazon Elastic Inference on Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-inference.html)
 // in the Amazon Elastic Container Service Developer Guide
 type ResourceRequirement struct {
@@ -1220,6 +2343,20 @@ type Rollback struct {
 type RuntimePlatform struct {
 	CPUArchitecture       *string `json:"cpuArchitecture,omitempty"`
 	OperatingSystemFamily *string `json:"operatingSystemFamily,omitempty"`
+}
+
+// This parameter is specified when you're using an Amazon S3 Files file system
+// for task storage. For more information, see Amazon S3 Files volumes (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/s3files-volumes.html)
+// in the Amazon Elastic Container Service Developer Guide.
+//
+// Your task definition must include a Task IAM Role. See IAM role for attaching
+// your file system to Amazon Web Services compute resources (https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files-prereq-policies.html#s3-files-prereq-iam-compute-role)
+// for required permissions.
+type S3FilesVolumeConfiguration struct {
+	AccessPointARN        *string `json:"accessPointARN,omitempty"`
+	FileSystemARN         *string `json:"fileSystemARN,omitempty"`
+	RootDirectory         *string `json:"rootDirectory,omitempty"`
+	TransitEncryptionPort *int64  `json:"transitEncryptionPort,omitempty"`
 }
 
 // A floating-point percentage of the desired number of tasks to place and keep
@@ -1354,6 +2491,32 @@ type ServiceConnectService struct {
 type ServiceConnectServiceResource struct {
 	DiscoveryARN  *string `json:"discoveryARN,omitempty"`
 	DiscoveryName *string `json:"discoveryName,omitempty"`
+}
+
+// The header matching rules for test traffic routing in Amazon ECS blue/green
+// deployments. These rules determine how incoming requests are matched based
+// on HTTP headers to route test traffic to the new service revision.
+type ServiceConnectTestTrafficHeaderMatchRules struct {
+	Exact *string `json:"exact,omitempty"`
+}
+
+// The HTTP header rules used to identify and route test traffic during Amazon
+// ECS blue/green deployments. These rules specify which HTTP headers to examine
+// and what values to match for routing decisions.
+//
+// For more information, see Service Connect for Amazon ECS blue/green deployments
+// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-blue-green.html)
+// in the Amazon Elastic Container Service Developer Guide.
+type ServiceConnectTestTrafficHeaderRules struct {
+	Name *string `json:"name,omitempty"`
+}
+
+// The summary of the current service revision configuration
+type ServiceCurrentRevisionSummary struct {
+	ARN                *string `json:"arn,omitempty"`
+	PendingTaskCount   *int64  `json:"pendingTaskCount,omitempty"`
+	RequestedTaskCount *int64  `json:"requestedTaskCount,omitempty"`
+	RunningTaskCount   *int64  `json:"runningTaskCount,omitempty"`
 }
 
 // Information about the service deployment.
@@ -1499,13 +2662,23 @@ type ServiceRevision struct {
 	VPCLatticeConfigurations    []*VPCLatticeConfiguration    `json:"vpcLatticeConfigurations,omitempty"`
 }
 
+// The resolved load balancer configuration for a service revision. This includes
+// information about which target groups serve traffic and which listener rules
+// direct traffic to them.
+type ServiceRevisionLoadBalancer struct {
+	ProductionListenerRule *string `json:"productionListenerRule,omitempty"`
+	TargetGroupARN         *string `json:"targetGroupARN,omitempty"`
+}
+
 // The information about the number of requested, pending, and running tasks
 // for a service revision.
 type ServiceRevisionSummary struct {
-	ARN                *string `json:"arn,omitempty"`
-	PendingTaskCount   *int64  `json:"pendingTaskCount,omitempty"`
-	RequestedTaskCount *int64  `json:"requestedTaskCount,omitempty"`
-	RunningTaskCount   *int64  `json:"runningTaskCount,omitempty"`
+	ARN                              *string  `json:"arn,omitempty"`
+	PendingTaskCount                 *int64   `json:"pendingTaskCount,omitempty"`
+	RequestedProductionTrafficWeight *float64 `json:"requestedProductionTrafficWeight,omitempty"`
+	RequestedTaskCount               *int64   `json:"requestedTaskCount,omitempty"`
+	RequestedTestTrafficWeight       *float64 `json:"requestedTestTrafficWeight,omitempty"`
+	RunningTaskCount                 *int64   `json:"runningTaskCount,omitempty"`
 }
 
 // The configuration for a volume specified in the task definition as a volume
@@ -1765,16 +2938,17 @@ type TaskEphemeralStorage struct {
 // on your behalf. These settings are used to create each Amazon EBS volume,
 // with one volume created for each task.
 type TaskManagedEBSVolumeConfiguration struct {
-	Encrypted         *bool                  `json:"encrypted,omitempty"`
-	FilesystemType    *string                `json:"filesystemType,omitempty"`
-	IOPS              *int64                 `json:"iops,omitempty"`
-	KMSKeyID          *string                `json:"kmsKeyID,omitempty"`
-	RoleARN           *string                `json:"roleARN,omitempty"`
-	SizeInGiB         *int64                 `json:"sizeInGiB,omitempty"`
-	SnapshotID        *string                `json:"snapshotID,omitempty"`
-	TagSpecifications []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
-	Throughput        *int64                 `json:"throughput,omitempty"`
-	VolumeType        *string                `json:"volumeType,omitempty"`
+	Encrypted                *bool                  `json:"encrypted,omitempty"`
+	FilesystemType           *string                `json:"filesystemType,omitempty"`
+	IOPS                     *int64                 `json:"iops,omitempty"`
+	KMSKeyID                 *string                `json:"kmsKeyID,omitempty"`
+	RoleARN                  *string                `json:"roleARN,omitempty"`
+	SizeInGiB                *int64                 `json:"sizeInGiB,omitempty"`
+	SnapshotID               *string                `json:"snapshotID,omitempty"`
+	TagSpecifications        []*EBSTagSpecification `json:"tagSpecifications,omitempty"`
+	Throughput               *int64                 `json:"throughput,omitempty"`
+	VolumeInitializationRate *int64                 `json:"volumeInitializationRate,omitempty"`
+	VolumeType               *string                `json:"volumeType,omitempty"`
 }
 
 // The termination policy for the Amazon EBS volume when the task exits. For
@@ -1860,6 +3034,14 @@ type Tmpfs struct {
 	Size          *int64    `json:"size,omitempty"`
 }
 
+// The minimum and maximum total local storage in gigabytes (GB) for instance
+// types with local storage. This is useful for workloads that require local
+// storage for temporary data or caching.
+type TotalLocalStorageGBRequest struct {
+	Max *float64 `json:"max,omitempty"`
+	Min *float64 `json:"min,omitempty"`
+}
+
 // The ulimit settings to pass to the container.
 //
 // Amazon ECS tasks hosted on Fargate use the default resource limit values
@@ -1873,6 +3055,46 @@ type Ulimit struct {
 	HardLimit *int64  `json:"hardLimit,omitempty"`
 	Name      *string `json:"name,omitempty"`
 	SoftLimit *int64  `json:"softLimit,omitempty"`
+}
+
+// The updated configuration for a Amazon ECS Managed Instances provider. You
+// can modify the infrastructure role, instance launch template, and tag propagation
+// settings. Changes apply to new instances launched after the update.
+type UpdateManagedInstancesProviderConfiguration struct {
+	// The auto repair configuration for an Amazon ECS Managed Instances capacity
+	// provider. When enabled, Amazon ECS automatically replaces container instances
+	// that are detected as unhealthy based on container instance health checks,
+	// including accelerated compute device and daemon health checks.
+	AutoRepairConfiguration *AutoRepairConfiguration `json:"autoRepairConfiguration,omitempty"`
+	// The configuration that controls how Amazon ECS optimizes your infrastructure.
+	InfrastructureOptimization *InfrastructureOptimization `json:"infrastructureOptimization,omitempty"`
+	InfrastructureRoleARN      *string                     `json:"infrastructureRoleARN,omitempty"`
+	// The updated launch template configuration for Amazon ECS Managed Instances.
+	// You can modify the instance profile, network configuration, storage settings,
+	// and instance requirements. Changes apply to new instances launched after
+	// the update.
+	//
+	// For more information, see Store instance launch parameters in Amazon EC2
+	// launch templates (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)
+	// in the Amazon EC2 User Guide.
+	InstanceLaunchTemplate *InstanceLaunchTemplateUpdate `json:"instanceLaunchTemplate,omitempty"`
+	PropagateTags          *string                       `json:"propagateTags,omitempty"`
+}
+
+// An object that describes an Express service to be updated.
+type UpdatedExpressGatewayService struct {
+	Cluster     *string      `json:"cluster,omitempty"`
+	CreatedAt   *metav1.Time `json:"createdAt,omitempty"`
+	ServiceARN  *string      `json:"serviceARN,omitempty"`
+	ServiceName *string      `json:"serviceName,omitempty"`
+	UpdatedAt   *metav1.Time `json:"updatedAt,omitempty"`
+}
+
+// The minimum and maximum number of vCPUs for instance type selection. This
+// allows you to specify a range of vCPU counts that meet your workload requirements.
+type VCPUCountRangeRequest struct {
+	Max *int64 `json:"max,omitempty"`
+	Min *int64 `json:"min,omitempty"`
 }
 
 // The VPC Lattice configuration for your service that holds the information
@@ -1896,9 +3118,10 @@ type VersionInfo struct {
 // configuration may contain multiple volumes but only one volume configured
 // at launch is supported. Each volume defined in the volume configuration may
 // only specify a name and one of either configuredAtLaunch, dockerVolumeConfiguration,
-// efsVolumeConfiguration, fsxWindowsFileServerVolumeConfiguration, or host.
-// If an empty volume configuration is specified, by default Amazon ECS uses
-// a host volume. For more information, see Using data volumes in tasks (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
+// efsVolumeConfiguration, s3filesVolumeConfiguration, fsxWindowsFileServerVolumeConfiguration,
+// or host. If an empty volume configuration is specified, by default Amazon
+// ECS uses a host volume. For more information, see Using data volumes in tasks
+// (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_data_volumes.html).
 type Volume struct {
 	ConfiguredAtLaunch *bool `json:"configuredAtLaunch,omitempty"`
 	// This parameter is specified when you're using Docker volumes. Docker volumes

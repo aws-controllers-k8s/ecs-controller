@@ -1,0 +1,12 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: Cluster
+metadata:
+  name: $CLUSTER_NAME
+spec:
+  name: $CLUSTER_NAME
+  capacityProviders:
+    - $CAPACITY_PROVIDER_NAME
+  defaultCapacityProviderStrategy:
+    - capacityProvider: $CAPACITY_PROVIDER_NAME
+      weight: 1
+      base: 0

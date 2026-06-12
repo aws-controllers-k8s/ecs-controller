@@ -130,7 +130,7 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Optional
 	Conditions []*ackv1alpha1.Condition `json:"conditions"`
 	// The number of services that are running on the cluster in an ACTIVE state.
-	// You can view these services with PListServices (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html).
+	// You can view these services with ListServices (https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ListServices.html).
 	// +kubebuilder:validation:Optional
 	ActiveServicesCount *int64 `json:"activeServicesCount,omitempty"`
 	// The resources attached to a cluster. When using a capacity provider with

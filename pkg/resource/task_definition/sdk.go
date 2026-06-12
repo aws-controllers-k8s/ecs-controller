@@ -1512,7 +1512,7 @@ func (rm *resourceManager) newCreateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field Cpu is of type int32")
+					return nil, fmt.Errorf("error: field cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy
@@ -2903,7 +2903,7 @@ func (rm *resourceManager) newUpdateRequestPayload(
 			if f0iter.CPU != nil {
 				cpuCopy0 := *f0iter.CPU
 				if cpuCopy0 > math.MaxInt32 || cpuCopy0 < math.MinInt32 {
-					return nil, fmt.Errorf("error: field Cpu is of type int32")
+					return nil, fmt.Errorf("error: field cpu is of type int32")
 				}
 				cpuCopy := int32(cpuCopy0)
 				f0elem.Cpu = cpuCopy

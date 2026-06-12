@@ -60,3 +60,18 @@ class ECSValidator:
         
     def service_exists(self, cluster_name, service_name) -> bool:
         return self.get_service(cluster_name, service_name) is not None
+
+    def get_capacity_provider(self, capacity_provider_name: str) -> dict:
+        try:
+            resp = self.ecs_client.describe_capacity_providers(
+                capacityProviders=[capacity_provider_name],
+            )
+            if resp.get("capacityProviders"):
+                return resp["capacityProviders"][0]
+            return None
+        except Exception as e:
+            return None
+
+    def capacity_provider_exists(self, capacity_provider_name: str) -> bool:
+        cp = self.get_capacity_provider(capacity_provider_name)
+        return cp is not None and cp.get("status") != "INACTIVE"

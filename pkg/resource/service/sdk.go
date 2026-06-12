@@ -2023,6 +2023,12 @@ func (rm *resourceManager) sdkUpdate(
 	if desired.ko.Spec.Name != nil {
 		input.Service = desired.ko.Spec.Name
 	}
+	// ECS requires ForceNewDeployment when modifying the capacity provider
+	// strategy on an existing service, otherwise the API returns
+	// InvalidParameterException.
+	if delta.DifferentAt("Spec.CapacityProviderStrategy") {
+		input.ForceNewDeployment = true
+	}
 
 	var resp *svcsdk.UpdateServiceOutput
 	_ = resp
@@ -2810,6 +2816,13 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		}
 		res.DeploymentConfiguration = f3
 	}
+	if r.ko.Spec.DeploymentController != nil {
+		f4 := &svcsdktypes.DeploymentController{}
+		if r.ko.Spec.DeploymentController.Type != nil {
+			f4.Type = svcsdktypes.DeploymentControllerType(*r.ko.Spec.DeploymentController.Type)
+		}
+		res.DeploymentController = f4
+	}
 	if r.ko.Spec.DesiredCount != nil {
 		desiredCountCopy0 := *r.ko.Spec.DesiredCount
 		if desiredCountCopy0 > math.MaxInt32 || desiredCountCopy0 < math.MinInt32 {
@@ -2833,74 +2846,74 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		res.HealthCheckGracePeriodSeconds = &healthCheckGracePeriodSecondsCopy
 	}
 	if r.ko.Spec.LoadBalancers != nil {
-		f9 := []svcsdktypes.LoadBalancer{}
-		for _, f9iter := range r.ko.Spec.LoadBalancers {
-			f9elem := &svcsdktypes.LoadBalancer{}
-			if f9iter.ContainerName != nil {
-				f9elem.ContainerName = f9iter.ContainerName
+		f10 := []svcsdktypes.LoadBalancer{}
+		for _, f10iter := range r.ko.Spec.LoadBalancers {
+			f10elem := &svcsdktypes.LoadBalancer{}
+			if f10iter.ContainerName != nil {
+				f10elem.ContainerName = f10iter.ContainerName
 			}
-			if f9iter.ContainerPort != nil {
-				containerPortCopy0 := *f9iter.ContainerPort
+			if f10iter.ContainerPort != nil {
+				containerPortCopy0 := *f10iter.ContainerPort
 				if containerPortCopy0 > math.MaxInt32 || containerPortCopy0 < math.MinInt32 {
 					return nil, fmt.Errorf("error: field containerPort is of type int32")
 				}
 				containerPortCopy := int32(containerPortCopy0)
-				f9elem.ContainerPort = &containerPortCopy
+				f10elem.ContainerPort = &containerPortCopy
 			}
-			if f9iter.LoadBalancerName != nil {
-				f9elem.LoadBalancerName = f9iter.LoadBalancerName
+			if f10iter.LoadBalancerName != nil {
+				f10elem.LoadBalancerName = f10iter.LoadBalancerName
 			}
-			if f9iter.TargetGroupARN != nil {
-				f9elem.TargetGroupArn = f9iter.TargetGroupARN
+			if f10iter.TargetGroupARN != nil {
+				f10elem.TargetGroupArn = f10iter.TargetGroupARN
 			}
-			f9 = append(f9, *f9elem)
+			f10 = append(f10, *f10elem)
 		}
-		res.LoadBalancers = f9
+		res.LoadBalancers = f10
 	}
 	if r.ko.Spec.NetworkConfiguration != nil {
-		f10 := &svcsdktypes.NetworkConfiguration{}
+		f11 := &svcsdktypes.NetworkConfiguration{}
 		if r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration != nil {
-			f10f0 := &svcsdktypes.AwsVpcConfiguration{}
+			f11f0 := &svcsdktypes.AwsVpcConfiguration{}
 			if r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.AssignPublicIP != nil {
-				f10f0.AssignPublicIp = svcsdktypes.AssignPublicIp(*r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.AssignPublicIP)
+				f11f0.AssignPublicIp = svcsdktypes.AssignPublicIp(*r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.AssignPublicIP)
 			}
 			if r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.SecurityGroups != nil {
-				f10f0.SecurityGroups = aws.ToStringSlice(r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.SecurityGroups)
+				f11f0.SecurityGroups = aws.ToStringSlice(r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.SecurityGroups)
 			}
 			if r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.Subnets != nil {
-				f10f0.Subnets = aws.ToStringSlice(r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.Subnets)
+				f11f0.Subnets = aws.ToStringSlice(r.ko.Spec.NetworkConfiguration.AWSVPCConfiguration.Subnets)
 			}
-			f10.AwsvpcConfiguration = f10f0
+			f11.AwsvpcConfiguration = f11f0
 		}
-		res.NetworkConfiguration = f10
+		res.NetworkConfiguration = f11
 	}
 	if r.ko.Spec.PlacementConstraints != nil {
-		f11 := []svcsdktypes.PlacementConstraint{}
-		for _, f11iter := range r.ko.Spec.PlacementConstraints {
-			f11elem := &svcsdktypes.PlacementConstraint{}
-			if f11iter.Expression != nil {
-				f11elem.Expression = f11iter.Expression
-			}
-			if f11iter.Type != nil {
-				f11elem.Type = svcsdktypes.PlacementConstraintType(*f11iter.Type)
-			}
-			f11 = append(f11, *f11elem)
-		}
-		res.PlacementConstraints = f11
-	}
-	if r.ko.Spec.PlacementStrategy != nil {
-		f12 := []svcsdktypes.PlacementStrategy{}
-		for _, f12iter := range r.ko.Spec.PlacementStrategy {
-			f12elem := &svcsdktypes.PlacementStrategy{}
-			if f12iter.Field != nil {
-				f12elem.Field = f12iter.Field
+		f12 := []svcsdktypes.PlacementConstraint{}
+		for _, f12iter := range r.ko.Spec.PlacementConstraints {
+			f12elem := &svcsdktypes.PlacementConstraint{}
+			if f12iter.Expression != nil {
+				f12elem.Expression = f12iter.Expression
 			}
 			if f12iter.Type != nil {
-				f12elem.Type = svcsdktypes.PlacementStrategyType(*f12iter.Type)
+				f12elem.Type = svcsdktypes.PlacementConstraintType(*f12iter.Type)
 			}
 			f12 = append(f12, *f12elem)
 		}
-		res.PlacementStrategy = f12
+		res.PlacementConstraints = f12
+	}
+	if r.ko.Spec.PlacementStrategy != nil {
+		f13 := []svcsdktypes.PlacementStrategy{}
+		for _, f13iter := range r.ko.Spec.PlacementStrategy {
+			f13elem := &svcsdktypes.PlacementStrategy{}
+			if f13iter.Field != nil {
+				f13elem.Field = f13iter.Field
+			}
+			if f13iter.Type != nil {
+				f13elem.Type = svcsdktypes.PlacementStrategyType(*f13iter.Type)
+			}
+			f13 = append(f13, *f13elem)
+		}
+		res.PlacementStrategy = f13
 	}
 	if r.ko.Spec.PlatformVersion != nil {
 		res.PlatformVersion = r.ko.Spec.PlatformVersion
@@ -2909,234 +2922,234 @@ func (rm *resourceManager) newUpdateRequestPayload(
 		res.PropagateTags = svcsdktypes.PropagateTags(*r.ko.Spec.PropagateTags)
 	}
 	if r.ko.Spec.ServiceConnectConfiguration != nil {
-		f16 := &svcsdktypes.ServiceConnectConfiguration{}
+		f17 := &svcsdktypes.ServiceConnectConfiguration{}
 		if r.ko.Spec.ServiceConnectConfiguration.Enabled != nil {
-			f16.Enabled = *r.ko.Spec.ServiceConnectConfiguration.Enabled
+			f17.Enabled = *r.ko.Spec.ServiceConnectConfiguration.Enabled
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration != nil {
-			f16f1 := &svcsdktypes.LogConfiguration{}
+			f17f1 := &svcsdktypes.LogConfiguration{}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver != nil {
-				f16f1.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
+				f17f1.LogDriver = svcsdktypes.LogDriver(*r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.LogDriver)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options != nil {
-				f16f1.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
+				f17f1.Options = aws.ToStringMap(r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.Options)
 			}
 			if r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions != nil {
-				f16f1f2 := []svcsdktypes.Secret{}
-				for _, f16f1f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
-					f16f1f2elem := &svcsdktypes.Secret{}
-					if f16f1f2iter.Name != nil {
-						f16f1f2elem.Name = f16f1f2iter.Name
+				f17f1f2 := []svcsdktypes.Secret{}
+				for _, f17f1f2iter := range r.ko.Spec.ServiceConnectConfiguration.LogConfiguration.SecretOptions {
+					f17f1f2elem := &svcsdktypes.Secret{}
+					if f17f1f2iter.Name != nil {
+						f17f1f2elem.Name = f17f1f2iter.Name
 					}
-					if f16f1f2iter.ValueFrom != nil {
-						f16f1f2elem.ValueFrom = f16f1f2iter.ValueFrom
+					if f17f1f2iter.ValueFrom != nil {
+						f17f1f2elem.ValueFrom = f17f1f2iter.ValueFrom
 					}
-					f16f1f2 = append(f16f1f2, *f16f1f2elem)
+					f17f1f2 = append(f17f1f2, *f17f1f2elem)
 				}
-				f16f1.SecretOptions = f16f1f2
+				f17f1.SecretOptions = f17f1f2
 			}
-			f16.LogConfiguration = f16f1
+			f17.LogConfiguration = f17f1
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Namespace != nil {
-			f16.Namespace = r.ko.Spec.ServiceConnectConfiguration.Namespace
+			f17.Namespace = r.ko.Spec.ServiceConnectConfiguration.Namespace
 		}
 		if r.ko.Spec.ServiceConnectConfiguration.Services != nil {
-			f16f3 := []svcsdktypes.ServiceConnectService{}
-			for _, f16f3iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
-				f16f3elem := &svcsdktypes.ServiceConnectService{}
-				if f16f3iter.ClientAliases != nil {
-					f16f3elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
-					for _, f16f3elemf0iter := range f16f3iter.ClientAliases {
-						f16f3elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
-						if f16f3elemf0iter.DNSName != nil {
-							f16f3elemf0elem.DnsName = f16f3elemf0iter.DNSName
+			f17f3 := []svcsdktypes.ServiceConnectService{}
+			for _, f17f3iter := range r.ko.Spec.ServiceConnectConfiguration.Services {
+				f17f3elem := &svcsdktypes.ServiceConnectService{}
+				if f17f3iter.ClientAliases != nil {
+					f17f3elemf0 := []svcsdktypes.ServiceConnectClientAlias{}
+					for _, f17f3elemf0iter := range f17f3iter.ClientAliases {
+						f17f3elemf0elem := &svcsdktypes.ServiceConnectClientAlias{}
+						if f17f3elemf0iter.DNSName != nil {
+							f17f3elemf0elem.DnsName = f17f3elemf0iter.DNSName
 						}
-						if f16f3elemf0iter.Port != nil {
-							portCopy0 := *f16f3elemf0iter.Port
+						if f17f3elemf0iter.Port != nil {
+							portCopy0 := *f17f3elemf0iter.Port
 							if portCopy0 > math.MaxInt32 || portCopy0 < math.MinInt32 {
 								return nil, fmt.Errorf("error: field port is of type int32")
 							}
 							portCopy := int32(portCopy0)
-							f16f3elemf0elem.Port = &portCopy
+							f17f3elemf0elem.Port = &portCopy
 						}
-						f16f3elemf0 = append(f16f3elemf0, *f16f3elemf0elem)
+						f17f3elemf0 = append(f17f3elemf0, *f17f3elemf0elem)
 					}
-					f16f3elem.ClientAliases = f16f3elemf0
+					f17f3elem.ClientAliases = f17f3elemf0
 				}
-				if f16f3iter.DiscoveryName != nil {
-					f16f3elem.DiscoveryName = f16f3iter.DiscoveryName
+				if f17f3iter.DiscoveryName != nil {
+					f17f3elem.DiscoveryName = f17f3iter.DiscoveryName
 				}
-				if f16f3iter.IngressPortOverride != nil {
-					ingressPortOverrideCopy0 := *f16f3iter.IngressPortOverride
+				if f17f3iter.IngressPortOverride != nil {
+					ingressPortOverrideCopy0 := *f17f3iter.IngressPortOverride
 					if ingressPortOverrideCopy0 > math.MaxInt32 || ingressPortOverrideCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field ingressPortOverride is of type int32")
 					}
 					ingressPortOverrideCopy := int32(ingressPortOverrideCopy0)
-					f16f3elem.IngressPortOverride = &ingressPortOverrideCopy
+					f17f3elem.IngressPortOverride = &ingressPortOverrideCopy
 				}
-				if f16f3iter.PortName != nil {
-					f16f3elem.PortName = f16f3iter.PortName
+				if f17f3iter.PortName != nil {
+					f17f3elem.PortName = f17f3iter.PortName
 				}
-				if f16f3iter.Timeout != nil {
-					f16f3elemf4 := &svcsdktypes.TimeoutConfiguration{}
-					if f16f3iter.Timeout.IdleTimeoutSeconds != nil {
-						idleTimeoutSecondsCopy0 := *f16f3iter.Timeout.IdleTimeoutSeconds
+				if f17f3iter.Timeout != nil {
+					f17f3elemf4 := &svcsdktypes.TimeoutConfiguration{}
+					if f17f3iter.Timeout.IdleTimeoutSeconds != nil {
+						idleTimeoutSecondsCopy0 := *f17f3iter.Timeout.IdleTimeoutSeconds
 						if idleTimeoutSecondsCopy0 > math.MaxInt32 || idleTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field idleTimeoutSeconds is of type int32")
 						}
 						idleTimeoutSecondsCopy := int32(idleTimeoutSecondsCopy0)
-						f16f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
+						f17f3elemf4.IdleTimeoutSeconds = &idleTimeoutSecondsCopy
 					}
-					if f16f3iter.Timeout.PerRequestTimeoutSeconds != nil {
-						perRequestTimeoutSecondsCopy0 := *f16f3iter.Timeout.PerRequestTimeoutSeconds
+					if f17f3iter.Timeout.PerRequestTimeoutSeconds != nil {
+						perRequestTimeoutSecondsCopy0 := *f17f3iter.Timeout.PerRequestTimeoutSeconds
 						if perRequestTimeoutSecondsCopy0 > math.MaxInt32 || perRequestTimeoutSecondsCopy0 < math.MinInt32 {
 							return nil, fmt.Errorf("error: field perRequestTimeoutSeconds is of type int32")
 						}
 						perRequestTimeoutSecondsCopy := int32(perRequestTimeoutSecondsCopy0)
-						f16f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
+						f17f3elemf4.PerRequestTimeoutSeconds = &perRequestTimeoutSecondsCopy
 					}
-					f16f3elem.Timeout = f16f3elemf4
+					f17f3elem.Timeout = f17f3elemf4
 				}
-				if f16f3iter.TLS != nil {
-					f16f3elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
-					if f16f3iter.TLS.IssuerCertificateAuthority != nil {
-						f16f3elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
-						if f16f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
-							f16f3elemf5f0.AwsPcaAuthorityArn = f16f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
+				if f17f3iter.TLS != nil {
+					f17f3elemf5 := &svcsdktypes.ServiceConnectTlsConfiguration{}
+					if f17f3iter.TLS.IssuerCertificateAuthority != nil {
+						f17f3elemf5f0 := &svcsdktypes.ServiceConnectTlsCertificateAuthority{}
+						if f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN != nil {
+							f17f3elemf5f0.AwsPcaAuthorityArn = f17f3iter.TLS.IssuerCertificateAuthority.AWSPCAAuthorityARN
 						}
-						f16f3elemf5.IssuerCertificateAuthority = f16f3elemf5f0
+						f17f3elemf5.IssuerCertificateAuthority = f17f3elemf5f0
 					}
-					if f16f3iter.TLS.KMSKey != nil {
-						f16f3elemf5.KmsKey = f16f3iter.TLS.KMSKey
+					if f17f3iter.TLS.KMSKey != nil {
+						f17f3elemf5.KmsKey = f17f3iter.TLS.KMSKey
 					}
-					if f16f3iter.TLS.RoleARN != nil {
-						f16f3elemf5.RoleArn = f16f3iter.TLS.RoleARN
+					if f17f3iter.TLS.RoleARN != nil {
+						f17f3elemf5.RoleArn = f17f3iter.TLS.RoleARN
 					}
-					f16f3elem.Tls = f16f3elemf5
+					f17f3elem.Tls = f17f3elemf5
 				}
-				f16f3 = append(f16f3, *f16f3elem)
+				f17f3 = append(f17f3, *f17f3elem)
 			}
-			f16.Services = f16f3
+			f17.Services = f17f3
 		}
-		res.ServiceConnectConfiguration = f16
+		res.ServiceConnectConfiguration = f17
 	}
 	if r.ko.Spec.ServiceRegistries != nil {
-		f17 := []svcsdktypes.ServiceRegistry{}
-		for _, f17iter := range r.ko.Spec.ServiceRegistries {
-			f17elem := &svcsdktypes.ServiceRegistry{}
-			if f17iter.ContainerName != nil {
-				f17elem.ContainerName = f17iter.ContainerName
+		f18 := []svcsdktypes.ServiceRegistry{}
+		for _, f18iter := range r.ko.Spec.ServiceRegistries {
+			f18elem := &svcsdktypes.ServiceRegistry{}
+			if f18iter.ContainerName != nil {
+				f18elem.ContainerName = f18iter.ContainerName
 			}
-			if f17iter.ContainerPort != nil {
-				containerPortCopy0 := *f17iter.ContainerPort
+			if f18iter.ContainerPort != nil {
+				containerPortCopy0 := *f18iter.ContainerPort
 				if containerPortCopy0 > math.MaxInt32 || containerPortCopy0 < math.MinInt32 {
 					return nil, fmt.Errorf("error: field containerPort is of type int32")
 				}
 				containerPortCopy := int32(containerPortCopy0)
-				f17elem.ContainerPort = &containerPortCopy
+				f18elem.ContainerPort = &containerPortCopy
 			}
-			if f17iter.Port != nil {
-				portCopy0 := *f17iter.Port
+			if f18iter.Port != nil {
+				portCopy0 := *f18iter.Port
 				if portCopy0 > math.MaxInt32 || portCopy0 < math.MinInt32 {
 					return nil, fmt.Errorf("error: field port is of type int32")
 				}
 				portCopy := int32(portCopy0)
-				f17elem.Port = &portCopy
+				f18elem.Port = &portCopy
 			}
-			if f17iter.RegistryARN != nil {
-				f17elem.RegistryArn = f17iter.RegistryARN
+			if f18iter.RegistryARN != nil {
+				f18elem.RegistryArn = f18iter.RegistryARN
 			}
-			f17 = append(f17, *f17elem)
+			f18 = append(f18, *f18elem)
 		}
-		res.ServiceRegistries = f17
+		res.ServiceRegistries = f18
 	}
 	if r.ko.Spec.TaskDefinition != nil {
 		res.TaskDefinition = r.ko.Spec.TaskDefinition
 	}
 	if r.ko.Spec.VolumeConfigurations != nil {
-		f19 := []svcsdktypes.ServiceVolumeConfiguration{}
-		for _, f19iter := range r.ko.Spec.VolumeConfigurations {
-			f19elem := &svcsdktypes.ServiceVolumeConfiguration{}
-			if f19iter.ManagedEBSVolume != nil {
-				f19elemf0 := &svcsdktypes.ServiceManagedEBSVolumeConfiguration{}
-				if f19iter.ManagedEBSVolume.Encrypted != nil {
-					f19elemf0.Encrypted = f19iter.ManagedEBSVolume.Encrypted
+		f20 := []svcsdktypes.ServiceVolumeConfiguration{}
+		for _, f20iter := range r.ko.Spec.VolumeConfigurations {
+			f20elem := &svcsdktypes.ServiceVolumeConfiguration{}
+			if f20iter.ManagedEBSVolume != nil {
+				f20elemf0 := &svcsdktypes.ServiceManagedEBSVolumeConfiguration{}
+				if f20iter.ManagedEBSVolume.Encrypted != nil {
+					f20elemf0.Encrypted = f20iter.ManagedEBSVolume.Encrypted
 				}
-				if f19iter.ManagedEBSVolume.FilesystemType != nil {
-					f19elemf0.FilesystemType = svcsdktypes.TaskFilesystemType(*f19iter.ManagedEBSVolume.FilesystemType)
+				if f20iter.ManagedEBSVolume.FilesystemType != nil {
+					f20elemf0.FilesystemType = svcsdktypes.TaskFilesystemType(*f20iter.ManagedEBSVolume.FilesystemType)
 				}
-				if f19iter.ManagedEBSVolume.IOPS != nil {
-					iopsCopy0 := *f19iter.ManagedEBSVolume.IOPS
+				if f20iter.ManagedEBSVolume.IOPS != nil {
+					iopsCopy0 := *f20iter.ManagedEBSVolume.IOPS
 					if iopsCopy0 > math.MaxInt32 || iopsCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field iops is of type int32")
 					}
 					iopsCopy := int32(iopsCopy0)
-					f19elemf0.Iops = &iopsCopy
+					f20elemf0.Iops = &iopsCopy
 				}
-				if f19iter.ManagedEBSVolume.KMSKeyID != nil {
-					f19elemf0.KmsKeyId = f19iter.ManagedEBSVolume.KMSKeyID
+				if f20iter.ManagedEBSVolume.KMSKeyID != nil {
+					f20elemf0.KmsKeyId = f20iter.ManagedEBSVolume.KMSKeyID
 				}
-				if f19iter.ManagedEBSVolume.RoleARN != nil {
-					f19elemf0.RoleArn = f19iter.ManagedEBSVolume.RoleARN
+				if f20iter.ManagedEBSVolume.RoleARN != nil {
+					f20elemf0.RoleArn = f20iter.ManagedEBSVolume.RoleARN
 				}
-				if f19iter.ManagedEBSVolume.SizeInGiB != nil {
-					sizeInGiBCopy0 := *f19iter.ManagedEBSVolume.SizeInGiB
+				if f20iter.ManagedEBSVolume.SizeInGiB != nil {
+					sizeInGiBCopy0 := *f20iter.ManagedEBSVolume.SizeInGiB
 					if sizeInGiBCopy0 > math.MaxInt32 || sizeInGiBCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field sizeInGiB is of type int32")
 					}
 					sizeInGiBCopy := int32(sizeInGiBCopy0)
-					f19elemf0.SizeInGiB = &sizeInGiBCopy
+					f20elemf0.SizeInGiB = &sizeInGiBCopy
 				}
-				if f19iter.ManagedEBSVolume.SnapshotID != nil {
-					f19elemf0.SnapshotId = f19iter.ManagedEBSVolume.SnapshotID
+				if f20iter.ManagedEBSVolume.SnapshotID != nil {
+					f20elemf0.SnapshotId = f20iter.ManagedEBSVolume.SnapshotID
 				}
-				if f19iter.ManagedEBSVolume.TagSpecifications != nil {
-					f19elemf0f7 := []svcsdktypes.EBSTagSpecification{}
-					for _, f19elemf0f7iter := range f19iter.ManagedEBSVolume.TagSpecifications {
-						f19elemf0f7elem := &svcsdktypes.EBSTagSpecification{}
-						if f19elemf0f7iter.PropagateTags != nil {
-							f19elemf0f7elem.PropagateTags = svcsdktypes.PropagateTags(*f19elemf0f7iter.PropagateTags)
+				if f20iter.ManagedEBSVolume.TagSpecifications != nil {
+					f20elemf0f7 := []svcsdktypes.EBSTagSpecification{}
+					for _, f20elemf0f7iter := range f20iter.ManagedEBSVolume.TagSpecifications {
+						f20elemf0f7elem := &svcsdktypes.EBSTagSpecification{}
+						if f20elemf0f7iter.PropagateTags != nil {
+							f20elemf0f7elem.PropagateTags = svcsdktypes.PropagateTags(*f20elemf0f7iter.PropagateTags)
 						}
-						if f19elemf0f7iter.ResourceType != nil {
-							f19elemf0f7elem.ResourceType = svcsdktypes.EBSResourceType(*f19elemf0f7iter.ResourceType)
+						if f20elemf0f7iter.ResourceType != nil {
+							f20elemf0f7elem.ResourceType = svcsdktypes.EBSResourceType(*f20elemf0f7iter.ResourceType)
 						}
-						if f19elemf0f7iter.Tags != nil {
-							f19elemf0f7elemf2 := []svcsdktypes.Tag{}
-							for _, f19elemf0f7elemf2iter := range f19elemf0f7iter.Tags {
-								f19elemf0f7elemf2elem := &svcsdktypes.Tag{}
-								if f19elemf0f7elemf2iter.Key != nil {
-									f19elemf0f7elemf2elem.Key = f19elemf0f7elemf2iter.Key
+						if f20elemf0f7iter.Tags != nil {
+							f20elemf0f7elemf2 := []svcsdktypes.Tag{}
+							for _, f20elemf0f7elemf2iter := range f20elemf0f7iter.Tags {
+								f20elemf0f7elemf2elem := &svcsdktypes.Tag{}
+								if f20elemf0f7elemf2iter.Key != nil {
+									f20elemf0f7elemf2elem.Key = f20elemf0f7elemf2iter.Key
 								}
-								if f19elemf0f7elemf2iter.Value != nil {
-									f19elemf0f7elemf2elem.Value = f19elemf0f7elemf2iter.Value
+								if f20elemf0f7elemf2iter.Value != nil {
+									f20elemf0f7elemf2elem.Value = f20elemf0f7elemf2iter.Value
 								}
-								f19elemf0f7elemf2 = append(f19elemf0f7elemf2, *f19elemf0f7elemf2elem)
+								f20elemf0f7elemf2 = append(f20elemf0f7elemf2, *f20elemf0f7elemf2elem)
 							}
-							f19elemf0f7elem.Tags = f19elemf0f7elemf2
+							f20elemf0f7elem.Tags = f20elemf0f7elemf2
 						}
-						f19elemf0f7 = append(f19elemf0f7, *f19elemf0f7elem)
+						f20elemf0f7 = append(f20elemf0f7, *f20elemf0f7elem)
 					}
-					f19elemf0.TagSpecifications = f19elemf0f7
+					f20elemf0.TagSpecifications = f20elemf0f7
 				}
-				if f19iter.ManagedEBSVolume.Throughput != nil {
-					throughputCopy0 := *f19iter.ManagedEBSVolume.Throughput
+				if f20iter.ManagedEBSVolume.Throughput != nil {
+					throughputCopy0 := *f20iter.ManagedEBSVolume.Throughput
 					if throughputCopy0 > math.MaxInt32 || throughputCopy0 < math.MinInt32 {
 						return nil, fmt.Errorf("error: field throughput is of type int32")
 					}
 					throughputCopy := int32(throughputCopy0)
-					f19elemf0.Throughput = &throughputCopy
+					f20elemf0.Throughput = &throughputCopy
 				}
-				if f19iter.ManagedEBSVolume.VolumeType != nil {
-					f19elemf0.VolumeType = f19iter.ManagedEBSVolume.VolumeType
+				if f20iter.ManagedEBSVolume.VolumeType != nil {
+					f20elemf0.VolumeType = f20iter.ManagedEBSVolume.VolumeType
 				}
-				f19elem.ManagedEBSVolume = f19elemf0
+				f20elem.ManagedEBSVolume = f20elemf0
 			}
-			if f19iter.Name != nil {
-				f19elem.Name = f19iter.Name
+			if f20iter.Name != nil {
+				f20elem.Name = f20iter.Name
 			}
-			f19 = append(f19, *f19elem)
+			f20 = append(f20, *f20elem)
 		}
-		res.VolumeConfigurations = f19
+		res.VolumeConfigurations = f20
 	}
 
 	return res, nil

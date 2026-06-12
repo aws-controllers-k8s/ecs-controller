@@ -15,6 +15,48 @@
 
 package v1alpha1
 
+type AcceleratorManufacturer string
+
+const (
+	AcceleratorManufacturer_amazon_web_services AcceleratorManufacturer = "amazon-web-services"
+	AcceleratorManufacturer_amd                 AcceleratorManufacturer = "amd"
+	AcceleratorManufacturer_habana              AcceleratorManufacturer = "habana"
+	AcceleratorManufacturer_nvidia              AcceleratorManufacturer = "nvidia"
+	AcceleratorManufacturer_xilinx              AcceleratorManufacturer = "xilinx"
+)
+
+type AcceleratorName string
+
+const (
+	AcceleratorName_a100            AcceleratorName = "a100"
+	AcceleratorName_a10g            AcceleratorName = "a10g"
+	AcceleratorName_h100            AcceleratorName = "h100"
+	AcceleratorName_inferentia      AcceleratorName = "inferentia"
+	AcceleratorName_k520            AcceleratorName = "k520"
+	AcceleratorName_k80             AcceleratorName = "k80"
+	AcceleratorName_m60             AcceleratorName = "m60"
+	AcceleratorName_radeon_pro_v520 AcceleratorName = "radeon-pro-v520"
+	AcceleratorName_t4              AcceleratorName = "t4"
+	AcceleratorName_t4g             AcceleratorName = "t4g"
+	AcceleratorName_v100            AcceleratorName = "v100"
+	AcceleratorName_vu9p            AcceleratorName = "vu9p"
+)
+
+type AcceleratorType string
+
+const (
+	AcceleratorType_fpga      AcceleratorType = "fpga"
+	AcceleratorType_gpu       AcceleratorType = "gpu"
+	AcceleratorType_inference AcceleratorType = "inference"
+)
+
+type AccessType string
+
+const (
+	AccessType_PRIVATE AccessType = "PRIVATE"
+	AccessType_PUBLIC  AccessType = "PUBLIC"
+)
+
 type AgentUpdateStatus string
 
 const (
@@ -41,11 +83,34 @@ const (
 	AssignPublicIP_ENABLED  AssignPublicIP = "ENABLED"
 )
 
+type AutoRepairActionsStatus string
+
+const (
+	AutoRepairActionsStatus_DISABLED AutoRepairActionsStatus = "DISABLED"
+	AutoRepairActionsStatus_ENABLED  AutoRepairActionsStatus = "ENABLED"
+)
+
 type AvailabilityZoneRebalancing string
 
 const (
 	AvailabilityZoneRebalancing_DISABLED AvailabilityZoneRebalancing = "DISABLED"
 	AvailabilityZoneRebalancing_ENABLED  AvailabilityZoneRebalancing = "ENABLED"
+)
+
+type BareMetal string
+
+const (
+	BareMetal_excluded BareMetal = "excluded"
+	BareMetal_included BareMetal = "included"
+	BareMetal_required BareMetal = "required"
+)
+
+type BurstablePerformance string
+
+const (
+	BurstablePerformance_excluded BurstablePerformance = "excluded"
+	BurstablePerformance_included BurstablePerformance = "included"
+	BurstablePerformance_required BurstablePerformance = "required"
 )
 
 type CPUArchitecture string
@@ -55,28 +120,66 @@ const (
 	CPUArchitecture_X86_64 CPUArchitecture = "X86_64"
 )
 
+type CPUManufacturer string
+
+const (
+	CPUManufacturer_amazon_web_services CPUManufacturer = "amazon-web-services"
+	CPUManufacturer_amd                 CPUManufacturer = "amd"
+	CPUManufacturer_intel               CPUManufacturer = "intel"
+)
+
+type CapacityOptionType string
+
+const (
+	CapacityOptionType_ON_DEMAND CapacityOptionType = "ON_DEMAND"
+	CapacityOptionType_RESERVED  CapacityOptionType = "RESERVED"
+	CapacityOptionType_SPOT      CapacityOptionType = "SPOT"
+)
+
 type CapacityProviderField string
 
 const (
 	CapacityProviderField_TAGS CapacityProviderField = "TAGS"
 )
 
-type CapacityProviderStatus string
+type CapacityProviderStatus_SDK string
 
 const (
-	CapacityProviderStatus_ACTIVE   CapacityProviderStatus = "ACTIVE"
-	CapacityProviderStatus_INACTIVE CapacityProviderStatus = "INACTIVE"
+	CapacityProviderStatus_SDK_ACTIVE         CapacityProviderStatus_SDK = "ACTIVE"
+	CapacityProviderStatus_SDK_DEPROVISIONING CapacityProviderStatus_SDK = "DEPROVISIONING"
+	CapacityProviderStatus_SDK_INACTIVE       CapacityProviderStatus_SDK = "INACTIVE"
+	CapacityProviderStatus_SDK_PROVISIONING   CapacityProviderStatus_SDK = "PROVISIONING"
+)
+
+type CapacityProviderType string
+
+const (
+	CapacityProviderType_EC2_AUTOSCALING   CapacityProviderType = "EC2_AUTOSCALING"
+	CapacityProviderType_FARGATE           CapacityProviderType = "FARGATE"
+	CapacityProviderType_FARGATE_SPOT      CapacityProviderType = "FARGATE_SPOT"
+	CapacityProviderType_MANAGED_INSTANCES CapacityProviderType = "MANAGED_INSTANCES"
 )
 
 type CapacityProviderUpdateStatus string
 
 const (
+	CapacityProviderUpdateStatus_CREATE_COMPLETE    CapacityProviderUpdateStatus = "CREATE_COMPLETE"
+	CapacityProviderUpdateStatus_CREATE_FAILED      CapacityProviderUpdateStatus = "CREATE_FAILED"
+	CapacityProviderUpdateStatus_CREATE_IN_PROGRESS CapacityProviderUpdateStatus = "CREATE_IN_PROGRESS"
 	CapacityProviderUpdateStatus_DELETE_COMPLETE    CapacityProviderUpdateStatus = "DELETE_COMPLETE"
 	CapacityProviderUpdateStatus_DELETE_FAILED      CapacityProviderUpdateStatus = "DELETE_FAILED"
 	CapacityProviderUpdateStatus_DELETE_IN_PROGRESS CapacityProviderUpdateStatus = "DELETE_IN_PROGRESS"
 	CapacityProviderUpdateStatus_UPDATE_COMPLETE    CapacityProviderUpdateStatus = "UPDATE_COMPLETE"
 	CapacityProviderUpdateStatus_UPDATE_FAILED      CapacityProviderUpdateStatus = "UPDATE_FAILED"
 	CapacityProviderUpdateStatus_UPDATE_IN_PROGRESS CapacityProviderUpdateStatus = "UPDATE_IN_PROGRESS"
+)
+
+type CapacityReservationPreference string
+
+const (
+	CapacityReservationPreference_RESERVATIONS_EXCLUDED CapacityReservationPreference = "RESERVATIONS_EXCLUDED"
+	CapacityReservationPreference_RESERVATIONS_FIRST    CapacityReservationPreference = "RESERVATIONS_FIRST"
+	CapacityReservationPreference_RESERVATIONS_ONLY     CapacityReservationPreference = "RESERVATIONS_ONLY"
 )
 
 type ClusterField string
@@ -98,9 +201,10 @@ const (
 type Compatibility string
 
 const (
-	Compatibility_EC2      Compatibility = "EC2"
-	Compatibility_EXTERNAL Compatibility = "EXTERNAL"
-	Compatibility_FARGATE  Compatibility = "FARGATE"
+	Compatibility_EC2               Compatibility = "EC2"
+	Compatibility_EXTERNAL          Compatibility = "EXTERNAL"
+	Compatibility_FARGATE           Compatibility = "FARGATE"
+	Compatibility_MANAGED_INSTANCES Compatibility = "MANAGED_INSTANCES"
 )
 
 type Connectivity string
@@ -136,6 +240,64 @@ const (
 	ContainerInstanceStatus_REGISTRATION_FAILED ContainerInstanceStatus = "REGISTRATION_FAILED"
 )
 
+type DaemonDeploymentRollbackMonitorsStatus string
+
+const (
+	DaemonDeploymentRollbackMonitorsStatus_DISABLED            DaemonDeploymentRollbackMonitorsStatus = "DISABLED"
+	DaemonDeploymentRollbackMonitorsStatus_MONITORING          DaemonDeploymentRollbackMonitorsStatus = "MONITORING"
+	DaemonDeploymentRollbackMonitorsStatus_MONITORING_COMPLETE DaemonDeploymentRollbackMonitorsStatus = "MONITORING_COMPLETE"
+	DaemonDeploymentRollbackMonitorsStatus_TRIGGERED           DaemonDeploymentRollbackMonitorsStatus = "TRIGGERED"
+)
+
+type DaemonDeploymentStatus string
+
+const (
+	DaemonDeploymentStatus_IN_PROGRESS          DaemonDeploymentStatus = "IN_PROGRESS"
+	DaemonDeploymentStatus_PENDING              DaemonDeploymentStatus = "PENDING"
+	DaemonDeploymentStatus_ROLLBACK_FAILED      DaemonDeploymentStatus = "ROLLBACK_FAILED"
+	DaemonDeploymentStatus_ROLLBACK_IN_PROGRESS DaemonDeploymentStatus = "ROLLBACK_IN_PROGRESS"
+	DaemonDeploymentStatus_ROLLBACK_SUCCESSFUL  DaemonDeploymentStatus = "ROLLBACK_SUCCESSFUL"
+	DaemonDeploymentStatus_STOPPED              DaemonDeploymentStatus = "STOPPED"
+	DaemonDeploymentStatus_STOP_REQUESTED       DaemonDeploymentStatus = "STOP_REQUESTED"
+	DaemonDeploymentStatus_SUCCESSFUL           DaemonDeploymentStatus = "SUCCESSFUL"
+)
+
+type DaemonPropagateTags string
+
+const (
+	DaemonPropagateTags_DAEMON DaemonPropagateTags = "DAEMON"
+	DaemonPropagateTags_NONE   DaemonPropagateTags = "NONE"
+)
+
+type DaemonStatus string
+
+const (
+	DaemonStatus_ACTIVE             DaemonStatus = "ACTIVE"
+	DaemonStatus_DELETE_IN_PROGRESS DaemonStatus = "DELETE_IN_PROGRESS"
+)
+
+type DaemonTaskDefinitionRevisionFilter string
+
+const (
+	DaemonTaskDefinitionRevisionFilter_LAST_REGISTERED DaemonTaskDefinitionRevisionFilter = "LAST_REGISTERED"
+)
+
+type DaemonTaskDefinitionStatus string
+
+const (
+	DaemonTaskDefinitionStatus_ACTIVE             DaemonTaskDefinitionStatus = "ACTIVE"
+	DaemonTaskDefinitionStatus_DELETED            DaemonTaskDefinitionStatus = "DELETED"
+	DaemonTaskDefinitionStatus_DELETE_IN_PROGRESS DaemonTaskDefinitionStatus = "DELETE_IN_PROGRESS"
+)
+
+type DaemonTaskDefinitionStatusFilter string
+
+const (
+	DaemonTaskDefinitionStatusFilter_ACTIVE             DaemonTaskDefinitionStatusFilter = "ACTIVE"
+	DaemonTaskDefinitionStatusFilter_ALL                DaemonTaskDefinitionStatusFilter = "ALL"
+	DaemonTaskDefinitionStatusFilter_DELETE_IN_PROGRESS DaemonTaskDefinitionStatusFilter = "DELETE_IN_PROGRESS"
+)
+
 type DeploymentControllerType string
 
 const (
@@ -144,12 +306,58 @@ const (
 	DeploymentControllerType_EXTERNAL    DeploymentControllerType = "EXTERNAL"
 )
 
+type DeploymentLifecycleHookAction string
+
+const (
+	DeploymentLifecycleHookAction_CONTINUE DeploymentLifecycleHookAction = "CONTINUE"
+	DeploymentLifecycleHookAction_ROLLBACK DeploymentLifecycleHookAction = "ROLLBACK"
+)
+
+type DeploymentLifecycleHookStage string
+
+const (
+	DeploymentLifecycleHookStage_POST_PRODUCTION_TRAFFIC_SHIFT DeploymentLifecycleHookStage = "POST_PRODUCTION_TRAFFIC_SHIFT"
+	DeploymentLifecycleHookStage_POST_SCALE_UP                 DeploymentLifecycleHookStage = "POST_SCALE_UP"
+	DeploymentLifecycleHookStage_POST_TEST_TRAFFIC_SHIFT       DeploymentLifecycleHookStage = "POST_TEST_TRAFFIC_SHIFT"
+	DeploymentLifecycleHookStage_PRE_PRODUCTION_TRAFFIC_SHIFT  DeploymentLifecycleHookStage = "PRE_PRODUCTION_TRAFFIC_SHIFT"
+	DeploymentLifecycleHookStage_PRE_SCALE_UP                  DeploymentLifecycleHookStage = "PRE_SCALE_UP"
+	DeploymentLifecycleHookStage_PRODUCTION_TRAFFIC_SHIFT      DeploymentLifecycleHookStage = "PRODUCTION_TRAFFIC_SHIFT"
+	DeploymentLifecycleHookStage_RECONCILE_SERVICE             DeploymentLifecycleHookStage = "RECONCILE_SERVICE"
+	DeploymentLifecycleHookStage_TEST_TRAFFIC_SHIFT            DeploymentLifecycleHookStage = "TEST_TRAFFIC_SHIFT"
+)
+
+type DeploymentLifecycleHookStatus string
+
+const (
+	DeploymentLifecycleHookStatus_AWAITING_ACTION DeploymentLifecycleHookStatus = "AWAITING_ACTION"
+	DeploymentLifecycleHookStatus_FAILED          DeploymentLifecycleHookStatus = "FAILED"
+	DeploymentLifecycleHookStatus_IN_PROGRESS     DeploymentLifecycleHookStatus = "IN_PROGRESS"
+	DeploymentLifecycleHookStatus_SUCCEEDED       DeploymentLifecycleHookStatus = "SUCCEEDED"
+	DeploymentLifecycleHookStatus_TIMED_OUT       DeploymentLifecycleHookStatus = "TIMED_OUT"
+)
+
+type DeploymentLifecycleHookTargetType string
+
+const (
+	DeploymentLifecycleHookTargetType_AWS_LAMBDA DeploymentLifecycleHookTargetType = "AWS_LAMBDA"
+	DeploymentLifecycleHookTargetType_PAUSE      DeploymentLifecycleHookTargetType = "PAUSE"
+)
+
 type DeploymentRolloutState string
 
 const (
 	DeploymentRolloutState_COMPLETED   DeploymentRolloutState = "COMPLETED"
 	DeploymentRolloutState_FAILED      DeploymentRolloutState = "FAILED"
 	DeploymentRolloutState_IN_PROGRESS DeploymentRolloutState = "IN_PROGRESS"
+)
+
+type DeploymentStrategy string
+
+const (
+	DeploymentStrategy_BLUE_GREEN DeploymentStrategy = "BLUE_GREEN"
+	DeploymentStrategy_CANARY     DeploymentStrategy = "CANARY"
+	DeploymentStrategy_LINEAR     DeploymentStrategy = "LINEAR"
+	DeploymentStrategy_ROLLING    DeploymentStrategy = "ROLLING"
 )
 
 type DesiredStatus string
@@ -202,6 +410,28 @@ const (
 	ExecuteCommandLogging_OVERRIDE ExecuteCommandLogging = "OVERRIDE"
 )
 
+type ExpressGatewayServiceInclude string
+
+const (
+	ExpressGatewayServiceInclude_TAGS ExpressGatewayServiceInclude = "TAGS"
+)
+
+type ExpressGatewayServiceScalingMetric string
+
+const (
+	ExpressGatewayServiceScalingMetric_AVERAGE_CPU              ExpressGatewayServiceScalingMetric = "AVERAGE_CPU"
+	ExpressGatewayServiceScalingMetric_AVERAGE_MEMORY           ExpressGatewayServiceScalingMetric = "AVERAGE_MEMORY"
+	ExpressGatewayServiceScalingMetric_REQUEST_COUNT_PER_TARGET ExpressGatewayServiceScalingMetric = "REQUEST_COUNT_PER_TARGET"
+)
+
+type ExpressGatewayServiceStatusCode string
+
+const (
+	ExpressGatewayServiceStatusCode_ACTIVE   ExpressGatewayServiceStatusCode = "ACTIVE"
+	ExpressGatewayServiceStatusCode_DRAINING ExpressGatewayServiceStatusCode = "DRAINING"
+	ExpressGatewayServiceStatusCode_INACTIVE ExpressGatewayServiceStatusCode = "INACTIVE"
+)
+
 type FirelensConfigurationType string
 
 const (
@@ -225,6 +455,13 @@ const (
 	IPCMode_task IPCMode = "task"
 )
 
+type InstanceGeneration string
+
+const (
+	InstanceGeneration_current  InstanceGeneration = "current"
+	InstanceGeneration_previous InstanceGeneration = "previous"
+)
+
 type InstanceHealthCheckState string
 
 const (
@@ -237,15 +474,33 @@ const (
 type InstanceHealthCheckType string
 
 const (
-	InstanceHealthCheckType_CONTAINER_RUNTIME InstanceHealthCheckType = "CONTAINER_RUNTIME"
+	InstanceHealthCheckType_ACCELERATED_COMPUTE InstanceHealthCheckType = "ACCELERATED_COMPUTE"
+	InstanceHealthCheckType_CONTAINER_RUNTIME   InstanceHealthCheckType = "CONTAINER_RUNTIME"
+	InstanceHealthCheckType_DAEMON              InstanceHealthCheckType = "DAEMON"
 )
 
 type LaunchType string
 
 const (
-	LaunchType_EC2      LaunchType = "EC2"
-	LaunchType_EXTERNAL LaunchType = "EXTERNAL"
-	LaunchType_FARGATE  LaunchType = "FARGATE"
+	LaunchType_EC2               LaunchType = "EC2"
+	LaunchType_EXTERNAL          LaunchType = "EXTERNAL"
+	LaunchType_FARGATE           LaunchType = "FARGATE"
+	LaunchType_MANAGED_INSTANCES LaunchType = "MANAGED_INSTANCES"
+)
+
+type LocalStorage string
+
+const (
+	LocalStorage_excluded LocalStorage = "excluded"
+	LocalStorage_included LocalStorage = "included"
+	LocalStorage_required LocalStorage = "required"
+)
+
+type LocalStorageType string
+
+const (
+	LocalStorageType_hdd LocalStorageType = "hdd"
+	LocalStorageType_ssd LocalStorageType = "ssd"
 )
 
 type LogDriver string
@@ -272,6 +527,23 @@ type ManagedDraining string
 const (
 	ManagedDraining_DISABLED ManagedDraining = "DISABLED"
 	ManagedDraining_ENABLED  ManagedDraining = "ENABLED"
+)
+
+type ManagedInstancesMonitoringOptions string
+
+const (
+	ManagedInstancesMonitoringOptions_BASIC    ManagedInstancesMonitoringOptions = "BASIC"
+	ManagedInstancesMonitoringOptions_DETAILED ManagedInstancesMonitoringOptions = "DETAILED"
+)
+
+type ManagedResourceStatus string
+
+const (
+	ManagedResourceStatus_ACTIVE         ManagedResourceStatus = "ACTIVE"
+	ManagedResourceStatus_DELETED        ManagedResourceStatus = "DELETED"
+	ManagedResourceStatus_DEPROVISIONING ManagedResourceStatus = "DEPROVISIONING"
+	ManagedResourceStatus_FAILED         ManagedResourceStatus = "FAILED"
+	ManagedResourceStatus_PROVISIONING   ManagedResourceStatus = "PROVISIONING"
 )
 
 type ManagedScalingStatus string
@@ -307,6 +579,8 @@ const (
 	OSFamily_WINDOWS_SERVER_2019_FULL OSFamily = "WINDOWS_SERVER_2019_FULL"
 	OSFamily_WINDOWS_SERVER_2022_CORE OSFamily = "WINDOWS_SERVER_2022_CORE"
 	OSFamily_WINDOWS_SERVER_2022_FULL OSFamily = "WINDOWS_SERVER_2022_FULL"
+	OSFamily_WINDOWS_SERVER_2025_CORE OSFamily = "WINDOWS_SERVER_2025_CORE"
+	OSFamily_WINDOWS_SERVER_2025_FULL OSFamily = "WINDOWS_SERVER_2025_FULL"
 	OSFamily_WINDOWS_SERVER_20H2_CORE OSFamily = "WINDOWS_SERVER_20H2_CORE"
 )
 
@@ -335,7 +609,15 @@ const (
 type PlatformDeviceType string
 
 const (
-	PlatformDeviceType_GPU PlatformDeviceType = "GPU"
+	PlatformDeviceType_GPU           PlatformDeviceType = "GPU"
+	PlatformDeviceType_NEURON_DEVICE PlatformDeviceType = "NEURON_DEVICE"
+)
+
+type PropagateMITags string
+
+const (
+	PropagateMITags_CAPACITY_PROVIDER PropagateMITags = "CAPACITY_PROVIDER"
+	PropagateMITags_NONE              PropagateMITags = "NONE"
 )
 
 type PropagateTags string
@@ -352,11 +634,19 @@ const (
 	ProxyConfigurationType_APPMESH ProxyConfigurationType = "APPMESH"
 )
 
+type ResourceManagementType string
+
+const (
+	ResourceManagementType_CUSTOMER ResourceManagementType = "CUSTOMER"
+	ResourceManagementType_ECS      ResourceManagementType = "ECS"
+)
+
 type ResourceType string
 
 const (
 	ResourceType_GPU                  ResourceType = "GPU"
 	ResourceType_InferenceAccelerator ResourceType = "InferenceAccelerator"
+	ResourceType_NeuronDevice         ResourceType = "NeuronDevice"
 )
 
 type ScaleUnit string
@@ -379,6 +669,35 @@ const (
 	Scope_task   Scope = "task"
 )
 
+type ServiceConnectAccessLoggingFormat string
+
+const (
+	ServiceConnectAccessLoggingFormat_JSON ServiceConnectAccessLoggingFormat = "JSON"
+	ServiceConnectAccessLoggingFormat_TEXT ServiceConnectAccessLoggingFormat = "TEXT"
+)
+
+type ServiceConnectIncludeQueryParameters string
+
+const (
+	ServiceConnectIncludeQueryParameters_DISABLED ServiceConnectIncludeQueryParameters = "DISABLED"
+	ServiceConnectIncludeQueryParameters_ENABLED  ServiceConnectIncludeQueryParameters = "ENABLED"
+)
+
+type ServiceDeploymentLifecycleStage string
+
+const (
+	ServiceDeploymentLifecycleStage_BAKE_TIME                     ServiceDeploymentLifecycleStage = "BAKE_TIME"
+	ServiceDeploymentLifecycleStage_CLEAN_UP                      ServiceDeploymentLifecycleStage = "CLEAN_UP"
+	ServiceDeploymentLifecycleStage_POST_PRODUCTION_TRAFFIC_SHIFT ServiceDeploymentLifecycleStage = "POST_PRODUCTION_TRAFFIC_SHIFT"
+	ServiceDeploymentLifecycleStage_POST_SCALE_UP                 ServiceDeploymentLifecycleStage = "POST_SCALE_UP"
+	ServiceDeploymentLifecycleStage_POST_TEST_TRAFFIC_SHIFT       ServiceDeploymentLifecycleStage = "POST_TEST_TRAFFIC_SHIFT"
+	ServiceDeploymentLifecycleStage_PRE_SCALE_UP                  ServiceDeploymentLifecycleStage = "PRE_SCALE_UP"
+	ServiceDeploymentLifecycleStage_PRODUCTION_TRAFFIC_SHIFT      ServiceDeploymentLifecycleStage = "PRODUCTION_TRAFFIC_SHIFT"
+	ServiceDeploymentLifecycleStage_RECONCILE_SERVICE             ServiceDeploymentLifecycleStage = "RECONCILE_SERVICE"
+	ServiceDeploymentLifecycleStage_SCALE_UP                      ServiceDeploymentLifecycleStage = "SCALE_UP"
+	ServiceDeploymentLifecycleStage_TEST_TRAFFIC_SHIFT            ServiceDeploymentLifecycleStage = "TEST_TRAFFIC_SHIFT"
+)
+
 type ServiceDeploymentRollbackMonitorsStatus string
 
 const (
@@ -395,6 +714,7 @@ const (
 	ServiceDeploymentStatus_PENDING              ServiceDeploymentStatus = "PENDING"
 	ServiceDeploymentStatus_ROLLBACK_FAILED      ServiceDeploymentStatus = "ROLLBACK_FAILED"
 	ServiceDeploymentStatus_ROLLBACK_IN_PROGRESS ServiceDeploymentStatus = "ROLLBACK_IN_PROGRESS"
+	ServiceDeploymentStatus_ROLLBACK_REQUESTED   ServiceDeploymentStatus = "ROLLBACK_REQUESTED"
 	ServiceDeploymentStatus_ROLLBACK_SUCCESSFUL  ServiceDeploymentStatus = "ROLLBACK_SUCCESSFUL"
 	ServiceDeploymentStatus_STOPPED              ServiceDeploymentStatus = "STOPPED"
 	ServiceDeploymentStatus_STOP_REQUESTED       ServiceDeploymentStatus = "STOP_REQUESTED"
@@ -413,6 +733,8 @@ const (
 	SettingName_awsvpcTrunking                  SettingName = "awsvpcTrunking"
 	SettingName_containerInsights               SettingName = "containerInsights"
 	SettingName_containerInstanceLongArnFormat  SettingName = "containerInstanceLongArnFormat"
+	SettingName_defaultLogDriverMode            SettingName = "defaultLogDriverMode"
+	SettingName_fargateEventWindows             SettingName = "fargateEventWindows"
 	SettingName_fargateFIPSMode                 SettingName = "fargateFIPSMode"
 	SettingName_fargateTaskRetirementWaitPeriod SettingName = "fargateTaskRetirementWaitPeriod"
 	SettingName_guardDutyActivate               SettingName = "guardDutyActivate"
@@ -440,6 +762,13 @@ type StabilityStatus string
 const (
 	StabilityStatus_STABILIZING  StabilityStatus = "STABILIZING"
 	StabilityStatus_STEADY_STATE StabilityStatus = "STEADY_STATE"
+)
+
+type StopServiceDeploymentStopType string
+
+const (
+	StopServiceDeploymentStopType_ABORT    StopServiceDeploymentStopType = "ABORT"
+	StopServiceDeploymentStopType_ROLLBACK StopServiceDeploymentStopType = "ROLLBACK"
 )
 
 type TargetType string

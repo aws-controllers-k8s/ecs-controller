@@ -41,37 +41,13 @@ type TaskDefinitionSpec struct {
 	// Task-level CPU and memory parameters are ignored for Windows containers.
 	// We recommend specifying container-level resources for Windows containers.
 	//
-	// If you're using the EC2 launch type, this field is optional. Supported values
-	// are between 128 CPU units (0.125 vCPUs) and 10240 CPU units (10 vCPUs). If
-	// you do not specify a value, the parameter is ignored.
+	// If you're using the EC2 launch type or external launch type, this field is
+	// optional. Supported values are between 128 CPU units (0.125 vCPUs) and 196608
+	// CPU units (192 vCPUs). If you do not specify a value, the parameter is ignored.
 	//
-	// If you're using the Fargate launch type, this field is required and you must
-	// use one of the following values, which determines your range of supported
-	// values for the memory parameter:
-	//
-	// The CPU units cannot be less than 1 vCPU when you use Windows containers
-	// on Fargate.
-	//
-	//   - 256 (.25 vCPU) - Available memory values: 512 (0.5 GB), 1024 (1 GB),
-	//     2048 (2 GB)
-	//
-	//   - 512 (.5 vCPU) - Available memory values: 1024 (1 GB), 2048 (2 GB), 3072
-	//     (3 GB), 4096 (4 GB)
-	//
-	//   - 1024 (1 vCPU) - Available memory values: 2048 (2 GB), 3072 (3 GB), 4096
-	//     (4 GB), 5120 (5 GB), 6144 (6 GB), 7168 (7 GB), 8192 (8 GB)
-	//
-	//   - 2048 (2 vCPU) - Available memory values: 4096 (4 GB) and 16384 (16 GB)
-	//     in increments of 1024 (1 GB)
-	//
-	//   - 4096 (4 vCPU) - Available memory values: 8192 (8 GB) and 30720 (30 GB)
-	//     in increments of 1024 (1 GB)
-	//
-	//   - 8192 (8 vCPU) - Available memory values: 16 GB and 60 GB in 4 GB increments
-	//     This option requires Linux platform 1.4.0 or later.
-	//
-	//   - 16384 (16vCPU) - Available memory values: 32GB and 120 GB in 8 GB increments
-	//     This option requires Linux platform 1.4.0 or later.
+	// This field is required for Fargate. For information about the valid values,
+	// see Task size (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size)
+	// in the Amazon Elastic Container Service Developer Guide.
 	CPU *string `json:"cpu,omitempty"`
 	// The amount of ephemeral storage to allocate for the task. This parameter
 	// is used to expand the total amount of ephemeral storage available, beyond
@@ -170,12 +146,12 @@ type TaskDefinitionSpec struct {
 	//
 	// For Amazon ECS tasks on Fargate, the awsvpc network mode is required. For
 	// Amazon ECS tasks on Amazon EC2 Linux instances, any network mode can be used.
-	// For Amazon ECS tasks on Amazon EC2 Windows instances, or awsvpc can be used.
-	// If the network mode is set to none, you cannot specify port mappings in your
-	// container definitions, and the tasks containers do not have external connectivity.
-	// The host and awsvpc network modes offer the highest networking performance
-	// for containers because they use the EC2 network stack instead of the virtualized
-	// network stack provided by the bridge mode.
+	// For Amazon ECS tasks on Amazon EC2 Windows instances, <default> or awsvpc
+	// can be used. If the network mode is set to none, you cannot specify port
+	// mappings in your container definitions, and the tasks containers do not have
+	// external connectivity. The host and awsvpc network modes offer the highest
+	// networking performance for containers because they use the EC2 network stack
+	// instead of the virtualized network stack provided by the bridge mode.
 	//
 	// With the host and awsvpc network modes, exposed container ports are mapped
 	// directly to the corresponding host port (for the host network mode) or the
@@ -206,7 +182,8 @@ type TaskDefinitionSpec struct {
 	// If task is specified, all containers within the specified task share the
 	// same process namespace.
 	//
-	// If no value is specified, the default is a private namespace for each container.
+	// If no value is specified, the The default is a private namespace for each
+	// container.
 	//
 	// If the host PID mode is used, there's a heightened risk of undesired process
 	// namespace exposure.
@@ -236,8 +213,7 @@ type TaskDefinitionSpec struct {
 	// the compatibilities specified. If no value is specified, the parameter is
 	// omitted from the response.
 	RequiresCompatibilities []*string `json:"requiresCompatibilities,omitempty"`
-	// The operating system that your tasks definitions run on. A platform family
-	// is specified only for tasks using the Fargate launch type.
+	// The operating system that your tasks definitions run on.
 	RuntimePlatform *RuntimePlatform `json:"runtimePlatform,omitempty"`
 	// The metadata that you apply to the task definition to help you categorize
 	// and organize them. Each tag consists of a key and an optional value. You

@@ -1,0 +1,14 @@
+apiVersion: ecs.services.k8s.aws/v1alpha1
+kind: CapacityProvider
+metadata:
+  name: $CAPACITY_PROVIDER_NAME
+spec:
+  name: $CAPACITY_PROVIDER_NAME
+  autoScalingGroupProvider:
+    autoScalingGroupARN: $ASG_ARN
+    managedScaling:
+      status: ENABLED
+      targetCapacity: 80
+      minimumScalingStepSize: 1
+      maximumScalingStepSize: 5
+    managedTerminationProtection: DISABLED

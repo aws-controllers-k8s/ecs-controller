@@ -10,20 +10,53 @@
 # on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 # express or implied. See the License for the specific language governing
 # permissions and limitations under the License.
-"""Bootstraps the resources required to run the EFS integration tests.
+"""Bootstraps the resources required to run the ECS integration tests.
 """
 import logging
+import boto3
 
 from acktest.bootstrapping import Resources, BootstrapFailureException
+from acktest.bootstrapping.iam import Role
 from acktest.bootstrapping.vpc import VPC
 
 from e2e import bootstrap_directory
 from e2e.bootstrap_resources import BootstrapResources
 
+
+# Policies for ECS Managed Instances infrastructure role
+ECS_INFRA_ROLE_POLICIES = [
+    "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
+    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+]
+
+# Policies for ECS Managed Instances EC2 instance profile role
+ECS_EC2_ROLE_POLICIES = [
+    "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role",
+]
+
+
 def service_bootstrap() -> Resources:
     logging.getLogger().setLevel(logging.INFO)
 
-    resources = BootstrapResources()
+    resources = BootstrapResources(
+        ManagedInstancesInfraRole=Role(
+            name_prefix="ack-ecs-mi-infra",
+            principal_service="ecs.amazonaws.com",
+            description="Infrastructure role for ECS Managed Instances E2E tests",
+            managed_policies=ECS_INFRA_ROLE_POLICIES,
+        ),
+        ManagedInstancesEC2Role=Role(
+            name_prefix="ack-ecs-mi-ec2",
+            principal_service="ec2.amazonaws.com",
+            description="EC2 instance profile role for ECS Managed Instances E2E tests",
+            managed_policies=ECS_EC2_ROLE_POLICIES,
+        ),
+        ManagedInstancesVPC=VPC(
+            name_prefix="ack-ecs-mi",
+            num_public_subnet=1,
+            num_private_subnet=0,
+        ),
+    )
 
     try:
         resources.bootstrap()
