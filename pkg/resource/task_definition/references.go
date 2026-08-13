@@ -35,12 +35,19 @@ import (
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
 // +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
 
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles,verbs=get;list
+// +kubebuilder:rbac:groups=iam.services.k8s.aws,resources=roles/status,verbs=get;list
+
 // ClearResolvedReferences removes any reference values that were made
 // concrete in the spec. It returns a copy of the input AWSResource which
 // contains the original *Ref values, but none of their respective concrete
 // values.
 func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) acktypes.AWSResource {
 	ko := rm.concreteResource(res).ko.DeepCopy()
+
+	if ko.Spec.ExecutionRoleRef != nil {
+		ko.Spec.ExecutionRoleARN = nil
+	}
 
 	if ko.Spec.TaskRoleRef != nil {
 		ko.Spec.TaskRoleARN = nil
@@ -65,6 +72,12 @@ func (rm *resourceManager) ResolveReferences(
 
 	resourceHasReferences := false
 	err := validateReferenceFields(ko)
+	if fieldHasReferences, err := rm.resolveReferenceForExecutionRoleARN(ctx, apiReader, ko); err != nil {
+		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
+	} else {
+		resourceHasReferences = resourceHasReferences || fieldHasReferences
+	}
+
 	if fieldHasReferences, err := rm.resolveReferenceForTaskRoleARN(ctx, apiReader, ko); err != nil {
 		return &resource{ko}, (resourceHasReferences || fieldHasReferences), err
 	} else {
@@ -78,26 +91,30 @@ func (rm *resourceManager) ResolveReferences(
 // identifier field.
 func validateReferenceFields(ko *svcapitypes.TaskDefinition) error {
 
+	if ko.Spec.ExecutionRoleRef != nil && ko.Spec.ExecutionRoleARN != nil {
+		return ackerr.ResourceReferenceAndIDNotSupportedFor("ExecutionRoleARN", "ExecutionRoleRef")
+	}
+
 	if ko.Spec.TaskRoleRef != nil && ko.Spec.TaskRoleARN != nil {
 		return ackerr.ResourceReferenceAndIDNotSupportedFor("TaskRoleARN", "TaskRoleRef")
 	}
 	return nil
 }
 
-// resolveReferenceForTaskRoleARN reads the resource referenced
-// from TaskRoleRef field and sets the TaskRoleARN
+// resolveReferenceForExecutionRoleARN reads the resource referenced
+// from ExecutionRoleRef field and sets the ExecutionRoleARN
 // from referenced resource. Returns a boolean indicating whether a reference
 // contains references, or an error
-func (rm *resourceManager) resolveReferenceForTaskRoleARN(
+func (rm *resourceManager) resolveReferenceForExecutionRoleARN(
 	ctx context.Context,
 	apiReader client.Reader,
 	ko *svcapitypes.TaskDefinition,
 ) (hasReferences bool, err error) {
-	if ko.Spec.TaskRoleRef != nil && ko.Spec.TaskRoleRef.From != nil {
+	if ko.Spec.ExecutionRoleRef != nil && ko.Spec.ExecutionRoleRef.From != nil {
 		hasReferences = true
-		arr := ko.Spec.TaskRoleRef.From
+		arr := ko.Spec.ExecutionRoleRef.From
 		if arr.Name == nil || *arr.Name == "" {
-			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: TaskRoleRef")
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ExecutionRoleRef")
 		}
 		namespace, err := ackrt.ResolveCrossNamespaceReference(
 			ctx,
@@ -115,7 +132,7 @@ func (rm *resourceManager) resolveReferenceForTaskRoleARN(
 		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
 			return hasReferences, err
 		}
-		ko.Spec.TaskRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+		ko.Spec.ExecutionRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
 	}
 
 	return hasReferences, nil
@@ -173,4 +190,41 @@ func getReferencedResourceState_Role(
 			"Status.ACKResourceMetadata.ARN")
 	}
 	return nil
+}
+
+// resolveReferenceForTaskRoleARN reads the resource referenced
+// from TaskRoleRef field and sets the TaskRoleARN
+// from referenced resource. Returns a boolean indicating whether a reference
+// contains references, or an error
+func (rm *resourceManager) resolveReferenceForTaskRoleARN(
+	ctx context.Context,
+	apiReader client.Reader,
+	ko *svcapitypes.TaskDefinition,
+) (hasReferences bool, err error) {
+	if ko.Spec.TaskRoleRef != nil && ko.Spec.TaskRoleRef.From != nil {
+		hasReferences = true
+		arr := ko.Spec.TaskRoleRef.From
+		if arr.Name == nil || *arr.Name == "" {
+			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: TaskRoleRef")
+		}
+		namespace, err := ackrt.ResolveCrossNamespaceReference(
+			ctx,
+			rm.cfg.EnableCrossNamespace,
+			&ko.Status.Conditions,
+			ackrt.CrossNamespaceRefKindResource,
+			ko.ObjectMeta.GetNamespace(),
+			arr.Namespace,
+			*arr.Name,
+		)
+		if err != nil {
+			return hasReferences, err
+		}
+		obj := &iamapitypes.Role{}
+		if err := getReferencedResourceState_Role(ctx, apiReader, obj, *arr.Name, namespace); err != nil {
+			return hasReferences, err
+		}
+		ko.Spec.TaskRoleARN = (*string)(obj.Status.ACKResourceMetadata.ARN)
+	}
+
+	return hasReferences, nil
 }

@@ -27,7 +27,7 @@ import (
 // use the Amazon ECS service, but you may also create other clusters. Clusters
 // may contain more than one instance type simultaneously.
 type ClusterSpec struct {
-
+	CapacityProviderRefs []*ackv1alpha1.AWSResourceReferenceWrapper `json:"capacityProviderRefs,omitempty"`
 	// The short name of one or more capacity providers to associate with the cluster.
 	// A capacity provider must be associated with a cluster before it can be included
 	// as part of the default capacity provider strategy of the cluster or used

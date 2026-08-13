@@ -74,6 +74,9 @@ func newResourceDelta(
 			delta.Add("Spec.ExecutionRoleARN", a.ko.Spec.ExecutionRoleARN, b.ko.Spec.ExecutionRoleARN)
 		}
 	}
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.ExecutionRoleRef, b.ko.Spec.ExecutionRoleRef) {
+		delta.Add("Spec.ExecutionRoleRef", a.ko.Spec.ExecutionRoleRef, b.ko.Spec.ExecutionRoleRef)
+	}
 	if ackcompare.HasNilDifference(a.ko.Spec.Family, b.ko.Spec.Family) {
 		delta.Add("Spec.Family", a.ko.Spec.Family, b.ko.Spec.Family)
 	} else if a.ko.Spec.Family != nil && b.ko.Spec.Family != nil {

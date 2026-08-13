@@ -42,6 +42,9 @@ func newResourceDelta(
 		return delta
 	}
 
+	if !equality.Semantic.Equalities.DeepEqual(a.ko.Spec.CapacityProviderRefs, b.ko.Spec.CapacityProviderRefs) {
+		delta.Add("Spec.CapacityProviderRefs", a.ko.Spec.CapacityProviderRefs, b.ko.Spec.CapacityProviderRefs)
+	}
 	if len(a.ko.Spec.CapacityProviders) != len(b.ko.Spec.CapacityProviders) {
 		delta.Add("Spec.CapacityProviders", a.ko.Spec.CapacityProviders, b.ko.Spec.CapacityProviders)
 	} else if len(a.ko.Spec.CapacityProviders) > 0 {

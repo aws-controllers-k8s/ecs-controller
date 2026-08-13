@@ -169,6 +169,10 @@ resources:
       Status:
         print:
           name: STATUS
+      CapacityProviders:
+        references:
+          resource: CapacityProvider
+          path: Spec.Name
     hooks:
       sdk_create_post_set_output:
         template_path: hooks/cluster/sdk_create_post_set_output.go.tpl
@@ -224,6 +228,11 @@ resources:
           name: NETWORKMODE
           index: 4
       TaskRoleArn:
+        references:
+          path: Status.ACKResourceMetadata.ARN
+          resource: Role
+          service_name: iam
+      ExecutionRoleArn:
         references:
           path: Status.ACKResourceMetadata.ARN
           resource: Role
