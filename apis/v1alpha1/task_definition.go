@@ -67,7 +67,8 @@ type TaskDefinitionSpec struct {
 	// on your behalf. For informationabout the required IAM roles for Amazon ECS,
 	// see IAM roles for Amazon ECS (https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security-ecs-iam-role-overview.html)
 	// in the Amazon Elastic Container Service Developer Guide.
-	ExecutionRoleARN *string `json:"executionRoleARN,omitempty"`
+	ExecutionRoleARN *string                                  `json:"executionRoleARN,omitempty"`
+	ExecutionRoleRef *ackv1alpha1.AWSResourceReferenceWrapper `json:"executionRoleRef,omitempty"`
 	// You must specify a family for a task definition. You can use it track multiple
 	// versions of the same task definition. The family is used as a name for your
 	// task definition. Up to 255 letters (uppercase and lowercase), numbers, underscores,
