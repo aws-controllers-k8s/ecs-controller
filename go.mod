@@ -3,10 +3,10 @@ module github.com/aws-controllers-k8s/ecs-controller
 go 1.25.0
 
 require (
-	github.com/aws-controllers-k8s/autoscaling-controller v0.2.0
-	github.com/aws-controllers-k8s/ec2-controller v1.10.1
-	github.com/aws-controllers-k8s/elbv2-controller v1.3.3
-	github.com/aws-controllers-k8s/iam-controller v1.6.2
+	github.com/aws-controllers-k8s/autoscaling-controller v1.3.0
+	github.com/aws-controllers-k8s/ec2-controller v1.21.0
+	github.com/aws-controllers-k8s/elbv2-controller v1.7.0
+	github.com/aws-controllers-k8s/iam-controller v1.9.0
 	github.com/aws-controllers-k8s/runtime v0.63.0
 	github.com/aws/aws-sdk-go-v2 v1.41.9
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.81.2
@@ -20,7 +20,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.50.20 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.28.6 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.47 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.21 // indirect
