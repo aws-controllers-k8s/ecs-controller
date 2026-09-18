@@ -103,6 +103,101 @@ func (rm *resourceManager) ClearResolvedReferences(res acktypes.AWSResource) ack
 	return &resource{ko}
 }
 
+// EnsureReferences restores, onto a copy of `latest`, the cross-resource reference
+// (*Ref) fields it is missing, taking them from `desired`. Only reference fields are
+// written, so every concrete value on `latest` stands.
+//
+// A *Ref is a sibling of the concrete field it resolves into, so rebuilding the
+// containing struct from an AWS API response drops it. That disables
+// ClearResolvedReferences, which suppresses a resolved value only while the sibling
+// *Ref is visible, so the spec patch would otherwise delete the declared *Ref and
+// store the resolved value in its place.
+//
+// Only references reached through structs are restored, and each containing struct
+// is created on `latest` when `desired` has it and `latest` does not -- generated
+// set-output code nils a struct when the response omits it. A top-level *Ref needs
+// no help, since generated set-output code overwrites only the concrete field. One
+// reached through a list is not restored: it has no fixed address, and replacing the
+// whole list would discard whatever the service populated inside it.
+//
+// Nothing is written unless `desired` actually holds the reference, so a source that
+// declares none leaves `latest` untouched.
+func (rm *resourceManager) EnsureReferences(
+	desired acktypes.AWSResource,
+	latest acktypes.AWSResource,
+) acktypes.AWSResource {
+	// Deep copy the source as well, so a reference handed over below does not
+	// alias the caller's declared object.
+	desiredKO := rm.concreteResource(desired).ko.DeepCopy()
+	latestKO := rm.concreteResource(latest).ko.DeepCopy()
+
+	if desiredKO.Spec.AutoScalingGroupProvider != nil {
+		if desiredKO.Spec.AutoScalingGroupProvider.AutoScalingGroupRef != nil {
+			if latestKO.Spec.AutoScalingGroupProvider == nil {
+				latestKO.Spec.AutoScalingGroupProvider = &svcapitypes.AutoScalingGroupProvider{}
+			}
+			if latestKO.Spec.AutoScalingGroupProvider.AutoScalingGroupRef == nil {
+				latestKO.Spec.AutoScalingGroupProvider.AutoScalingGroupRef = desiredKO.Spec.AutoScalingGroupProvider.AutoScalingGroupRef
+			}
+		}
+	}
+	if desiredKO.Spec.ManagedInstancesProvider != nil {
+		if desiredKO.Spec.ManagedInstancesProvider.InfrastructureRoleRef != nil {
+			if latestKO.Spec.ManagedInstancesProvider == nil {
+				latestKO.Spec.ManagedInstancesProvider = &svcapitypes.CreateManagedInstancesProviderConfiguration{}
+			}
+			if latestKO.Spec.ManagedInstancesProvider.InfrastructureRoleRef == nil {
+				latestKO.Spec.ManagedInstancesProvider.InfrastructureRoleRef = desiredKO.Spec.ManagedInstancesProvider.InfrastructureRoleRef
+			}
+		}
+		if desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate != nil {
+			if desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileRef != nil {
+				if latestKO.Spec.ManagedInstancesProvider == nil {
+					latestKO.Spec.ManagedInstancesProvider = &svcapitypes.CreateManagedInstancesProviderConfiguration{}
+				}
+				if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate == nil {
+					latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate = &svcapitypes.InstanceLaunchTemplate{}
+				}
+				if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileRef == nil {
+					latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileRef = desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileRef
+				}
+			}
+			if desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration != nil {
+				if len(desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroupRefs) > 0 {
+					if latestKO.Spec.ManagedInstancesProvider == nil {
+						latestKO.Spec.ManagedInstancesProvider = &svcapitypes.CreateManagedInstancesProviderConfiguration{}
+					}
+					if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate == nil {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate = &svcapitypes.InstanceLaunchTemplate{}
+					}
+					if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration == nil {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration = &svcapitypes.ManagedInstancesNetworkConfiguration{}
+					}
+					if len(latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroupRefs) == 0 {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroupRefs = desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroupRefs
+					}
+				}
+				if len(desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SubnetRefs) > 0 {
+					if latestKO.Spec.ManagedInstancesProvider == nil {
+						latestKO.Spec.ManagedInstancesProvider = &svcapitypes.CreateManagedInstancesProviderConfiguration{}
+					}
+					if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate == nil {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate = &svcapitypes.InstanceLaunchTemplate{}
+					}
+					if latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration == nil {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration = &svcapitypes.ManagedInstancesNetworkConfiguration{}
+					}
+					if len(latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SubnetRefs) == 0 {
+						latestKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SubnetRefs = desiredKO.Spec.ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SubnetRefs
+					}
+				}
+			}
+		}
+	}
+
+	return &resource{latestKO}
+}
+
 // ResolveReferences finds if there are any Reference field(s) present
 // inside AWSResource passed in the parameter and attempts to resolve those
 // reference field(s) into their respective target field(s). It returns a

@@ -212,22 +212,22 @@ type ServiceSpec struct {
 	//
 	// There are two service scheduler strategies available:
 	//
-	//   - REPLICA-The replica scheduling strategy places and maintains the desired
-	//     number of tasks across your cluster. By default, the service scheduler
-	//     spreads tasks across Availability Zones. You can use task placement strategies
-	//     and constraints to customize task placement decisions. This scheduler
-	//     strategy is required if the service uses the CODE_DEPLOY or EXTERNAL deployment
-	//     controller types.
+	//    * REPLICA-The replica scheduling strategy places and maintains the desired
+	//    number of tasks across your cluster. By default, the service scheduler
+	//    spreads tasks across Availability Zones. You can use task placement strategies
+	//    and constraints to customize task placement decisions. This scheduler
+	//    strategy is required if the service uses the CODE_DEPLOY or EXTERNAL deployment
+	//    controller types.
 	//
-	//   - DAEMON-The daemon scheduling strategy deploys exactly one task on each
-	//     active container instance that meets all of the task placement constraints
-	//     that you specify in your cluster. The service scheduler also evaluates
-	//     the task placement constraints for running tasks and will stop tasks that
-	//     don't meet the placement constraints. When you're using this strategy,
-	//     you don't need to specify a desired number of tasks, a task placement
-	//     strategy, or use Service Auto Scaling policies. Tasks using the Fargate
-	//     launch type or the CODE_DEPLOY or EXTERNAL deployment controller types
-	//     don't support the DAEMON scheduling strategy.
+	//    * DAEMON-The daemon scheduling strategy deploys exactly one task on each
+	//    active container instance that meets all of the task placement constraints
+	//    that you specify in your cluster. The service scheduler also evaluates
+	//    the task placement constraints for running tasks and will stop tasks that
+	//    don't meet the placement constraints. When you're using this strategy,
+	//    you don't need to specify a desired number of tasks, a task placement
+	//    strategy, or use Service Auto Scaling policies. Tasks using the Fargate
+	//    launch type or the CODE_DEPLOY or EXTERNAL deployment controller types
+	//    don't support the DAEMON scheduling strategy.
 	SchedulingStrategy *string `json:"schedulingStrategy,omitempty"`
 	// The configuration for this service to discover and connect to services, and
 	// be discovered by, and connected from, other services within a namespace.
@@ -252,26 +252,26 @@ type ServiceSpec struct {
 	//
 	// The following basic restrictions apply to tags:
 	//
-	//   - Maximum number of tags per resource - 50
+	//    * Maximum number of tags per resource - 50
 	//
-	//   - For each resource, each tag key must be unique, and each tag key can
-	//     have only one value.
+	//    * For each resource, each tag key must be unique, and each tag key can
+	//    have only one value.
 	//
-	//   - Maximum key length - 128 Unicode characters in UTF-8
+	//    * Maximum key length - 128 Unicode characters in UTF-8
 	//
-	//   - Maximum value length - 256 Unicode characters in UTF-8
+	//    * Maximum value length - 256 Unicode characters in UTF-8
 	//
-	//   - If your tagging schema is used across multiple services and resources,
-	//     remember that other services may have restrictions on allowed characters.
-	//     Generally allowed characters are: letters, numbers, and spaces representable
-	//     in UTF-8, and the following characters: + - = . _ : / @.
+	//    * If your tagging schema is used across multiple services and resources,
+	//    remember that other services may have restrictions on allowed characters.
+	//    Generally allowed characters are: letters, numbers, and spaces representable
+	//    in UTF-8, and the following characters: + - = . _ : / @.
 	//
-	//   - Tag keys and values are case-sensitive.
+	//    * Tag keys and values are case-sensitive.
 	//
-	//   - Do not use aws:, AWS:, or any upper or lowercase combination of such
-	//     as a prefix for either keys or values as it is reserved for Amazon Web
-	//     Services use. You cannot edit or delete tag keys or values with this prefix.
-	//     Tags with this prefix do not count against your tags per resource limit.
+	//    * Do not use aws:, AWS:, or any upper or lowercase combination of such
+	//    as a prefix for either keys or values as it is reserved for Amazon Web
+	//    Services use. You cannot edit or delete tag keys or values with this prefix.
+	//    Tags with this prefix do not count against your tags per resource limit.
 	Tags []*Tag `json:"tags,omitempty"`
 	// The family and revision (family:revision) or full ARN of the task definition
 	// to run in your service. If a revision isn't specified, the latest ACTIVE
