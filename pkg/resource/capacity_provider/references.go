@@ -319,11 +319,8 @@ func (rm *resourceManager) resolveReferenceForAutoScalingGroupProvider_AutoScali
 			if arr.Name == nil || *arr.Name == "" {
 				return hasReferences, fmt.Errorf("provided resource reference is nil or empty: AutoScalingGroupProvider.AutoScalingGroupRef")
 			}
-			namespace, err := ackrt.ResolveCrossNamespaceReference(
-				ctx,
+			namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 				rm.cfg.EnableCrossNamespace,
-				&ko.Status.Conditions,
-				ackrt.CrossNamespaceRefKindResource,
 				ko.ObjectMeta.GetNamespace(),
 				arr.Namespace,
 				*arr.Name,
@@ -411,11 +408,8 @@ func (rm *resourceManager) resolveReferenceForCluster(
 		if arr.Name == nil || *arr.Name == "" {
 			return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ClusterRef")
 		}
-		namespace, err := ackrt.ResolveCrossNamespaceReference(
-			ctx,
+		namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 			rm.cfg.EnableCrossNamespace,
-			&ko.Status.Conditions,
-			ackrt.CrossNamespaceRefKindResource,
 			ko.ObjectMeta.GetNamespace(),
 			arr.Namespace,
 			*arr.Name,
@@ -503,11 +497,8 @@ func (rm *resourceManager) resolveReferenceForManagedInstancesProvider_Infrastru
 			if arr.Name == nil || *arr.Name == "" {
 				return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ManagedInstancesProvider.InfrastructureRoleRef")
 			}
-			namespace, err := ackrt.ResolveCrossNamespaceReference(
-				ctx,
+			namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 				rm.cfg.EnableCrossNamespace,
-				&ko.Status.Conditions,
-				ackrt.CrossNamespaceRefKindResource,
 				ko.ObjectMeta.GetNamespace(),
 				arr.Namespace,
 				*arr.Name,
@@ -597,11 +588,8 @@ func (rm *resourceManager) resolveReferenceForManagedInstancesProvider_InstanceL
 				if arr.Name == nil || *arr.Name == "" {
 					return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ManagedInstancesProvider.InstanceLaunchTemplate.EC2InstanceProfileRef")
 				}
-				namespace, err := ackrt.ResolveCrossNamespaceReference(
-					ctx,
+				namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 					rm.cfg.EnableCrossNamespace,
-					&ko.Status.Conditions,
-					ackrt.CrossNamespaceRefKindResource,
 					ko.ObjectMeta.GetNamespace(),
 					arr.Namespace,
 					*arr.Name,
@@ -694,11 +682,8 @@ func (rm *resourceManager) resolveReferenceForManagedInstancesProvider_InstanceL
 						if arr.Name == nil || *arr.Name == "" {
 							return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SecurityGroupRefs")
 						}
-						namespace, err := ackrt.ResolveCrossNamespaceReference(
-							ctx,
+						namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 							rm.cfg.EnableCrossNamespace,
-							&ko.Status.Conditions,
-							ackrt.CrossNamespaceRefKindResource,
 							ko.ObjectMeta.GetNamespace(),
 							arr.Namespace,
 							*arr.Name,
@@ -796,11 +781,8 @@ func (rm *resourceManager) resolveReferenceForManagedInstancesProvider_InstanceL
 						if arr.Name == nil || *arr.Name == "" {
 							return hasReferences, fmt.Errorf("provided resource reference is nil or empty: ManagedInstancesProvider.InstanceLaunchTemplate.NetworkConfiguration.SubnetRefs")
 						}
-						namespace, err := ackrt.ResolveCrossNamespaceReference(
-							ctx,
+						namespace, _, err := ackrt.ValidateCrossNamespaceReference(
 							rm.cfg.EnableCrossNamespace,
-							&ko.Status.Conditions,
-							ackrt.CrossNamespaceRefKindResource,
 							ko.ObjectMeta.GetNamespace(),
 							arr.Namespace,
 							*arr.Name,
