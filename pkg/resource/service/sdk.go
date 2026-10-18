@@ -99,11 +99,11 @@ func (rm *resourceManager) sdkFind(
 	// the original Kubernetes object we passed to the function
 	ko := r.ko.DeepCopy()
 	if len(resp.Services) > 0 {
-		if *resp.Services[0].Status == "INACTIVE" {
+		if *resp.Services[0].Status == ServiceStatusInactive {
 			return nil, ackerr.NotFound
 		}
-		if *resp.Services[0].Status == "DRAINING" {
-			return nil, ackrequeue.NeededAfter(nil, 1000*1000*1000*5)
+		if *resp.Services[0].Status == ServiceStatusDraining {
+			return nil, requeueWaitWhileDraining
 		}
 	}
 

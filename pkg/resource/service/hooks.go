@@ -14,6 +14,7 @@ const (
 	ServiceStatusActive       = "ACTIVE"
 	ServiceStatusProvisioning = "PRIMARY"
 	ServiceStatusInactive     = "INACTIVE"
+	ServiceStatusDraining     = "DRAINING"
 )
 
 // Ideally, a part of this code needs to be generated.. However since the
@@ -21,20 +22,13 @@ const (
 // have to do this Go-fu to make it work.
 var syncTags = tags.SyncTags
 
-// requeueWaitState returns a `ackrequeue.RequeueNeededAfter` struct
-// explaining the cluster cannot be modified until it reaches an active status.
-func requeueWaitStateActive(r *resource) *ackrequeue.RequeueNeededAfter {
-	if r.ko.Status.Status == nil {
-		return nil
-	}
-	return ackrequeue.NeededAfter(
-		fmt.Errorf(
-			"service in '%s' state, requeuing until cluster is '%s'",
-			*r.ko.Status.Status, ServiceStatusActive,
-		),
-		time.Second*10,
-	)
-}
+// requeueWaitWhileDraining is returned from sdkFind while a service drains,
+// until DescribeServices reports it inactive and the resource reads as gone.
+var requeueWaitWhileDraining = ackrequeue.NeededAfter(
+	fmt.Errorf("service in '%s' state, requeuing until it is '%s'",
+		ServiceStatusDraining, ServiceStatusInactive),
+	5*time.Second,
+)
 
 // clusterActive returns true if the supplied cluster is in an active status
 func clusterActive(r *resource) bool {
