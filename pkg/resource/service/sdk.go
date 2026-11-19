@@ -1554,6 +1554,11 @@ func (rm *resourceManager) sdkCreate(
 	}
 
 	rm.setStatusDefaults(ko)
+	// CreateService does not return tags. The generated output merger treats
+	// that as an empty tag set and clears Spec.Tags. Keep the desired tags.
+	if ko.Spec.Tags == nil {
+		ko.Spec.Tags = desired.ko.Spec.Tags
+	}
 	// The resource now exists in AWS and ko carries its identifiers. Mark any
 	// error from here on as a post-create failure so the reconciler retains the
 	// ACK finalizer, and return ko so those identifiers reach the CR status and
@@ -2032,6 +2037,23 @@ func (rm *resourceManager) sdkUpdate(
 	input, err := rm.newUpdateRequestPayload(ctx, desired, delta)
 	if err != nil {
 		return nil, err
+	}
+	// UpdateService does not change tags. Sync them with TagResource and
+	// UntagResource, then skip UpdateService when tags are the only difference.
+	if delta.DifferentAt("Spec.Tags") {
+		if latest.ko.Status.ACKResourceMetadata == nil || latest.ko.Status.ACKResourceMetadata.ARN == nil {
+			return nil, fmt.Errorf("service ARN is required to sync tags")
+		}
+		if err = syncTags(
+			ctx, rm.sdkapi, rm.metrics,
+			string(*latest.ko.Status.ACKResourceMetadata.ARN),
+			desired.ko.Spec.Tags, latest.ko.Spec.Tags,
+		); err != nil {
+			return nil, err
+		}
+	}
+	if !delta.DifferentExcept("Spec.Tags") {
+		return desired, nil
 	}
 	if desired.ko.Spec.Name != nil {
 		input.Service = desired.ko.Spec.Name
@@ -2744,6 +2766,11 @@ func (rm *resourceManager) sdkUpdate(
 	}
 
 	rm.setStatusDefaults(ko)
+	// UpdateService does not return tags. The generated output merger treats
+	// that as an empty tag set and clears Spec.Tags. Keep the desired tags.
+	if ko.Spec.Tags == nil {
+		ko.Spec.Tags = desired.ko.Spec.Tags
+	}
 	return &resource{ko}, nil
 }
 
