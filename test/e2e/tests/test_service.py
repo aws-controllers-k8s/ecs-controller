@@ -132,6 +132,10 @@ class TestService:
         expected = {"env": "prod", "owner": "ack-e2e"}
         assert _ecs_tags(ecs_client, service_arn) == expected
 
+        # The tag sync must not remove the ACK system tags.
+        all_tags = ecs_client.list_tags_for_resource(resourceArn=service_arn)["tags"]
+        assert any(t["key"] == "services.k8s.aws/namespace" for t in all_tags)
+
         cr = k8s.get_resource(ref)
         assert _tags_to_dict(cr["spec"].get("tags")) == expected
 
@@ -141,8 +145,14 @@ def _tags_to_dict(tags):
 
 
 def _ecs_tags(ecs_client, resource_arn):
+    """Return the ECS tags on resource_arn, minus the ACK system tags
+    (services.k8s.aws/*) that the controller adds to every resource."""
     resp = ecs_client.list_tags_for_resource(resourceArn=resource_arn)
-    return {t["key"]: t.get("value") for t in resp.get("tags", [])}
+    return {
+        t["key"]: t.get("value")
+        for t in resp.get("tags", [])
+        if not t["key"].startswith("services.k8s.aws/")
+    }
 
 
 CP_CREATE_WAIT_AFTER_SECONDS = 60
