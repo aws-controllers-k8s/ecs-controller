@@ -19,6 +19,7 @@ import (
 	"github.com/aws-controllers-k8s/ecs-controller/apis/v1alpha1"
 	ackrtlog "github.com/aws-controllers-k8s/runtime/pkg/runtime/log"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	svcsdk "github.com/aws/aws-sdk-go-v2/service/ecs"
 	svcsdktypes "github.com/aws/aws-sdk-go-v2/service/ecs/types"
 )
@@ -61,7 +62,7 @@ func SyncTags(
 	toDelete := []string{}
 
 	for k, v := range desiredTags {
-		if ev, found := existingTags[k]; !found || *ev != *v {
+		if ev, found := existingTags[k]; !found || aws.ToString(ev) != aws.ToString(v) {
 			toAdd[k] = v
 		}
 	}
@@ -75,7 +76,7 @@ func SyncTags(
 
 	if len(toAdd) > 0 {
 		for k, v := range toAdd {
-			rlog.Debug("adding tag to resource", "key", k, "value", *v)
+			rlog.Debug("adding tag to resource", "key", k, "value", aws.ToString(v))
 		}
 		if err = addTags(
 			ctx,

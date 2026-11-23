@@ -1,5 +1,6 @@
-	// CreateService and UpdateService omit tags. The generated merger treats
-	// that as an empty tag set and clears Spec.Tags. Keep the desired tags.
-	if ko.Spec.Tags == nil {
+	// CreateService and UpdateService responses don't include tags, so the
+	// generated SetOutput leaves Spec.Tags empty. Keep the desired tags;
+	// ReadOne fills in the real ones.
+	if len(ko.Spec.Tags) == 0 {
 		ko.Spec.Tags = desired.ko.Spec.Tags
 	}

@@ -103,6 +103,47 @@ class TestService:
         assert cs is not None
         assert cs["services"][0]["desiredCount"] == 1
 
+    def test_update_tags(self, ecs_client, simple_service):
+        (ref, _, _, _) = simple_service
+
+        k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        # CreateService doesn't return tags; spec.tags must survive the create.
+        cr = k8s.get_resource(ref)
+        assert _tags_to_dict(cr["spec"].get("tags")) == {"env": "test", "team": "ack"}
+
+        service_arn = cr["status"]["ackResourceMetadata"]["arn"]
+        assert _ecs_tags(ecs_client, service_arn) == {"env": "test", "team": "ack"}
+
+        # Change one value, add one key and remove one key.
+        updates = {
+            "spec": {
+                "tags": [
+                    {"key": "env", "value": "prod"},
+                    {"key": "owner", "value": "ack-e2e"},
+                ],
+            },
+        }
+        k8s.patch_custom_resource(ref, updates)
+        time.sleep(UPDATE_WAIT_AFTER_SECONDS)
+
+        k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
+
+        expected = {"env": "prod", "owner": "ack-e2e"}
+        assert _ecs_tags(ecs_client, service_arn) == expected
+
+        cr = k8s.get_resource(ref)
+        assert _tags_to_dict(cr["spec"].get("tags")) == expected
+
+
+def _tags_to_dict(tags):
+    return {t["key"]: t.get("value") for t in (tags or [])}
+
+
+def _ecs_tags(ecs_client, resource_arn):
+    resp = ecs_client.list_tags_for_resource(resourceArn=resource_arn)
+    return {t["key"]: t.get("value") for t in resp.get("tags", [])}
+
 
 CP_CREATE_WAIT_AFTER_SECONDS = 60
 CP_UPDATE_WAIT_AFTER_SECONDS = 120

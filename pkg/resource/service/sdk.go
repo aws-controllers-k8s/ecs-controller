@@ -1554,11 +1554,6 @@ func (rm *resourceManager) sdkCreate(
 	}
 
 	rm.setStatusDefaults(ko)
-	// CreateService does not return tags. The generated output merger treats
-	// that as an empty tag set and clears Spec.Tags. Keep the desired tags.
-	if ko.Spec.Tags == nil {
-		ko.Spec.Tags = desired.ko.Spec.Tags
-	}
 	// The resource now exists in AWS and ko carries its identifiers. Mark any
 	// error from here on as a post-create failure so the reconciler retains the
 	// ACK finalizer, and return ko so those identifiers reach the CR status and
@@ -1572,6 +1567,13 @@ func (rm *resourceManager) sdkCreate(
 			}
 		}
 	}()
+	// CreateService and UpdateService responses don't include tags, so the
+	// generated SetOutput leaves Spec.Tags empty. Keep the desired tags;
+	// ReadOne fills in the real ones.
+	if len(ko.Spec.Tags) == 0 {
+		ko.Spec.Tags = desired.ko.Spec.Tags
+	}
+
 	return &resource{ko}, nil
 }
 
@@ -2766,11 +2768,13 @@ func (rm *resourceManager) sdkUpdate(
 	}
 
 	rm.setStatusDefaults(ko)
-	// UpdateService does not return tags. The generated output merger treats
-	// that as an empty tag set and clears Spec.Tags. Keep the desired tags.
-	if ko.Spec.Tags == nil {
+	// CreateService and UpdateService responses don't include tags, so the
+	// generated SetOutput leaves Spec.Tags empty. Keep the desired tags;
+	// ReadOne fills in the real ones.
+	if len(ko.Spec.Tags) == 0 {
 		ko.Spec.Tags = desired.ko.Spec.Tags
 	}
+
 	return &resource{ko}, nil
 }
 
