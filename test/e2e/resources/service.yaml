@@ -18,3 +18,5 @@ spec:
     value: test
   - key: team
     value: ack
+  - key: owner
+    value: e2e

@@ -33,25 +33,30 @@ import (
 var errStubbedCall = errors.New("stubbed API call")
 
 // recordingHTTPClient records the ECS operation of each request. TagResource
-// and UntagResource succeed; every other operation fails with errStubbedCall.
+// and UntagResource succeed, operations in responses return that JSON body, and
+// every other operation fails with errStubbedCall.
 type recordingHTTPClient struct {
-	ops []string
+	ops       []string
+	responses map[string]string
 }
 
 func (c *recordingHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	target := req.Header.Get("X-Amz-Target")
 	op := target[strings.LastIndex(target, ".")+1:]
 	c.ops = append(c.ops, op)
-	switch op {
-	case "TagResource", "UntagResource":
-		return &http.Response{
-			StatusCode: http.StatusOK,
-			Header:     http.Header{"Content-Type": []string{"application/x-amz-json-1.1"}},
-			Body:       io.NopCloser(strings.NewReader("{}")),
-			Request:    req,
-		}, nil
+	body, ok := c.responses[op]
+	if !ok && (op == "TagResource" || op == "UntagResource") {
+		body, ok = "{}", true
 	}
-	return nil, errStubbedCall
+	if !ok {
+		return nil, errStubbedCall
+	}
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/x-amz-json-1.1"}},
+		Body:       io.NopCloser(strings.NewReader(body)),
+		Request:    req,
+	}, nil
 }
 
 func newTagsTestManager() (*resourceManager, *recordingHTTPClient) {
@@ -140,5 +145,75 @@ func TestSdkUpdate_TagWithoutValue_DoesNotPanic(t *testing.T) {
 	want := []string{"TagResource"}
 	if !slices.Equal(httpClient.ops, want) {
 		t.Errorf("API calls = %v, want %v", httpClient.ops, want)
+	}
+}
+
+// serviceResponse is a CreateService/UpdateService response whose tags are in
+// a different order from the desired tags and include an ACK system tag, as
+// ECS returns them.
+const serviceResponse = `{"service": {
+	"serviceArn": "arn:aws:ecs:us-west-2:111111111111:service/c/s",
+	"serviceName": "s",
+	"status": "ACTIVE",
+	"tags": [
+		{"key": "services.k8s.aws/namespace", "value": "default"},
+		{"key": "owner", "value": "c"},
+		{"key": "team", "value": "b"},
+		{"key": "env", "value": "a"}
+	]
+}}`
+
+func orderedTags(kv ...string) []*svcapitypes.Tag {
+	tags := []*svcapitypes.Tag{}
+	for i := 0; i < len(kv); i += 2 {
+		tags = append(tags, &svcapitypes.Tag{Key: aws.String(kv[i]), Value: aws.String(kv[i+1])})
+	}
+	return tags
+}
+
+func tagKeys(tags []*svcapitypes.Tag) []string {
+	keys := []string{}
+	for _, t := range tags {
+		keys = append(keys, aws.ToString(t.Key))
+	}
+	return keys
+}
+
+func TestSdkCreate_KeepsDesiredTagOrder(t *testing.T) {
+	rm, httpClient := newTagsTestManager()
+	httpClient.responses = map[string]string{"CreateService": serviceResponse}
+	desired := newServiceForTagsTest(1, nil)
+	desired.ko.Status.ACKResourceMetadata = nil
+	desired.ko.Spec.Tags = orderedTags("env", "a", "team", "b", "owner", "c")
+
+	created, err := rm.sdkCreate(context.TODO(), desired)
+	if err != nil {
+		t.Fatalf("sdkCreate returned error: %v", err)
+	}
+	want := []string{"env", "team", "owner"}
+	if got := tagKeys(created.ko.Spec.Tags); !slices.Equal(got, want) {
+		t.Errorf("Spec.Tags keys = %v, want %v", got, want)
+	}
+}
+
+func TestSdkUpdate_KeepsDesiredTagOrder(t *testing.T) {
+	rm, httpClient := newTagsTestManager()
+	httpClient.responses = map[string]string{"UpdateService": serviceResponse}
+	desired := newServiceForTagsTest(2, nil)
+	desired.ko.Spec.Tags = orderedTags("env", "a", "team", "b", "owner", "c")
+	latest := newServiceForTagsTest(1, nil)
+	latest.ko.Spec.Tags = orderedTags("owner", "c", "team", "b", "env", "a")
+	delta := newResourceDelta(desired, latest)
+
+	updated, err := rm.sdkUpdate(context.TODO(), desired, latest, delta)
+	if err != nil {
+		t.Fatalf("sdkUpdate returned error: %v", err)
+	}
+	if want := []string{"UpdateService"}; !slices.Equal(httpClient.ops, want) {
+		t.Errorf("API calls = %v, want %v", httpClient.ops, want)
+	}
+	want := []string{"env", "team", "owner"}
+	if got := tagKeys(updated.ko.Spec.Tags); !slices.Equal(got, want) {
+		t.Errorf("Spec.Tags keys = %v, want %v", got, want)
 	}
 }

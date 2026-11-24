@@ -1373,22 +1373,6 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.Status = nil
 	}
-	if resp.Service.Tags != nil {
-		f28 := []*svcapitypes.Tag{}
-		for _, f28iter := range resp.Service.Tags {
-			f28elem := &svcapitypes.Tag{}
-			if f28iter.Key != nil {
-				f28elem.Key = f28iter.Key
-			}
-			if f28iter.Value != nil {
-				f28elem.Value = f28iter.Value
-			}
-			f28 = append(f28, f28elem)
-		}
-		ko.Spec.Tags = f28
-	} else {
-		ko.Spec.Tags = nil
-	}
 	if resp.Service.TaskDefinition != nil {
 		ko.Spec.TaskDefinition = resp.Service.TaskDefinition
 	} else {
@@ -1567,13 +1551,6 @@ func (rm *resourceManager) sdkCreate(
 			}
 		}
 	}()
-	// CreateService and UpdateService responses don't include tags, so the
-	// generated SetOutput leaves Spec.Tags empty. Keep the desired tags;
-	// ReadOne fills in the real ones.
-	if len(ko.Spec.Tags) == 0 {
-		ko.Spec.Tags = desired.ko.Spec.Tags
-	}
-
 	return &resource{ko}, nil
 }
 
@@ -2587,22 +2564,6 @@ func (rm *resourceManager) sdkUpdate(
 	} else {
 		ko.Status.Status = nil
 	}
-	if resp.Service.Tags != nil {
-		f28 := []*svcapitypes.Tag{}
-		for _, f28iter := range resp.Service.Tags {
-			f28elem := &svcapitypes.Tag{}
-			if f28iter.Key != nil {
-				f28elem.Key = f28iter.Key
-			}
-			if f28iter.Value != nil {
-				f28elem.Value = f28iter.Value
-			}
-			f28 = append(f28, f28elem)
-		}
-		ko.Spec.Tags = f28
-	} else {
-		ko.Spec.Tags = nil
-	}
 	if resp.Service.TaskDefinition != nil {
 		ko.Spec.TaskDefinition = resp.Service.TaskDefinition
 	} else {
@@ -2768,13 +2729,6 @@ func (rm *resourceManager) sdkUpdate(
 	}
 
 	rm.setStatusDefaults(ko)
-	// CreateService and UpdateService responses don't include tags, so the
-	// generated SetOutput leaves Spec.Tags empty. Keep the desired tags;
-	// ReadOne fills in the real ones.
-	if len(ko.Spec.Tags) == 0 {
-		ko.Spec.Tags = desired.ko.Spec.Tags
-	}
-
 	return &resource{ko}, nil
 }
 

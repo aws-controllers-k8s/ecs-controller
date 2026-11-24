@@ -108,20 +108,25 @@ class TestService:
 
         k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
 
-        # CreateService doesn't return tags; spec.tags must survive the create.
+        # CreateService returns tags in ECS's order and UpdateService returns
+        # none. spec.tags must keep the declared tags, in the declared order.
         cr = k8s.get_resource(ref)
-        assert _tags_to_dict(cr["spec"].get("tags")) == {"env": "test", "team": "ack"}
+        assert _tags_to_list(cr["spec"].get("tags")) == [
+            ("env", "test"), ("team", "ack"), ("owner", "e2e"),
+        ]
 
         service_arn = cr["status"]["ackResourceMetadata"]["arn"]
-        assert _ecs_tags(ecs_client, service_arn) == {"env": "test", "team": "ack"}
+        assert _ecs_tags(ecs_client, service_arn) == {
+            "env": "test", "team": "ack", "owner": "e2e",
+        }
 
-        # Change one value, add one key and remove one key.
+        # Change one value, remove one key and add one key.
+        desired = [
+            ("env", "prod"), ("owner", "e2e"), ("project", "ack-e2e"),
+        ]
         updates = {
             "spec": {
-                "tags": [
-                    {"key": "env", "value": "prod"},
-                    {"key": "owner", "value": "ack-e2e"},
-                ],
+                "tags": [{"key": k, "value": v} for k, v in desired],
             },
         }
         k8s.patch_custom_resource(ref, updates)
@@ -129,19 +134,18 @@ class TestService:
 
         k8s.wait_on_condition(ref, "ACK.ResourceSynced", "True", wait_periods=10)
 
-        expected = {"env": "prod", "owner": "ack-e2e"}
-        assert _ecs_tags(ecs_client, service_arn) == expected
+        assert _ecs_tags(ecs_client, service_arn) == dict(desired)
 
         # The tag sync must not remove the ACK system tags.
         all_tags = ecs_client.list_tags_for_resource(resourceArn=service_arn)["tags"]
         assert any(t["key"] == "services.k8s.aws/namespace" for t in all_tags)
 
         cr = k8s.get_resource(ref)
-        assert _tags_to_dict(cr["spec"].get("tags")) == expected
+        assert _tags_to_list(cr["spec"].get("tags")) == desired
 
 
-def _tags_to_dict(tags):
-    return {t["key"]: t.get("value") for t in (tags or [])}
+def _tags_to_list(tags):
+    return [(t["key"], t.get("value")) for t in (tags or [])]
 
 
 def _ecs_tags(ecs_client, resource_arn):

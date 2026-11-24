@@ -292,6 +292,15 @@ resources:
         references:
           resource: TaskDefinition
           path: Spec.Family
+      # CreateService returns tags in ECS's order and UpdateService returns
+      # none. Keep the desired tags so the write-back neither reorders nor
+      # clears spec.tags; ReadOne reads the real tags for the compare.
+      Tags:
+        set:
+          - method: Create
+            ignore: true
+          - method: Update
+            ignore: true
       DesiredCount:
         print:
           name: DESIRED
@@ -339,10 +348,6 @@ resources:
         template_path: hooks/service/sdk_read_many_pre_set_output.go.tpl
       sdk_update_post_build_request:
         template_path: hooks/service/sdk_update_post_build_request.go.tpl
-      sdk_create_post_set_output:
-        template_path: hooks/service/sdk_preserve_desired_tags.go.tpl
-      sdk_update_post_set_output:
-        template_path: hooks/service/sdk_preserve_desired_tags.go.tpl
       sdk_delete_pre_build_request:
         template_path: hooks/service/sdk_delete_pre_build_request.go.tpl
       sdk_delete_post_build_request:
