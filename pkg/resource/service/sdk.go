@@ -1373,22 +1373,6 @@ func (rm *resourceManager) sdkCreate(
 	} else {
 		ko.Status.Status = nil
 	}
-	if resp.Service.Tags != nil {
-		f28 := []*svcapitypes.Tag{}
-		for _, f28iter := range resp.Service.Tags {
-			f28elem := &svcapitypes.Tag{}
-			if f28iter.Key != nil {
-				f28elem.Key = f28iter.Key
-			}
-			if f28iter.Value != nil {
-				f28elem.Value = f28iter.Value
-			}
-			f28 = append(f28, f28elem)
-		}
-		ko.Spec.Tags = f28
-	} else {
-		ko.Spec.Tags = nil
-	}
 	if resp.Service.TaskDefinition != nil {
 		ko.Spec.TaskDefinition = resp.Service.TaskDefinition
 	} else {
@@ -2033,6 +2017,23 @@ func (rm *resourceManager) sdkUpdate(
 	if err != nil {
 		return nil, err
 	}
+	// UpdateService does not change tags. Sync them with TagResource and
+	// UntagResource, then skip UpdateService when tags are the only difference.
+	if delta.DifferentAt("Spec.Tags") {
+		if latest.ko.Status.ACKResourceMetadata == nil || latest.ko.Status.ACKResourceMetadata.ARN == nil {
+			return nil, fmt.Errorf("service ARN is required to sync tags")
+		}
+		if err = syncTags(
+			ctx, rm.sdkapi, rm.metrics,
+			string(*latest.ko.Status.ACKResourceMetadata.ARN),
+			desired.ko.Spec.Tags, latest.ko.Spec.Tags,
+		); err != nil {
+			return nil, err
+		}
+	}
+	if !delta.DifferentExcept("Spec.Tags") {
+		return desired, nil
+	}
 	if desired.ko.Spec.Name != nil {
 		input.Service = desired.ko.Spec.Name
 	}
@@ -2562,22 +2563,6 @@ func (rm *resourceManager) sdkUpdate(
 		ko.Status.Status = resp.Service.Status
 	} else {
 		ko.Status.Status = nil
-	}
-	if resp.Service.Tags != nil {
-		f28 := []*svcapitypes.Tag{}
-		for _, f28iter := range resp.Service.Tags {
-			f28elem := &svcapitypes.Tag{}
-			if f28iter.Key != nil {
-				f28elem.Key = f28iter.Key
-			}
-			if f28iter.Value != nil {
-				f28elem.Value = f28iter.Value
-			}
-			f28 = append(f28, f28elem)
-		}
-		ko.Spec.Tags = f28
-	} else {
-		ko.Spec.Tags = nil
 	}
 	if resp.Service.TaskDefinition != nil {
 		ko.Spec.TaskDefinition = resp.Service.TaskDefinition

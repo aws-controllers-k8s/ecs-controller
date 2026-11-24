@@ -13,3 +13,10 @@ spec:
       assignPublicIP: DISABLED
       subnets:
       - $PRIVATE_SUBNET
+  tags:
+  - key: env
+    value: test
+  - key: team
+    value: ack
+  - key: owner
+    value: e2e
